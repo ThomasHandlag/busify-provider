@@ -1,1 +1,288 @@
 @import "tailwindcss";
+
+/* Bus Enterprise Dashboard Styles */
+.responsive-layout {
+  min-height: 100vh;
+}
+
+/* Mobile-first responsive breakpoints following Ant Design's Grid system */
+@media (max-width: 575px) {
+  /* Extra Small devices */
+  .mobile-header {
+    padding: 0 12px !important;
+  }
+  
+  .mobile-content {
+    margin: 12px !important;
+    padding: 16px !important;
+  }
+
+  /* Mobile dashboard adjustments */
+  .ant-statistic-title {
+    font-size: 12px !important;
+  }
+
+  .ant-statistic-content {
+    font-size: 20px !important;
+  }
+
+  .ant-card-head-title {
+    font-size: 14px !important;
+  }
+}
+
+@media (min-width: 576px) and (max-width: 767px) {
+  /* Small devices */
+  .mobile-content {
+    margin: 16px !important;
+    padding: 20px !important;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  /* Medium devices (tablets) */
+  .tablet-content {
+    margin: 20px !important;
+    padding: 24px !important;
+  }
+}
+
+@media (min-width: 992px) {
+  /* Large devices and above */
+  .desktop-sidebar {
+    position: sticky !important;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+  }
+}
+
+/* Smooth transitions for collapsible elements */
+.ant-layout-sider {
+  transition: all 0.3s ease;
+}
+
+/* Custom scrollbar for sidebar */
+.ant-layout-sider::-webkit-scrollbar {
+  width: 6px;
+}
+
+.ant-layout-sider::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.ant-layout-sider::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+.ant-layout-sider::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* Ensure drawer content is properly styled */
+.ant-drawer-body {
+  padding: 0 !important;
+}
+
+.ant-drawer-body .ant-layout-sider {
+  height: 100% !important;
+  position: static !important;
+}
+
+/* Responsive menu adjustments */
+@media (max-width: 991px) {
+  .ant-menu-inline {
+    border-right: none !important;
+  }
+}
+
+/* Loading and transition states */
+.page-transition {
+  transition: opacity 0.2s ease-in-out;
+}
+
+.page-transition.loading {
+  opacity: 0.7;
+}
+
+/* Responsive typography */
+@media (max-width: 575px) {
+  .ant-typography h1 {
+    font-size: 20px !important;
+  }
+  
+  .ant-typography h2 {
+    font-size: 18px !important;
+  }
+  
+  .ant-typography h3 {
+    font-size: 16px !important;
+  }
+  
+  .ant-typography h4 {
+    font-size: 14px !important;
+  }
+}
+
+/* Bus Enterprise Dashboard Specific Styles */
+.bus-dashboard-card {
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: box-shadow 0.3s ease;
+}
+
+.bus-dashboard-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Status indicators */
+.status-active {
+  color: #52c41a;
+  font-weight: 500;
+}
+
+.status-maintenance {
+  color: #fa8c16;
+  font-weight: 500;
+}
+
+.status-inactive {
+  color: #d9d9d9;
+  font-weight: 500;
+}
+
+/* Responsive table adjustments */
+@media (max-width: 768px) {
+  .ant-table-thead > tr > th {
+    padding: 8px 4px !important;
+    font-size: 12px !important;
+  }
+
+  .ant-table-tbody > tr > td {
+    padding: 8px 4px !important;
+    font-size: 12px !important;
+  }
+
+  .ant-table-pagination {
+    margin: 16px 0 0 0 !important;
+  }
+}
+
+/* Custom badge styles for bus dashboard */
+.bus-status-badge {
+  font-size: 11px;
+  font-weight: 500;
+}
+
+/* Quick action cards */
+.quick-action-card {
+  transition: all 0.3s ease;
+  border: 1px solid #f0f0f0;
+}
+
+.quick-action-card:hover {
+  transform: translateY(-2px);
+  border-color: #1890ff;
+  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.15);
+}
+
+/* Header improvements */
+.dashboard-header {
+  backdrop-filter: blur(8px);
+  background: rgba(255, 255, 255, 0.95) !important;
+}
+
+/* Sidebar brand section */
+.sidebar-brand {
+  background: linear-gradient(135deg, #1890ff 0%, #096dd9 100%);
+  color: white;
+  text-align: center;
+  padding: 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sidebar-brand h4 {
+  margin: 0 !important;
+  color: white !important;
+}
+
+/* Progress bar customizations */
+.ant-progress-bg {
+  transition: all 0.3s ease;
+}
+
+/* List item hover effects */
+.ant-list-item {
+  transition: background-color 0.2s ease;
+}
+
+.ant-list-item:hover {
+  background-color: #fafafa;
+}
+
+/* Notification styles */
+.notification-item {
+  padding: 12px;
+  border-bottom: 1px solid #f0f0f0;
+  transition: background-color 0.2s ease;
+}
+
+.notification-item:hover {
+  background-color: #f5f5f5;
+}
+
+.notification-item:last-child {
+  border-bottom: none;
+}
+
+/* Stats card improvements */
+.stats-card {
+  text-align: center;
+  padding: 20px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #f6f9fc 0%, #ffffff 100%);
+  border: 1px solid #e8f4fd;
+  transition: all 0.3s ease;
+}
+
+.stats-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+/* Responsive grid adjustments */
+@media (max-width: 576px) {
+  .ant-col {
+    margin-bottom: 16px;
+  }
+}
+
+/* Custom ant design overrides for better bus theme */
+.ant-menu-item-selected {
+  background-color: #e6f7ff !important;
+  border-right: 3px solid #1890ff !important;
+}
+
+.ant-menu-submenu-selected {
+  color: #1890ff !important;
+}
+
+/* Improved mobile drawer */
+.ant-drawer-content-wrapper {
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Bus route visualization */
+.route-indicator {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 8px;
+  background-color: #52c41a;
+}
+
+.route-indicator.inactive {
+  background-color: #d9d9d9;
+}

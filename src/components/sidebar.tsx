@@ -1,0 +1,314 @@
+// src/components/Sidebar.tsx
+import React, { useState } from "react";
+import temp from "../assets/logo.png";
+import { Layout, Menu, Grid, Typography, Badge, Avatar, Space } from "antd";
+import {
+  DashboardOutlined,
+  UserOutlined,
+  SettingOutlined,
+  LogoutOutlined,
+  CarOutlined,
+  BarChartOutlined,
+  TeamOutlined,
+  ScheduleOutlined,
+  EnvironmentOutlined,
+  DollarOutlined,
+  ToolOutlined,
+  FileTextOutlined,
+  SafetyCertificateOutlined,
+  ClockCircleOutlined,
+} from "@ant-design/icons";
+
+const { Sider } = Layout;
+const { useBreakpoint } = Grid;
+const { Text } = Typography;
+
+interface SidebarProps {
+  onMenuSelect?: (key: string) => void;
+  selectedKey?: string;
+}
+
+const Sidebar: React.FC<SidebarProps> = ({ onMenuSelect, selectedKey }) => {
+  const screens = useBreakpoint();
+  const [collapsed, setCollapsed] = useState(false);
+
+  const handleCollapse = (value: boolean) => {
+    setCollapsed(value);
+  };
+
+  // Bus Enterprise Management Menu Items
+  const menuItems = [
+    {
+      key: "dashboard",
+      icon: <DashboardOutlined />,
+      label: "Dashboard Overview",
+    },
+    {
+      key: "fleet",
+      icon: <CarOutlined />,
+      label: "Fleet Management",
+      children: [
+        {
+          key: "buses",
+          icon: <CarOutlined />,
+          label: "Bus Inventory",
+        },
+        {
+          key: "maintenance",
+          icon: <ToolOutlined />,
+          label: "Maintenance",
+        },
+        {
+          key: "fuel",
+          icon: <DollarOutlined />,
+          label: "Fuel Management",
+        },
+      ],
+    },
+    {
+      key: "operations",
+      icon: <ScheduleOutlined />,
+      label: "Operations",
+      children: [
+        {
+          key: "routes",
+          icon: <EnvironmentOutlined />,
+          label: "Routes & Stops",
+        },
+        {
+          key: "schedules",
+          icon: <ClockCircleOutlined />,
+          label: "Schedules",
+        },
+        {
+          key: "trips",
+          icon: <FileTextOutlined />,
+          label: "Trip Management",
+        },
+      ],
+    },
+    {
+      key: "bookings",
+      icon: <FileTextOutlined />,
+      label: "Booking System",
+      children: [
+        {
+          key: "reservations",
+          icon: <FileTextOutlined />,
+          label: "Reservations",
+        },
+        {
+          key: "tickets",
+          icon: <SafetyCertificateOutlined />,
+          label: "Ticket Management",
+        },
+      ],
+    },
+    {
+      key: "customers",
+      icon: <TeamOutlined />,
+      label: "Customer Management",
+    },
+    {
+      key: "drivers",
+      icon: <UserOutlined />,
+      label: "Driver Management",
+    },
+    {
+      key: "analytics",
+      icon: <BarChartOutlined />,
+      label: "Analytics & Reports",
+      children: [
+        {
+          key: "financial-reports",
+          icon: <DollarOutlined />,
+          label: "Financial Reports",
+        },
+        {
+          key: "operational-reports",
+          icon: <BarChartOutlined />,
+          label: "Operational Reports",
+        },
+        {
+          key: "performance",
+          icon: <BarChartOutlined />,
+          label: "Performance Metrics",
+        },
+      ],
+    },
+    {
+      key: "finance",
+      icon: <DollarOutlined />,
+      label: "Financial Management",
+      children: [
+        {
+          key: "revenue",
+          icon: <DollarOutlined />,
+          label: "Revenue Tracking",
+        },
+        {
+          key: "expenses",
+          icon: <FileTextOutlined />,
+          label: "Expense Management",
+        },
+        {
+          key: "payroll",
+          icon: <UserOutlined />,
+          label: "Payroll",
+        },
+      ],
+    },
+    {
+      key: "settings",
+      icon: <SettingOutlined />,
+      label: "System Settings",
+    },
+  ];
+
+  return (
+    <Sider
+      collapsible={screens.lg} // Only allow collapse on desktop
+      collapsed={collapsed}
+      onCollapse={handleCollapse}
+      breakpoint="lg"
+      collapsedWidth={screens.xs ? 0 : 80}
+      width={300}
+      style={{
+        height: "100vh",
+        position: screens.lg ? "sticky" : "static",
+        top: 0,
+        left: 0,
+        background: "#fff",
+        borderRight: "1px solid #f0f0f0",
+        overflow: "auto",
+      }}
+    >
+      {/* Company Logo/Brand */}
+      <div
+        style={{
+          height: 80,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: "16px",
+          borderBottom: "1px solid #f0f0f0",
+          background: "linear-gradient(135deg, #1890ff 0%, #096dd9 100%)",
+        }}
+      >
+        {!collapsed ? (
+          <div style={{ textAlign: "center", color: "#fff" }}>
+            <div
+              style={{
+                fontSize: "20px",
+                fontWeight: "bold",
+                marginBottom: "4px",
+              }}
+            >
+              <Avatar size={"small"} icon={temp} /> Busify
+            </div>
+            <Text style={{ fontSize: "12px", color: "rgba(255,255,255,0.8)" }}>
+              Enterprise Transport
+            </Text>
+          </div>
+        ) : (
+          <div style={{ fontSize: "24px" }}>
+            <Avatar size={"small"} icon={temp} />
+          </div>
+        )}
+      </div>
+
+      {/* User Info Section */}
+      {!collapsed && (
+        <div
+          style={{
+            padding: "16px",
+            borderBottom: "1px solid #f0f0f0",
+            background: "#fafafa",
+          }}
+        >
+          <Space>
+            <Avatar size="small" icon={<UserOutlined />} />
+            <div>
+              <Text strong style={{ fontSize: "14px", display: "block" }}>
+                Admin User
+              </Text>
+              <Text type="secondary" style={{ fontSize: "12px" }}>
+                Super Administrator
+              </Text>
+            </div>
+          </Space>
+        </div>
+      )}
+
+      {/* Quick Stats */}
+      {!collapsed && (
+        <div
+          style={{
+            padding: "12px 16px",
+            borderBottom: "1px solid #f0f0f0",
+            background: "#f9f9f9",
+          }}
+        >
+          <Space direction="vertical" size="small" style={{ width: "100%" }}>
+            <div style={{ display: "flex", justifyContent: "space-between" }}>
+              <Text style={{ fontSize: "12px" }}>Active Buses</Text>
+              <Badge count={24} style={{ backgroundColor: "#52c41a" }} />
+            </div>
+            <div style={{ display: "flex", justifyContent: "space-between" }}>
+              <Text style={{ fontSize: "12px" }}>Today's Revenue</Text>
+              <Text strong style={{ fontSize: "12px", color: "#1890ff" }}>
+                $2,340
+              </Text>
+            </div>
+          </Space>
+        </div>
+      )}
+
+      {/* Navigation Menu */}
+      <Menu
+        theme="light"
+        mode="inline"
+        selectedKeys={selectedKey ? [selectedKey] : ["dashboard"]}
+        onClick={(e) => onMenuSelect?.(e.key)}
+        items={menuItems}
+        style={{
+          height: collapsed ? "calc(100vh - 80px)" : "calc(100vh - 200px)",
+          border: "none",
+          fontSize: "14px",
+        }}
+      />
+
+      {/* Bottom Action - Logout */}
+      <div
+        style={{
+          position: "absolute",
+          bottom: 0,
+          width: "100%",
+          borderTop: "1px solid #f0f0f0",
+          background: "#fff",
+        }}
+      >
+        <Menu
+          theme="light"
+          mode="inline"
+          items={[
+            {
+              key: "logout",
+              icon: <LogoutOutlined />,
+              label: "Logout",
+              danger: true,
+            },
+          ]}
+          onClick={(e) => onMenuSelect?.(e.key)}
+          style={{
+            border: "none",
+            fontSize: "14px",
+          }}
+        />
+      </div>
+    </Sider>
+  );
+};
+
+export default Sidebar;

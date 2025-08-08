@@ -17,3 +17,6 @@ export const useGNotify = () => {
     return context;
 };
 
+// Export responsive hook
+export { useResponsive, getResponsiveConfig } from './useResponsive';
+
