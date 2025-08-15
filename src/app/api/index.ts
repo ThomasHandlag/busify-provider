@@ -1,4 +1,4 @@
-import axios, { type InternalAxiosRequestConfig } from "axios";
+import axios from "axios";
 
 const apiClient = axios.create({
   baseURL: "http://localhost:8080/",
@@ -9,12 +9,11 @@ const apiClient = axios.create({
 });
 
 apiClient.interceptors.request.use(
-  (
-    config: InternalAxiosRequestConfig<unknown>
-  ): InternalAxiosRequestConfig<unknown> => {
-    const token = localStorage.getItem("auth-storage");
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+  (config) => {
+    const storage = localStorage.getItem("auth-storage");
+    const authToken = storage ? JSON.parse(storage).state.accessToken : null;
+    if (authToken) {
+      config.headers.Authorization = `Bearer ${authToken}`;
     }
     return config;
   },
@@ -24,9 +23,18 @@ apiClient.interceptors.request.use(
 );
 
 apiClient.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    console.error("API Error:", error);
+  (response) => {
+    return response;
+  },
+  async (error) => {
+
+    if (error.response?.status === 401 || error.response?.status === 403) {
+      console.error("Authentication failed, redirecting to login");
+      localStorage.removeItem("auth-storage");
+      window.location.href = "/login";
+      return Promise.reject(error);
+    }
+    // For all other errors, just reject
     return Promise.reject(error);
   }
 );

@@ -1,23 +1,32 @@
 // src/components/Sidebar.tsx
 import React, { useState } from "react";
 import temp from "../assets/logo.png";
-import { Layout, Menu, Grid, Typography, Badge, Avatar, Space } from "antd";
+import {
+  Layout,
+  Menu,
+  Grid,
+  Typography,
+  Badge,
+  Avatar,
+  Space,
+  Image,
+} from "antd";
 import {
   DashboardOutlined,
   UserOutlined,
   SettingOutlined,
-  LogoutOutlined,
   CarOutlined,
   BarChartOutlined,
   TeamOutlined,
   ScheduleOutlined,
   EnvironmentOutlined,
   DollarOutlined,
-  ToolOutlined,
   FileTextOutlined,
   SafetyCertificateOutlined,
   ClockCircleOutlined,
 } from "@ant-design/icons";
+import { useAuthStore } from "../stores/auth_store";
+import { operatorStore } from "../stores/operator_store";
 
 const { Sider } = Layout;
 const { useBreakpoint } = Grid;
@@ -36,10 +45,14 @@ const Sidebar: React.FC<SidebarProps> = ({ onMenuSelect, selectedKey }) => {
     setCollapsed(value);
   };
 
+  const operatorData = operatorStore();
+
+  const { user } = useAuthStore();
+
   // Bus Enterprise Management Menu Items
   const menuItems = [
     {
-      key: "dashboard",
+      key: "/dashboard",
       icon: <DashboardOutlined />,
       label: "Dashboard Overview",
     },
@@ -53,117 +66,113 @@ const Sidebar: React.FC<SidebarProps> = ({ onMenuSelect, selectedKey }) => {
           icon: <CarOutlined />,
           label: "Bus Inventory",
         },
-        {
-          key: "maintenance",
-          icon: <ToolOutlined />,
-          label: "Maintenance",
-        },
-        {
-          key: "fuel",
-          icon: <DollarOutlined />,
-          label: "Fuel Management",
-        },
       ],
     },
-    {
-      key: "operations",
-      icon: <ScheduleOutlined />,
-      label: "Operations",
-      children: [
-        {
-          key: "routes",
-          icon: <EnvironmentOutlined />,
-          label: "Routes & Stops",
-        },
-        {
-          key: "schedules",
-          icon: <ClockCircleOutlined />,
-          label: "Schedules",
-        },
-        {
-          key: "trips",
-          icon: <FileTextOutlined />,
-          label: "Trip Management",
-        },
-      ],
-    },
-    {
-      key: "bookings",
-      icon: <FileTextOutlined />,
-      label: "Booking System",
-      children: [
-        {
-          key: "reservations",
-          icon: <FileTextOutlined />,
-          label: "Reservations",
-        },
-        {
-          key: "tickets",
-          icon: <SafetyCertificateOutlined />,
-          label: "Ticket Management",
-        },
-      ],
-    },
-    {
-      key: "customers",
-      icon: <TeamOutlined />,
-      label: "Customer Management",
-    },
-    {
-      key: "drivers",
-      icon: <UserOutlined />,
-      label: "Driver Management",
-    },
-    {
-      key: "analytics",
-      icon: <BarChartOutlined />,
-      label: "Analytics & Reports",
-      children: [
-        {
-          key: "financial-reports",
-          icon: <DollarOutlined />,
-          label: "Financial Reports",
-        },
-        {
-          key: "operational-reports",
-          icon: <BarChartOutlined />,
-          label: "Operational Reports",
-        },
-        {
-          key: "performance",
-          icon: <BarChartOutlined />,
-          label: "Performance Metrics",
-        },
-      ],
-    },
-    {
-      key: "finance",
-      icon: <DollarOutlined />,
-      label: "Financial Management",
-      children: [
-        {
-          key: "revenue",
-          icon: <DollarOutlined />,
-          label: "Revenue Tracking",
-        },
-        {
-          key: "expenses",
-          icon: <FileTextOutlined />,
-          label: "Expense Management",
-        },
-        {
-          key: "payroll",
-          icon: <UserOutlined />,
-          label: "Payroll",
-        },
-      ],
-    },
+
     {
       key: "settings",
       icon: <SettingOutlined />,
       label: "System Settings",
     },
   ];
+
+  if (user?.role === "OPERATOR" || user?.role === "STAFF") {
+    menuItems.push(
+      {
+        key: "customers",
+        icon: <TeamOutlined />,
+        label: "Customer Management",
+      },
+      {
+        key: "analytics",
+        icon: <BarChartOutlined />,
+        label: "Analytics & Reports",
+        children: [
+          {
+            key: "financial-reports",
+            icon: <DollarOutlined />,
+            label: "Financial Reports",
+          },
+          {
+            key: "operational-reports",
+            icon: <BarChartOutlined />,
+            label: "Operational Reports",
+          },
+          {
+            key: "performance",
+            icon: <BarChartOutlined />,
+            label: "Performance Metrics",
+          },
+        ],
+      },
+      {
+        key: "finance",
+        icon: <DollarOutlined />,
+        label: "Financial Management",
+        children: [
+          {
+            key: "revenue",
+            icon: <DollarOutlined />,
+            label: "Revenue Tracking",
+          },
+          {
+            key: "expenses",
+            icon: <FileTextOutlined />,
+            label: "Expense Management",
+          },
+          {
+            key: "payroll",
+            icon: <UserOutlined />,
+            label: "Payroll",
+          },
+        ],
+      },
+      {
+        key: "drivers",
+        icon: <UserOutlined />,
+        label: "Driver Management",
+      },
+      {
+        key: "bookings",
+        icon: <FileTextOutlined />,
+        label: "Booking System",
+        children: [
+          {
+            key: "reservations",
+            icon: <FileTextOutlined />,
+            label: "Reservations",
+          },
+          {
+            key: "tickets",
+            icon: <SafetyCertificateOutlined />,
+            label: "Ticket Management",
+          },
+        ],
+      },
+      {
+        key: "operations",
+        icon: <ScheduleOutlined />,
+        label: "Operations",
+        children: [
+          {
+            key: "routes",
+            icon: <EnvironmentOutlined />,
+            label: "Routes & Stops",
+          },
+          {
+            key: "schedules",
+            icon: <ClockCircleOutlined />,
+            label: "Schedules",
+          },
+          {
+            key: "trips",
+            icon: <FileTextOutlined />,
+            label: "Trip Management",
+          },
+        ],
+      }
+    );
+  }
 
   return (
     <Sider
@@ -205,10 +214,10 @@ const Sidebar: React.FC<SidebarProps> = ({ onMenuSelect, selectedKey }) => {
                 marginBottom: "4px",
               }}
             >
-              <Avatar size={"small"} icon={temp} /> Busify
+              <Image src={temp} className="!w-10 !h-10" /> Busify
             </div>
             <Text style={{ fontSize: "12px", color: "rgba(255,255,255,0.8)" }}>
-              Enterprise Transport
+              {operatorData.operator?.name}
             </Text>
           </div>
         ) : (
@@ -231,10 +240,10 @@ const Sidebar: React.FC<SidebarProps> = ({ onMenuSelect, selectedKey }) => {
             <Avatar size="small" icon={<UserOutlined />} />
             <div>
               <Text strong style={{ fontSize: "14px", display: "block" }}>
-                Admin User
+                {user?.email}
               </Text>
               <Text type="secondary" style={{ fontSize: "12px" }}>
-                Super Administrator
+                {user?.role}
               </Text>
             </div>
           </Space>
@@ -278,35 +287,6 @@ const Sidebar: React.FC<SidebarProps> = ({ onMenuSelect, selectedKey }) => {
           fontSize: "14px",
         }}
       />
-
-      {/* Bottom Action - Logout */}
-      <div
-        style={{
-          position: "absolute",
-          bottom: 0,
-          width: "100%",
-          borderTop: "1px solid #f0f0f0",
-          background: "#fff",
-        }}
-      >
-        <Menu
-          theme="light"
-          mode="inline"
-          items={[
-            {
-              key: "logout",
-              icon: <LogoutOutlined />,
-              label: "Logout",
-              danger: true,
-            },
-          ]}
-          onClick={(e) => onMenuSelect?.(e.key)}
-          style={{
-            border: "none",
-            fontSize: "14px",
-          }}
-        />
-      </div>
     </Sider>
   );
 };

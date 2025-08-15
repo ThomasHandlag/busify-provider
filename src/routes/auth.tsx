@@ -1,12 +1,13 @@
 import { type RouteObject } from "react-router";
 import DashboardPage from "../features/dashboard/dashboard";
-import AnalyticsPage from "../features/analystic/analystic";
 import SettingsPage from "../features/settings/settings";
 import UsersPage from "../features/users/users";
 import BusPage from "../features/bus/bus";
 import CustomerPage from "../features/customer/customer";
 import ReportPage from "../features/report/report";
 import DashboardIndex from "../features/dashboard";
+import AnalysisPage from "../features/analysis/Analysis";
+import RoleGuard from "../components/RoleGuard";
 
 export const AuthRoute: RouteObject = {
   path: "dashboard",
@@ -14,31 +15,59 @@ export const AuthRoute: RouteObject = {
   children: [
     {
       index: true,
-      element: <DashboardIndex />,
+      element: (
+        <RoleGuard roles={["STAFF", "OPERATOR", "DRIVER"]}>
+          <DashboardIndex />
+        </RoleGuard>
+      ),
     },
     {
-      path: "analystics",
-      element: <AnalyticsPage />,
+      path: "analysis",
+      element: (
+        <RoleGuard roles={["STAFF", "OPERATOR"]}>
+          <AnalysisPage />
+        </RoleGuard>
+      ),
     },
     {
       path: "settings",
-      element: <SettingsPage />,
+      element: (
+        <RoleGuard roles={["STAFF", "OPERATOR"]}>
+          <SettingsPage />
+        </RoleGuard>
+      ),
     },
     {
       path: "users",
-      element: <UsersPage />,
+      element: (
+        <RoleGuard roles={["STAFF", "OPERATOR"]}>
+          <UsersPage />
+        </RoleGuard>
+      ),
     },
     {
-        path: "buses",
-        element: <BusPage />,
+      path: "buses",
+      element: (
+        <RoleGuard roles={["STAFF", "OPERATOR"]}>
+          <BusPage />
+        </RoleGuard>
+      ),
     },
     {
-        path: "customer",
-        element: <CustomerPage />,
+      path: "customer",
+      element: (
+        <RoleGuard roles={["STAFF", "OPERATOR", "DRIVER"]}>
+          <CustomerPage />
+        </RoleGuard>
+      ),
     },
     {
-        path: "report",
-        element: <ReportPage />,
-    }
+      path: "report",
+      element: (
+        <RoleGuard roles={["STAFF", "OPERATOR"]}>
+          <ReportPage />
+        </RoleGuard>
+      ),
+    },
   ],
 };

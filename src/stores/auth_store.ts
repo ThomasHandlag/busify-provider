@@ -2,15 +2,16 @@ import type { NavigateFunction } from "react-router";
 import { create } from "zustand";
 import { persist, devtools } from "zustand/middleware";
 import { login } from "../app/api/auth";
+import type { Role } from "../features/auth/data/role";
 
-export interface LoggedInUser {
-  role: string;
+export interface User {
+  role: Role;
   userId: number;
   email: string;
 }
 
 export interface AuthState {
-  loggedInUser?: LoggedInUser;
+  user?: User;
   accessToken: string;
   refreshToken: string;
   loading: boolean;
@@ -34,14 +35,14 @@ export const useAuthStore = create<AuthState>()(
         return {
           accessToken: "",
           refreshToken: "",
-          loggedInUser: undefined,
+          user: undefined,
           loading: false,
           error: null,
           login: async ({ username, password, navigate }) => {
             try {
               set(
                 {
-                  loggedInUser: undefined,
+                  user: undefined,
                   accessToken: "",
                   refreshToken: "",
                 },
@@ -60,7 +61,7 @@ export const useAuthStore = create<AuthState>()(
                 {
                   accessToken: response?.accessToken,
                   refreshToken: response?.refreshToken,
-                  loggedInUser: response?.loggedInUser as LoggedInUser,
+                  user: response?.user as User,
                   loading: false,
                   error: null,
                 },
@@ -69,12 +70,14 @@ export const useAuthStore = create<AuthState>()(
               );
               navigate("/dashboard");
             } catch (error) {
+              console.error("Login error:", error);
               set(
                 {
-                  error: error instanceof Error ? error.message : "Login failed",
+                  error:
+                    error instanceof Error ? error.message : "Login failed",
                   accessToken: "",
                   refreshToken: "",
-                  loggedInUser: undefined,
+                  user: undefined,
                 },
                 false,
                 {
@@ -88,7 +91,7 @@ export const useAuthStore = create<AuthState>()(
             set({
               accessToken: "",
               refreshToken: "",
-              loggedInUser: undefined,
+              user: undefined,
             });
           },
         };

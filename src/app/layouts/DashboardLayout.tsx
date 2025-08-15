@@ -1,9 +1,17 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Layout, Grid, Drawer } from "antd";
 import { Outlet, useNavigate, useLocation } from "react-router";
 import { useResponsive, getResponsiveConfig } from "../hooks";
-import Sidebar from "../../components/sidebar";
-import DashboardHeader from "../../components/dashboard-header";
+import Sidebar from "../../components/Sidebar";
+import DashboardHeader from "../../components/DashboardHeader";
+import { useAuthStore } from "../../stores/auth_store";
+import { operatorStore } from "../../stores/operator_store";
+import { getOperatorDataByUser } from "../api/operator";
+import {
+  notificationStore,
+  type NotificationData,
+} from "../../stores/notification_store";
+import { useWebSocket } from "../hooks/useWebSocket";
 
 const { Content } = Layout;
 const { useBreakpoint } = Grid;
@@ -15,14 +23,55 @@ const DashboardLayout = () => {
   const { screenSize, isMobile, isDesktop } = useResponsive();
   const config = getResponsiveConfig(screenSize);
   const [mobileDrawerVisible, setMobileDrawerVisible] = useState(false);
+  const { user } = useAuthStore();
+  const operatorData = operatorStore();
+  const notifyStorage = notificationStore();
+
+  useEffect(() => {
+    // Fetch operator data from API or other sources
+    const fetchOperatorData = async () => {
+      try {
+        const data = await getOperatorDataByUser();
+        operatorData.setOperator(data);
+      } catch (error) {
+        console.error("Error fetching operator data:", error);
+      }
+    };
+
+    fetchOperatorData();
+  }, []);
+
+  // Connect to WebSocket when operator ID is available
+  useWebSocket({
+    url: "http://localhost:8080/ws",
+    topic: operatorData.operator?.id
+      ? `/topic/operator/${operatorData.operator.id}`
+      : "",
+    onMessage: (message) => {
+      const newNotification = {
+        message: message.message,
+        id: `message-${message.userId}-${Date.now().toString()}`,
+        email: message.email || undefined,
+        phoneNumber: message.phoneNumber || undefined,
+        timestamp: new Date().toLocaleString(),
+      } as NotificationData;
+      notifyStorage.push(newNotification);
+    },
+  });
+
+  useEffect(() => {
+    if (!user) {
+      navigate("/login");
+    }
+  }, [user, navigate, location.pathname]);
 
   // Get current selected key from location pathname
   const getSelectedKey = () => {
     const path = location.pathname;
     // Remove leading slash and use the first segment as the key
-    const pathSegments = path.split('/').filter(Boolean);
-    if (pathSegments.length === 0 || pathSegments[0] === 'dashboard') {
-      return 'dashboard';
+    const pathSegments = path.split("/").filter(Boolean);
+    if (pathSegments.length === 0 || pathSegments[0] === "dashboard") {
+      return "dashboard";
     }
     return pathSegments[0];
   };
@@ -32,28 +81,28 @@ const DashboardLayout = () => {
   // Get current page name for breadcrumb
   const getCurrentPageName = () => {
     const path = location.pathname;
-    const pathSegments = path.split('/').filter(Boolean);
-    if (pathSegments.length === 0 || pathSegments[0] === 'dashboard') {
-      return 'Dashboard Overview';
+    const pathSegments = path.split("/").filter(Boolean);
+    if (pathSegments.length === 0 || pathSegments[0] === "dashboard") {
+      return "Dashboard Overview";
     }
     // Convert route to readable name
     const routeMap: { [key: string]: string } = {
-      'fleet': 'Fleet Management',
-      'buses': 'Bus Inventory',
-      'maintenance': 'Maintenance',
-      'fuel': 'Fuel Management',
-      'operations': 'Operations',
-      'routes': 'Routes & Stops',
-      'schedules': 'Schedules',
-      'trips': 'Trip Management',
-      'bookings': 'Booking System',
-      'reservations': 'Reservations',
-      'tickets': 'Ticket Management',
-      'customers': 'Customer Management',
-      'drivers': 'Driver Management',
-      'analytics': 'Analytics & Reports',
-      'finance': 'Financial Management',
-      'settings': 'System Settings',
+      fleet: "Fleet Management",
+      buses: "Bus Inventory",
+      maintenance: "Maintenance",
+      fuel: "Fuel Management",
+      operations: "Operations",
+      routes: "Routes & Stops",
+      schedules: "Schedules",
+      trips: "Trip Management",
+      bookings: "Booking System",
+      reservations: "Reservations",
+      tickets: "Ticket Management",
+      customers: "Customer Management",
+      drivers: "Driver Management",
+      analytics: "Analytics & Reports",
+      finance: "Financial Management",
+      settings: "System Settings",
     };
     return routeMap[pathSegments[0]] || pathSegments[0];
   };
@@ -85,7 +134,7 @@ const DashboardLayout = () => {
           userName="Admin"
           companyName="Busify Transport"
         />
-        
+
         <Drawer
           title="Navigation"
           placement="left"
@@ -96,12 +145,12 @@ const DashboardLayout = () => {
           styles={{
             header: {
               borderBottom: "1px solid #f0f0f0",
-            }
+            },
           }}
         >
           <Sidebar onMenuSelect={onSelectItem} selectedKey={selectedKey} />
         </Drawer>
-        
+
         <Content
           style={{
             margin: config.contentMargin,
@@ -109,7 +158,9 @@ const DashboardLayout = () => {
             background: "#fff",
             borderRadius: "8px",
             boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-            minHeight: `calc(100vh - ${config.headerHeight}px - ${config.contentMargin * 2}px)`,
+            minHeight: `calc(100vh - ${config.headerHeight}px - ${
+              config.contentMargin * 2
+            }px)`,
           }}
           className={isMobile ? "mobile-content" : "tablet-content"}
         >

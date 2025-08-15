@@ -1,6 +1,6 @@
 import { Result } from "antd";
 
-const UnauthicatedPage = () => {
+const Unauthenticated = () => {
   return (
     <Result
       status="403"
@@ -10,4 +10,4 @@ const UnauthicatedPage = () => {
   );
 };
 
-export default UnauthicatedPage;
+export default Unauthenticated;
