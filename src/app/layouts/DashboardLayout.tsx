@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Layout, Grid, Drawer } from "antd";
 import { Outlet, useNavigate, useLocation } from "react-router";
 import { useResponsive, getResponsiveConfig } from "../hooks";
-import Sidebar from "../../components/Sidebar";
+import Sidebar from "../../components/sidebar";
 import DashboardHeader from "../../components/DashboardHeader";
 import { useAuthStore } from "../../stores/auth_store";
 import { operatorStore } from "../../stores/operator_store";

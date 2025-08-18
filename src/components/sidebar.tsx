@@ -128,7 +128,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onMenuSelect, selectedKey }) => {
         ],
       },
       {
-        key: "drivers",
+        key: "driver",
         icon: <UserOutlined />,
         label: "Driver Management",
       },
