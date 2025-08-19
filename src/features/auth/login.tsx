@@ -12,27 +12,32 @@ type LoginFieldType = {
 
 const LoginPage = () => {
   const { notify } = useGNotify();
-  const {login} = useAuthStore();
+  const { login, error } = useAuthStore();
   const navigate = useNavigate();
 
   const onFinish: FormProps<LoginFieldType>["onFinish"] = async (
     values: LoginFieldType
   ) => {
     setLoading(true);
-    const response = await login(
-      {
-        username: values.username || "",
-        password: values.password || "",
-        navigate
-      }
-    );
-
-    console.log(response);
-    setLoading(false);
-    notify?.success({
-      message: "Login Successful",
-      placement: "bottomRight",
+    await login({
+      username: values.username || "",
+      password: values.password || "",
+      navigate,
     });
+
+    setLoading(false);
+    if (error) {
+      notify?.error({
+        message: "Login Failed",
+        description: error,
+        placement: "bottomRight",
+      });
+    } else {
+      notify?.success({
+        message: "Login Successful",
+        placement: "bottomRight",
+      });
+    }
   };
 
   const onFinishFailed: FormProps<LoginFieldType>["onFinishFailed"] = (

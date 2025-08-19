@@ -13,7 +13,7 @@ const AppLayout = ({ children }: { children: ReactNode }) => {
     if (!accessToken) {
       navigate("login");
     } else {
-      navigate("dashboard");
+      navigate(window.location.pathname)
     }
   }, [accessToken, navigate]);
 
