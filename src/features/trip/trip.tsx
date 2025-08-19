@@ -30,7 +30,7 @@ import {
 } from "@ant-design/icons";
 import { getTrips, deleteTrip } from "../../app/api/trip";
 import type { TableProps } from "antd";
-import type { TripData, TripResponse } from "../../stores/trip_store";
+import type { TripData } from "../../stores/trip_store";
 import TripModal from "./trip-modal";
 import dayjs from "dayjs";
 
@@ -347,6 +347,7 @@ const TripPage: React.FC = () => {
             <Statistic
               title="Tổng số chuyến xe"
               value={pagination.total}
+              valueStyle={{ color: "#1890ff" }}
               prefix={<CarOutlined />}
             />
           </Card>
@@ -356,7 +357,7 @@ const TripPage: React.FC = () => {
             <Statistic
               title="Đã lên lịch"
               value={stats.scheduled}
-              valueStyle={{ color: "#1890ff" }}
+              valueStyle={{ color: "#ffcd18" }}
             />
           </Card>
         </Col>

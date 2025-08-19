@@ -92,7 +92,7 @@ const DashboardLayout = () => {
       maintenance: "Maintenance",
       fuel: "Fuel Management",
       operations: "Operations",
-      routes: "Routes & Stops",
+      routes: "Routes Management",
       schedules: "Schedules",
       trips: "Trip Management",
       bookings: "Booking System",

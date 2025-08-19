@@ -19,13 +19,13 @@ import {
   BarChartOutlined,
   TeamOutlined,
   ScheduleOutlined,
-  EnvironmentOutlined,
   DollarOutlined,
   FileTextOutlined,
   SafetyCertificateOutlined,
   ClockCircleOutlined,
   LeftOutlined,
   RightOutlined,
+  SwapOutlined,
 } from "@ant-design/icons";
 import { useAuthStore } from "../stores/auth_store";
 import { operatorStore } from "../stores/operator_store";
@@ -158,8 +158,8 @@ const Sidebar: React.FC<SidebarProps> = ({ onMenuSelect, selectedKey }) => {
         children: [
           {
             key: "routes",
-            icon: <EnvironmentOutlined />,
-            label: "Routes & Stops",
+            icon: <SwapOutlined />,
+            label: "Routes Management",
           },
           {
             key: "schedules",

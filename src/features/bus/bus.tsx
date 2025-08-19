@@ -179,6 +179,7 @@ const BusPage: React.FC = () => {
       key: "id",
       width: 80,
       sorter: (a, b) => a.id - b.id,
+      // defaultSortOrder: "ascend",
     },
     {
       title: "Biển số",
