@@ -8,6 +8,7 @@ import ReportPage from "../features/report/report";
 import DashboardIndex from "../features/dashboard";
 import AnalysisPage from "../features/analysis/Analysis";
 import RoleGuard from "../components/RoleGuard";
+import TripPage from "../features/trip/trip";
 
 export const AuthRoute: RouteObject = {
   path: "dashboard",
@@ -50,6 +51,14 @@ export const AuthRoute: RouteObject = {
       element: (
         <RoleGuard roles={["STAFF", "OPERATOR"]}>
           <BusPage />
+        </RoleGuard>
+      ),
+    },
+    {
+      path: "trips",
+      element: (
+        <RoleGuard roles={["STAFF", "OPERATOR"]}>
+          <TripPage />
         </RoleGuard>
       ),
     },
