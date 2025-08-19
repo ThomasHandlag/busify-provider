@@ -24,6 +24,8 @@ import {
   FileTextOutlined,
   SafetyCertificateOutlined,
   ClockCircleOutlined,
+  LeftOutlined,
+  RightOutlined,
 } from "@ant-design/icons";
 import { useAuthStore } from "../stores/auth_store";
 import { operatorStore } from "../stores/operator_store";
@@ -176,7 +178,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onMenuSelect, selectedKey }) => {
 
   return (
     <Sider
-      collapsible={screens.lg} // Only allow collapse on desktop
+      collapsible={screens.lg}
       collapsed={collapsed}
       onCollapse={handleCollapse}
       breakpoint="lg"
@@ -189,8 +191,27 @@ const Sidebar: React.FC<SidebarProps> = ({ onMenuSelect, selectedKey }) => {
         left: 0,
         background: "#fff",
         borderRight: "1px solid #f0f0f0",
-        overflow: "auto",
       }}
+      trigger={
+        screens.lg && (
+          <div
+            style={{
+              position: "fixed",
+              bottom: 0,
+              width: collapsed ? "80px" : "300px",
+              zIndex: 1000,
+              // background: "#fff",
+              // borderTop: "1px solid #f0f0f0",
+              height: "48px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            {collapsed ? <RightOutlined /> : <LeftOutlined />}
+          </div>
+        )
+      }
     >
       {/* Company Logo/Brand */}
       <div
@@ -282,9 +303,11 @@ const Sidebar: React.FC<SidebarProps> = ({ onMenuSelect, selectedKey }) => {
         onClick={(e) => onMenuSelect?.(e.key)}
         items={menuItems}
         style={{
-          height: collapsed ? "calc(100vh - 80px)" : "calc(100vh - 200px)",
+          height: collapsed ? "calc(100vh - 120px)" : "calc(100vh - 240px)", // Điều chỉnh height
           border: "none",
           fontSize: "14px",
+          paddingBottom: "48px", // Thêm padding bottom để tránh content bị che
+          overflow: "auto",
         }}
       />
     </Sider>
