@@ -20,7 +20,7 @@ import {
   Alert,
 } from "antd";
 import {
-  CarOutlined,
+  UserOutlined,
   EditOutlined,
   DeleteOutlined,
   EyeOutlined,
@@ -28,22 +28,21 @@ import {
   ClearOutlined,
   PlusOutlined,
 } from "@ant-design/icons";
-import { getTrips, deleteTrip } from "../../app/api/trip";
+import { getEmployees, deleteEmployee } from "../../app/api/employee";
 import type { TableProps } from "antd";
-import type { TripData } from "../../stores/trip_store";
-import TripModal from "./trip-modal";
-import dayjs from "dayjs";
+import type { EmployeeData } from "../../stores/employee_store";
+import EmployeeModal from "./employee-modal";
 
 const { Title, Text } = Typography;
 const { Option } = Select;
 
-const TripPage: React.FC = () => {
+const EmployeePage: React.FC = () => {
   const [form] = Form.useForm();
-  const [trips, setTrips] = useState<TripData[]>([]);
+  const [employees, setEmployees] = useState<EmployeeData[]>([]);
   const [loading, setLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
-  const [isTripModalVisible, setIsTripModalVisible] = useState(false);
-  const [tripForm] = Form.useForm();
+  const [isEmployeeModalVisible, setIsEmployeeModalVisible] = useState(false);
+  const [employeeForm] = Form.useForm();
 
   const [pagination, setPagination] = useState({
     current: 1,
@@ -52,10 +51,10 @@ const TripPage: React.FC = () => {
   });
 
   useEffect(() => {
-    loadTrips({ page: 1, size: 10 });
+    loadEmployees({ page: 1, size: 10 });
   }, []);
 
-  const loadTrips = async (params: any = {}) => {
+  const loadEmployees = async (params: any = {}) => {
     setLoading(true);
     try {
       const query = {
@@ -65,34 +64,34 @@ const TripPage: React.FC = () => {
         status: params.status,
       };
 
-      const response = await getTrips(query);
+      const response = await getEmployees(query);
 
-      setTrips(response.result.result);
+      setEmployees(response.result);
       setPagination({
-        current: response.result.pageNumber,
-        pageSize: response.result.pageSize,
-        total: response.result.totalRecords,
+        current: response.pageNumber,
+        pageSize: response.pageSize,
+        total: response.totalRecords,
       });
 
-      if (params.routeName || params.status) {
+      if (params.keyword || params.status) {
         setHasSearched(true);
-        if (response.result.result.length === 0) {
-          message.info("Không tìm thấy chuyến xe nào");
+        if (response.result.length === 0) {
+          message.info("Không tìm thấy nhân viên nào");
         } else {
-          message.success(`Tìm thấy ${response.result.totalRecords} chuyến xe`);
+          message.success(`Tìm thấy ${response.totalRecords} nhân viên`);
         }
       }
     } catch (error) {
-      console.error("Error loading trips:", error);
-      message.error("Không thể tải danh sách chuyến xe");
-      setTrips([]);
+      console.error("Error loading employees:", error);
+      message.error("Không thể tải danh sách nhân viên");
+      setEmployees([]);
     } finally {
       setLoading(false);
     }
   };
 
   const handleSearch = async (values: any) => {
-    await loadTrips({
+    await loadEmployees({
       page: 1,
       size: pagination.pageSize,
       ...values,
@@ -102,40 +101,40 @@ const TripPage: React.FC = () => {
   const handleReset = () => {
     form.resetFields();
     setHasSearched(false);
-    loadTrips({ page: 1, size: pagination.pageSize });
+    loadEmployees({ page: 1, size: pagination.pageSize });
   };
 
   const handleTableChange = (paginationConfig: any) => {
-    loadTrips({
+    loadEmployees({
       page: paginationConfig.current,
       size: paginationConfig.pageSize,
       ...form.getFieldsValue(),
     });
   };
 
-  const handleDelete = (record: TripData) => {
+  const handleDelete = (record: EmployeeData) => {
     Modal.confirm({
-      title: "Bạn có chắc chắn muốn xóa chuyến xe này?",
-      content: `Hành động này sẽ xóa vĩnh viễn chuyến xe ${record.routeName}`,
+      title: "Bạn có chắc chắn muốn xóa nhân viên này?",
+      content: `Hành động này sẽ xóa vĩnh viễn nhân viên ${record.fullName}`,
       okText: "Xóa",
       okType: "danger",
       cancelText: "Hủy",
       onOk: async () => {
         try {
-          const response = await deleteTrip(record.id, true);
+          const response = await deleteEmployee(record.id, true);
           if (response.code === 200) {
-            message.success(`Đã xóa chuyến xe ${record.routeName}`);
-            loadTrips({
+            message.success(`Đã xóa nhân viên ${record.fullName}`);
+            loadEmployees({
               page: pagination.current,
               size: pagination.pageSize,
             });
           } else {
-            message.error(`Không thể xóa chuyến xe ${record.routeName}`);
+            message.error(`Không thể xóa nhân viên ${record.fullName}`);
           }
         } catch (error: any) {
           const errMsg =
             error.response?.data?.message ||
-            "An error occurred while deleting the trip";
+            "An error occurred while deleting the employee";
           message.error(errMsg);
         }
       },
@@ -144,17 +143,11 @@ const TripPage: React.FC = () => {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "scheduled":
-        return "default";
-      case "on_time":
+      case "active":
         return "green";
-      case "delayed":
+      case "inactive":
         return "orange";
-      case "departed":
-        return "blue";
-      case "arrived":
-        return "purple";
-      case "cancelled":
+      case "suspended":
         return "red";
       default:
         return "default";
@@ -163,24 +156,18 @@ const TripPage: React.FC = () => {
 
   const getStatusText = (status: string) => {
     switch (status) {
-      case "scheduled":
-        return "Đã lên lịch";
-      case "on_time":
-        return "Đúng giờ";
-      case "delayed":
-        return "Bị hoãn";
-      case "departed":
-        return "Đã khởi hành";
-      case "arrived":
-        return "Đã đến nơi";
-      case "cancelled":
-        return "Đã hủy";
+      case "active":
+        return "Hoạt động";
+      case "inactive":
+        return "Ngừng hoạt động";
+      case "suspended":
+        return "Bị cấm";
       default:
         return status;
     }
   };
 
-  const columns: TableProps<TripData>["columns"] = [
+  const columns: TableProps<EmployeeData>["columns"] = [
     {
       title: "ID",
       dataIndex: "id",
@@ -189,44 +176,41 @@ const TripPage: React.FC = () => {
       sorter: (a, b) => a.id - b.id,
     },
     {
-      title: "Tuyến đường",
-      dataIndex: "routeName",
-      key: "routeName",
+      title: "Họ tên",
+      dataIndex: "fullName",
+      key: "fullName",
       render: (name) => <Text strong>{name}</Text>,
+      width: 180,
+    },
+    {
+      title: "Email",
+      dataIndex: "email",
+      key: "email",
       width: 200,
     },
     {
-      title: "Xe",
-      dataIndex: "busId",
-      key: "busId",
-      width: 120,
-    },
-    {
-      title: "Tài xế",
-      dataIndex: "driverId",
-      key: "driverId",
-      width: 120,
-    },
-    {
-      title: "Thời gian khởi hành",
-      dataIndex: "departureTime",
-      key: "departureTime",
-      render: (time) => dayjs(time).format("DD/MM/YYYY HH:mm"),
+      title: "Nhà vận hành",
+      dataIndex: "operatorName",
+      key: "operatorName",
       width: 180,
     },
     {
-      title: "Thời gian đến",
-      dataIndex: "estimatedArrivalTime",
-      key: "estimatedArrivalTime",
-      render: (time) => dayjs(time).format("DD/MM/YYYY HH:mm"),
-      width: 180,
+      title: "Số GPLX",
+      dataIndex: "driverLicenseNumber",
+      key: "driverLicenseNumber",
+      width: 140,
     },
     {
-      title: "Giá vé",
-      dataIndex: "pricePerSeat",
-      key: "pricePerSeat",
-      render: (price) => `${price.toLocaleString()} VND`,
-      width: 150,
+      title: "Địa chỉ",
+      dataIndex: "address",
+      key: "address",
+      width: 200,
+    },
+    {
+      title: "SĐT",
+      dataIndex: "phoneNumber",
+      key: "phoneNumber",
+      width: 140,
     },
     {
       title: "Trạng thái",
@@ -235,7 +219,7 @@ const TripPage: React.FC = () => {
       render: (status) => (
         <Tag color={getStatusColor(status)}>{getStatusText(status)}</Tag>
       ),
-      width: 150,
+      width: 120,
     },
     {
       title: "Thao tác",
@@ -248,7 +232,7 @@ const TripPage: React.FC = () => {
             <Button
               type="text"
               icon={<EyeOutlined />}
-              onClick={() => message.info(`Chi tiết chuyến xe: ${record.id}`)}
+              onClick={() => message.info(`Chi tiết nhân viên: ${record.id}`)}
             />
           </Tooltip>
           <Tooltip title="Chỉnh sửa">
@@ -256,12 +240,8 @@ const TripPage: React.FC = () => {
               type="text"
               icon={<EditOutlined />}
               onClick={() => {
-                tripForm.setFieldsValue({
-                  ...record,
-                  departureTime: dayjs(record.departureTime),
-                  estimatedArrivalTime: dayjs(record.estimatedArrivalTime),
-                });
-                setIsTripModalVisible(true);
+                employeeForm.setFieldsValue({ ...record });
+                setIsEmployeeModalVisible(true);
               }}
             />
           </Tooltip>
@@ -279,12 +259,9 @@ const TripPage: React.FC = () => {
   ];
 
   const stats = {
-    scheduled: trips.filter((t) => t.status === "scheduled").length,
-    onTime: trips.filter((t) => t.status === "on_time").length,
-    delayed: trips.filter((t) => t.status === "delayed").length,
-    departed: trips.filter((t) => t.status === "departed").length,
-    arrived: trips.filter((t) => t.status === "arrived").length,
-    cancelled: trips.filter((t) => t.status === "cancelled").length,
+    active: employees.filter((e) => e.status === "active").length,
+    inactive: employees.filter((e) => e.status === "inactive").length,
+    suspended: employees.filter((e) => e.status === "suspended").length,
   };
 
   return (
@@ -296,32 +273,32 @@ const TripPage: React.FC = () => {
             title: "Quản lý vận hành",
           },
           {
-            title: "Quản lý chuyến xe",
+            title: "Quản lý nhân viên",
           },
         ]}
       />
 
       <Title level={2} style={{ marginBottom: "24px" }}>
-        <CarOutlined /> Quản lý chuyến xe
+        <UserOutlined /> Quản lý nhân viên
       </Title>
 
       <Card style={{ marginBottom: "24px" }}>
         <Form form={form} layout="vertical" onFinish={handleSearch}>
           <Row gutter={16}>
             <Col xs={24} sm={12} lg={6}>
-              <Form.Item name="keyword" label="Tìm kiếm theo tuyến đường">
+              <Form.Item name="keyword" label="Tìm kiếm theo tên/email">
                 <Input
-                  placeholder="Nhập tên tuyến đường"
-                  prefix={<CarOutlined />}
+                  placeholder="Nhập tên hoặc email"
+                  prefix={<UserOutlined />}
                 />
               </Form.Item>
             </Col>
             <Col xs={24} sm={12} lg={6}>
               <Form.Item name="status" label="Trạng thái">
                 <Select allowClear placeholder="Chọn trạng thái">
-                  <Option value="scheduled">Đã lên lịch</Option>
-                  <Option value="completed">Đã hoàn thành</Option>
-                  <Option value="cancelled">Đã hủy</Option>
+                  <Option value="active">Hoạt động</Option>
+                  <Option value="inactive">Ngừng hoạt động</Option>
+                  <Option value="suspended">Bị cấm</Option>
                 </Select>
               </Form.Item>
             </Col>
@@ -343,11 +320,11 @@ const TripPage: React.FC = () => {
                     icon={<PlusOutlined />}
                     type="dashed"
                     onClick={() => {
-                      tripForm.resetFields();
-                      setIsTripModalVisible(true);
+                      employeeForm.resetFields();
+                      setIsEmployeeModalVisible(true);
                     }}
                   >
-                    Thêm chuyến xe
+                    Thêm nhân viên
                   </Button>
                 </Space>
               </Form.Item>
@@ -357,93 +334,60 @@ const TripPage: React.FC = () => {
       </Card>
 
       <Row gutter={16} style={{ marginBottom: "24px" }}>
-        <Col xs={24} sm={12} lg={6}>
+        <Col xs={24} sm={6} md={6} lg={6} xl={6}>
           <Card>
             <Statistic
-              title="Tổng số chuyến xe"
+              title="Tổng số nhân viên"
               value={pagination.total}
-              valueStyle={{ color: "#a2d800" }}
-              prefix={<CarOutlined />}
+              valueStyle={{ color: "#1890ff" }}
+              prefix={<UserOutlined />}
             />
           </Card>
         </Col>
-
-        <Col xs={24} sm={12} lg={6}>
+        <Col xs={24} sm={6} md={6} lg={6} xl={6}>
           <Card>
             <Statistic
-              title="Đã lên lịch"
-              value={stats.scheduled}
-              valueStyle={{ color: "#595959" }}
-            />
-          </Card>
-        </Col>
-
-        <Col xs={24} sm={12} lg={6}>
-          <Card>
-            <Statistic
-              title="Đúng giờ"
-              value={stats.onTime}
+              title="Hoạt động"
+              value={stats.active}
               valueStyle={{ color: "#52c41a" }}
             />
           </Card>
         </Col>
-
-        <Col xs={24} sm={12} lg={6}>
+        <Col xs={24} sm={6} md={6} lg={6} xl={6}>
           <Card>
             <Statistic
-              title="Bị trễ"
-              value={stats.delayed}
+              title="Ngừng hoạt động"
+              value={stats.inactive}
               valueStyle={{ color: "#ff974d" }}
             />
           </Card>
         </Col>
-
-        <Col xs={24} sm={12} lg={6}>
+        <Col xs={24} sm={6} md={6} lg={6} xl={6}>
           <Card>
             <Statistic
-              title="Đang chạy"
-              value={stats.departed}
-              valueStyle={{ color: "#1890ff" }}
-            />
-          </Card>
-        </Col>
-
-        <Col xs={24} sm={12} lg={6}>
-          <Card>
-            <Statistic
-              title="Đã đến nơi"
-              value={stats.arrived}
-              valueStyle={{ color: "#722ed1" }}
-            />
-          </Card>
-        </Col>
-
-        <Col xs={24} sm={12} lg={6}>
-          <Card>
-            <Statistic
-              title="Bị hủy"
-              value={stats.cancelled}
-              valueStyle={{ color: "#ff3232" }}
+              title="Bị cấm"
+              value={stats.suspended}
+              valueStyle={{ color: "#ff4d4f" }}
             />
           </Card>
         </Col>
       </Row>
 
       <Card>
-        {trips.length === 0 && !loading ? (
-          <Empty description="Không có chuyến xe nào" />
+        {employees.length === 0 && !loading ? (
+          <Empty description="Không có nhân viên nào" />
         ) : (
           <>
             {hasSearched ? (
               <Alert
-                message={`Tìm thấy ${pagination.total} xe phù hợp`}
+                message={`Tìm thấy ${pagination.total} nhân viên phù hợp`}
                 type="success"
                 showIcon
                 style={{ marginBottom: "16px" }}
               />
             ) : (
               <Alert
-                message={`Hiển thị tất cả ${pagination.total} chuyến xe trong hệ thống`}
+                message={`Hiển thị tất cả ${pagination.total} nhân viên trong hệ thống`}
                 type="info"
                 showIcon
                 style={{ marginBottom: "16px" }}
@@ -451,7 +395,7 @@ const TripPage: React.FC = () => {
             )}
             <Table
               columns={columns}
-              dataSource={trips}
+              dataSource={employees}
               rowKey="id"
               pagination={{
                 current: pagination.current,
@@ -460,7 +404,7 @@ const TripPage: React.FC = () => {
                 showSizeChanger: true,
                 showQuickJumper: true,
                 showTotal: (total, range) =>
-                  `${range[0]}-${range[1]} của ${total} xe`,
+                  `${range[0]}-${range[1]} của ${total} nhân viên`,
               }}
               onChange={handleTableChange}
               loading={loading}
@@ -470,16 +414,16 @@ const TripPage: React.FC = () => {
         )}
       </Card>
 
-      <TripModal
-        isModalVisible={isTripModalVisible}
-        setIsModalVisible={setIsTripModalVisible}
-        form={tripForm}
+      <EmployeeModal
+        isModalVisible={isEmployeeModalVisible}
+        setIsModalVisible={setIsEmployeeModalVisible}
+        form={employeeForm}
         onSuccess={() =>
-          loadTrips({ page: pagination.current, size: pagination.pageSize })
+          loadEmployees({ page: pagination.current, size: pagination.pageSize })
         }
       />
     </div>
   );
 };
 
-export default TripPage;
+export default EmployeePage;

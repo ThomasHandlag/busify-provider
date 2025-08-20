@@ -88,13 +88,14 @@ const DashboardLayout = () => {
     // Convert route to readable name
     const routeMap: { [key: string]: string } = {
       fleet: "Fleet Management",
-      buses: "Bus Management",
+      buses: "Buses Management",
       maintenance: "Maintenance",
       fuel: "Fuel Management",
       operations: "Operations",
       routes: "Routes Management",
       schedules: "Schedules",
-      trips: "Trip Management",
+      trips: "Trips Management",
+      employees: "Employees Management",
       bookings: "Booking System",
       reservations: "Reservations",
       tickets: "Ticket Management",

@@ -10,6 +10,7 @@ import AnalysisPage from "../features/analysis/Analysis";
 import RoleGuard from "../components/RoleGuard";
 import TripPage from "../features/trip/trip";
 import RoutePage from "../features/route/route_feature";
+import EmployeePage from "../features/employee/employee";
 
 export const AuthRoute: RouteObject = {
   path: "dashboard",
@@ -68,6 +69,14 @@ export const AuthRoute: RouteObject = {
       element: (
         <RoleGuard roles={["STAFF", "OPERATOR"]}>
           <RoutePage />
+        </RoleGuard>
+      ),
+    },
+    {
+      path: "employees",
+      element: (
+        <RoleGuard roles={["STAFF", "OPERATOR"]}>
+          <EmployeePage />
         </RoleGuard>
       ),
     },

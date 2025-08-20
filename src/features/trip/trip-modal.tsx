@@ -212,8 +212,11 @@ const TripModal: React.FC<TripModalProps> = ({
               >
                 <Select>
                   <Option value="scheduled">Đã lên lịch</Option>
+                  <Option value="on_time">Đúng giờ</Option>
+                  <Option value="delayed">Bị hoãn</Option>
+                  <Option value="departed">Đã khởi hành</Option>
+                  <Option value="arrived">Đã đến nơi</Option>
                   <Option value="cancelled">Đã hủy</Option>
-                  <Option value="completed">Đã hoàn thành</Option>
                 </Select>
               </Form.Item>
             </Col>

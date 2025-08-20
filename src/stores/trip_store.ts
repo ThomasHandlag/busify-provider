@@ -9,7 +9,7 @@ export interface TripData {
   driverId: number;
   departureTime: string;
   estimatedArrivalTime: string;
-  status: "scheduled" | "cancelled" | "completed";
+  status: "scheduled" | "on_time" | "delayed" | "departed" | "arrived" | "cancelled";
   pricePerSeat: number;
 }
 
