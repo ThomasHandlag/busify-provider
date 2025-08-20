@@ -78,5 +78,6 @@ export const AuthRoute: RouteObject = {
         </RoleGuard>
       ),
     },
+     
   ],
 };
