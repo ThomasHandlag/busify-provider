@@ -1,5 +1,25 @@
 import { useEffect, useState } from "react";
-import { Card, Form, Input, Modal, Select, Space, Table, Button } from "antd";
+import {
+  Card,
+  Form,
+  Input,
+  Modal,
+  Select,
+  Space,
+  Table,
+  Button,
+  Tag,
+  Divider,
+} from "antd";
+import {
+  EditOutlined,
+  EnvironmentOutlined,
+  DollarOutlined,
+  TeamOutlined,
+  ClockCircleOutlined,
+  StarOutlined,
+  WifiOutlined,
+} from "@ant-design/icons";
 import { useGNotify } from "../../app/hooks";
 import apiClient from "../../app/api";
 
@@ -250,7 +270,15 @@ const DriverManagement = () => {
       title: "Actions",
       key: "actions",
       render: (_: any, record: Passenger) => (
-        <a onClick={() => handleEditTicket(record)}>Edit</a>
+        <Button
+          type="primary"
+          size="small"
+          icon={<EditOutlined />}
+          onClick={() => handleEditTicket(record)}
+          className="flex items-center justify-center"
+        >
+          Sửa
+        </Button>
       ),
     },
   ];
@@ -268,59 +296,100 @@ const DriverManagement = () => {
           Manage Drivers
         </button>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {trips.map((trip) => (
           <Card
             key={trip.trip_id}
-            title={trip.operator_name}
-            extra={
-              <a onClick={() => handleEditTripStatus(trip)}>Edit Status</a>
-            }
-            className="hover:shadow-lg transition-shadow"
+            className="hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border-0 overflow-hidden"
+            bodyStyle={{ padding: 0 }}
           >
-            <p>
-              <strong>TripID:</strong> {trip.trip_id}
-            </p>
-            <p>
-              <strong>From:</strong> {trip.route.start_location}
-            </p>
-            <p>
-              <strong>To:</strong> {trip.route.end_location}
-            </p>
-            <p>
-              <strong>Departure:</strong>{" "}
-              {new Date(trip.departure_time).toLocaleString()}
-            </p>
-            <p>
-              <strong>Arrival:</strong>{" "}
-              {new Date(trip.arrival_time).toLocaleString()}
-            </p>
-            <p>
-              <strong>Price:</strong> {trip.price_per_seat.toLocaleString()}đ
-            </p>
-            <p>
-              <strong>Available Seats:</strong> {trip.available_seats}/
-              {trip.total_seats}
-            </p>
-            <p>
-              <strong>Rating:</strong>{" "}
-              {trip.average_rating?.toFixed(1) || "N/A"}
-            </p>
-            <p>
-              <strong>Status:</strong> {trip.status || "N/A"}
-            </p>
-            <p>
-              <strong>Amenities:</strong>{" "}
-              {[
-                trip.amenities.wifi && "WiFi",
-                trip.amenities.air_conditioner && "Air Conditioner",
-              ]
-                .filter(Boolean)
-                .join(", ") || "None"}
-            </p>
+            {/* Header với gradient background */}
+            <div >
+              <div className="flex justify-between items-center">
+                <h3 className="text-lg font-bold truncate">
+                  {trip.operator_name}
+                </h3>
+                <Tag
+                  color={trip.status === "active" ? "green" : "orange"}
+                  className="border-0"
+                >
+                  {trip.status || "N/A"}
+                </Tag>
+              </div>
+              <p className="text-sm opacity-90 mt-1">ID: {trip.trip_id}</p>
+            </div>
 
-            <div className="mt-4">
-              <a onClick={() => handleTripClick(trip)}>View Passengers</a>
+            {/* Content chính */}
+            <div className="p-4">
+              {/* Route */}
+              <div className="flex items-center mb-3">
+                <EnvironmentOutlined className="text-blue-500 mr-2" />
+                <span className="text-sm">
+                  <strong>{trip.route.start_location}</strong> →{" "}
+                  <strong>{trip.route.end_location}</strong>
+                </span>
+              </div>
+
+              {/* Thời gian */}
+              <div className="space-y-2 mb-3">
+                <div className="flex items-center">
+                  <ClockCircleOutlined className="text-green-500 mr-2" />
+                  <span className="text-xs">
+                    Khởi hành: {new Date(trip.departure_time).toLocaleString()}
+                  </span>
+                </div>
+                <div className="flex items-center">
+                  <ClockCircleOutlined className="text-red-500 mr-2" />
+                  <span className="text-xs">
+                    Đến: {new Date(trip.arrival_time).toLocaleString()}
+                  </span>
+                </div>
+              </div>
+
+              <Divider className="my-3" />
+
+              {/* Thông tin chi tiết */}
+              <div className="grid grid-cols-2 gap-2 text-xs mb-3">
+                <div className="flex items-center">
+                  <DollarOutlined className="text-yellow-500 mr-1" />
+                  <span>{trip.price_per_seat.toLocaleString()}đ</span>
+                </div>
+                <div className="flex items-center">
+                  <TeamOutlined className="text-purple-500 mr-1" />
+                  <span>
+                    {trip.available_seats}/{trip.total_seats}
+                  </span>
+                </div>
+                <div className="flex items-center">
+                  <StarOutlined className="text-orange-500 mr-1" />
+                  <span>{trip.average_rating?.toFixed(1) || "N/A"}</span>
+                </div>
+                <div className="flex items-center">
+                  <WifiOutlined className="text-blue-500 mr-1" />
+                  <span>{trip.amenities.wifi ? "Có" : "Không"}</span>
+                </div>
+              </div>
+
+              {/* Action buttons */}
+              <div className="flex gap-2">
+                <Button
+                  type="primary"
+                  size="small"
+                  icon={<TeamOutlined />}
+                  onClick={() => handleTripClick(trip)}
+                  className="flex-1"
+                >
+                  Xem khách
+                </Button>
+                <Button
+                  size="small"
+                  icon={<EditOutlined />}
+                  onClick={() => handleEditTripStatus(trip)}
+                  className="flex-1"
+                >
+                  Sửa TT
+                </Button>
+              </div>
             </div>
           </Card>
         ))}
