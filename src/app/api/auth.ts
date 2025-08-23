@@ -8,7 +8,7 @@ export const login = async (credentials: {
   | { accessToken: string; refreshToken: string; user: User }
   | undefined
 > => {
-  const response = await apiClient.post("api/auth/login", credentials);
+  const response = await apiClient.post("/api/auth/login", credentials);
   if (response.status !== 200) {
     console.error("Login failed:", response);
     throw new Error("Login failed");

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Layout, Grid, Drawer } from "antd";
 import { Outlet, useNavigate, useLocation } from "react-router";
 import { useResponsive, getResponsiveConfig } from "../hooks";
-import Sidebar from "../../components/Sidebar";
+import Sidebar from "../../components/sidebar";
 import DashboardHeader from "../../components/DashboardHeader";
 import { useAuthStore } from "../../stores/auth_store";
 import { operatorStore } from "../../stores/operator_store";
@@ -88,13 +88,14 @@ const DashboardLayout = () => {
     // Convert route to readable name
     const routeMap: { [key: string]: string } = {
       fleet: "Fleet Management",
-      buses: "Bus Inventory",
+      buses: "Buses Management",
       maintenance: "Maintenance",
       fuel: "Fuel Management",
       operations: "Operations",
-      routes: "Routes & Stops",
+      routes: "Routes Management",
       schedules: "Schedules",
-      trips: "Trip Management",
+      trips: "Trips Management",
+      employees: "Employees Management",
       bookings: "Booking System",
       reservations: "Reservations",
       tickets: "Ticket Management",

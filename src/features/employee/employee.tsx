@@ -1,49 +1,48 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState, useEffect } from "react";
 import {
-  Card,
-  Form,
-  Input,
-  Button,
   Table,
+  Card,
+  Button,
   Space,
+  Modal,
+  message,
   Typography,
   Tag,
+  Tooltip,
+  Form,
+  Input,
+  Select,
   Row,
   Col,
-  Statistic,
-  Alert,
   Breadcrumb,
   Empty,
-  Tooltip,
-  message,
-  Select,
-  Modal,
+  Statistic,
+  Alert,
 } from "antd";
 import {
-  SearchOutlined,
-  EyeOutlined,
+  UserOutlined,
   EditOutlined,
-  CarOutlined,
-  ClearOutlined,
   DeleteOutlined,
+  EyeOutlined,
+  SearchOutlined,
+  ClearOutlined,
   PlusOutlined,
 } from "@ant-design/icons";
+import { getEmployees, deleteEmployee } from "../../app/api/employee";
 import type { TableProps } from "antd";
-import { getBuses, deleteBus } from "../../app/api/bus";
-import type { BusData, BusResponse } from "../../stores/bus_store";
-import BusModal from "./bus-modal";
+import type { EmployeeData } from "../../stores/employee_store";
+import EmployeeModal from "./employee-modal";
 
 const { Title, Text } = Typography;
 const { Option } = Select;
 
-const BusPage: React.FC = () => {
+const EmployeePage: React.FC = () => {
   const [form] = Form.useForm();
-  const [buses, setBuses] = useState<BusData[]>([]);
+  const [employees, setEmployees] = useState<EmployeeData[]>([]);
   const [loading, setLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
-  const [isBusModalVisible, setIsBusModalVisible] = useState(false);
-  const [busForm] = Form.useForm();
+  const [isEmployeeModalVisible, setIsEmployeeModalVisible] = useState(false);
+  const [employeeForm] = Form.useForm();
 
   const [pagination, setPagination] = useState({
     current: 1,
@@ -51,12 +50,11 @@ const BusPage: React.FC = () => {
     total: 0,
   });
 
-  // Load dữ liệu ban đầu
   useEffect(() => {
-    loadBuses({ page: 1, size: 10 });
+    loadEmployees({ page: 1, size: 10 });
   }, []);
 
-  const loadBuses = async (params: any = {}) => {
+  const loadEmployees = async (params: any = {}) => {
     setLoading(true);
     try {
       const query = {
@@ -66,80 +64,77 @@ const BusPage: React.FC = () => {
         status: params.status,
       };
 
-      const response: BusResponse = await getBuses(query);
+      const response = await getEmployees(query);
 
-      setBuses(response.result);
+      setEmployees(response.result);
       setPagination({
         current: response.pageNumber,
         pageSize: response.pageSize,
         total: response.totalRecords,
       });
 
-      if (params.licensePlate || params.status) {
+      if (params.keyword || params.status) {
         setHasSearched(true);
         if (response.result.length === 0) {
-          message.info("Không tìm thấy xe nào");
+          message.info("Không tìm thấy nhân viên nào");
         } else {
-          message.success(`Tìm thấy ${response.totalRecords} xe`);
+          message.success(`Tìm thấy ${response.totalRecords} nhân viên`);
         }
       }
     } catch (error) {
-      console.error("Error loading buses:", error);
-      message.error("Không thể tải danh sách xe");
-      setBuses([]);
+      console.error("Error loading employees:", error);
+      message.error("Không thể tải danh sách nhân viên");
+      setEmployees([]);
     } finally {
       setLoading(false);
     }
   };
 
-  // Search
   const handleSearch = async (values: any) => {
-    await loadBuses({
+    await loadEmployees({
       page: 1,
       size: pagination.pageSize,
       ...values,
     });
   };
 
-  // Reset
   const handleReset = () => {
     form.resetFields();
     setHasSearched(false);
-    loadBuses({ page: 1, size: pagination.pageSize });
+    loadEmployees({ page: 1, size: pagination.pageSize });
   };
 
-  // Chuyển trang
   const handleTableChange = (paginationConfig: any) => {
-    loadBuses({
+    loadEmployees({
       page: paginationConfig.current,
       size: paginationConfig.pageSize,
-      ...form.getFieldsValue(), // giữ filter khi chuyển trang
+      ...form.getFieldsValue(),
     });
   };
 
-  const handleDelete = (record: BusData) => {
+  const handleDelete = (record: EmployeeData) => {
     Modal.confirm({
-      title: "Are you sure you want to delete this bus?",
-      content: `This will permanently delete ${record.licensePlate} and all associated data.`,
-      okText: "Yes, Delete",
+      title: "Bạn có chắc chắn muốn xóa nhân viên này?",
+      content: `Hành động này sẽ xóa vĩnh viễn nhân viên ${record.fullName}`,
+      okText: "Xóa",
       okType: "danger",
-      cancelText: "Cancel",
+      cancelText: "Hủy",
       onOk: async () => {
         try {
-          const response = await deleteBus(record.id, true); // truyền isDelete = true
+          const response = await deleteEmployee(record.id, true);
           if (response.code === 200) {
-            message.success(`Đã xóa xe khách ${record.licensePlate}`);
-            loadBuses({
+            message.success(`Đã xóa nhân viên ${record.fullName}`);
+            loadEmployees({
               page: pagination.current,
               size: pagination.pageSize,
             });
           } else {
-            message.error(`Failed to delete bus ${record.licensePlate}`);
+            message.error(`Không thể xóa nhân viên ${record.fullName}`);
           }
         } catch (error: any) {
           const errMsg =
             error.response?.data?.message ||
-            "An error occurred while deleting the bus";
+            "An error occurred while deleting the employee";
           message.error(errMsg);
         }
       },
@@ -150,9 +145,9 @@ const BusPage: React.FC = () => {
     switch (status) {
       case "active":
         return "green";
-      case "under_maintenance":
+      case "inactive":
         return "orange";
-      case "out_of_service":
+      case "suspended":
         return "red";
       default:
         return "default";
@@ -162,55 +157,60 @@ const BusPage: React.FC = () => {
   const getStatusText = (status: string) => {
     switch (status) {
       case "active":
-        return "Đang hoạt động";
-      case "under_maintenance":
-        return "Bảo trì";
-      case "out_of_service":
-        return "Ngưng hoạt động";
+        return "Hoạt động";
+      case "inactive":
+        return "Ngừng hoạt động";
+      case "suspended":
+        return "Bị cấm";
       default:
         return status;
     }
   };
 
-  const columns: TableProps<BusData>["columns"] = [
+  const columns: TableProps<EmployeeData>["columns"] = [
     {
       title: "ID",
       dataIndex: "id",
       key: "id",
       width: 80,
       sorter: (a, b) => a.id - b.id,
-      // defaultSortOrder: "ascend",
     },
     {
-      title: "Biển số",
-      dataIndex: "licensePlate",
-      key: "licensePlate",
-      render: (plate) => <Text strong>{plate}</Text>,
-      width: 150,
-    },
-    {
-      title: "Mẫu xe",
-      dataIndex: "modelName",
-      key: "modelName",
+      title: "Họ tên",
+      dataIndex: "fullName",
+      key: "fullName",
+      render: (name) => <Text strong>{name}</Text>,
       width: 180,
     },
     {
-      title: "Số ghế",
-      dataIndex: "totalSeats",
-      key: "totalSeats",
-      width: 100,
-    },
-    {
-      title: "Nhà xe",
-      dataIndex: "operatorName",
-      key: "operatorName",
+      title: "Email",
+      dataIndex: "email",
+      key: "email",
       width: 200,
     },
     {
-      title: "Bố trí ghế",
-      dataIndex: "seatLayoutName",
-      key: "seatLayoutName",
-      width: 150,
+      title: "Nhà vận hành",
+      dataIndex: "operatorName",
+      key: "operatorName",
+      width: 180,
+    },
+    {
+      title: "Số GPLX",
+      dataIndex: "driverLicenseNumber",
+      key: "driverLicenseNumber",
+      width: 140,
+    },
+    {
+      title: "Địa chỉ",
+      dataIndex: "address",
+      key: "address",
+      width: 200,
+    },
+    {
+      title: "SĐT",
+      dataIndex: "phoneNumber",
+      key: "phoneNumber",
+      width: 140,
     },
     {
       title: "Trạng thái",
@@ -219,34 +219,20 @@ const BusPage: React.FC = () => {
       render: (status) => (
         <Tag color={getStatusColor(status)}>{getStatusText(status)}</Tag>
       ),
-      width: 150,
-    },
-    {
-      title: "Tiện ích",
-      key: "amenities",
-      render: (_, record) => (
-        <Space>
-          {record.amenities.wifi && <Tag color="blue">WiFi</Tag>}
-          {record.amenities.tv && <Tag color="geekblue">TV</Tag>}
-          {record.amenities.toilet && <Tag color="volcano">Toilet</Tag>}
-          {record.amenities.charging && <Tag color="purple">Sạc</Tag>}
-          {record.amenities.air_conditioner && <Tag color="cyan">Điều hòa</Tag>}
-        </Space>
-      ),
-      width: 250,
+      width: 120,
     },
     {
       title: "Thao tác",
       key: "action",
+      fixed: "right",
+      width: 120,
       render: (_, record) => (
         <Space>
           <Tooltip title="Xem chi tiết">
             <Button
               type="text"
               icon={<EyeOutlined />}
-              onClick={() =>
-                message.info(`Chi tiết xe: ${record.licensePlate}`)
-              }
+              onClick={() => message.info(`Chi tiết nhân viên: ${record.id}`)}
             />
           </Tooltip>
           <Tooltip title="Chỉnh sửa">
@@ -254,13 +240,8 @@ const BusPage: React.FC = () => {
               type="text"
               icon={<EditOutlined />}
               onClick={() => {
-                busForm.setFieldsValue({
-                  ...record,
-                  amenities: Object.keys(record.amenities).filter(
-                    (key) => record.amenities[key] === true
-                  ),
-                });
-                setIsBusModalVisible(true);
+                employeeForm.setFieldsValue({ ...record });
+                setIsEmployeeModalVisible(true);
               }}
             />
           </Tooltip>
@@ -274,16 +255,13 @@ const BusPage: React.FC = () => {
           </Tooltip>
         </Space>
       ),
-      width: 120,
-      fixed: "right",
     },
   ];
 
-  // Thống kê theo dữ liệu hiện tại
   const stats = {
-    active: buses.filter((b) => b.status === "active").length,
-    maintenance: buses.filter((b) => b.status === "under_maintenance").length,
-    out_of_service: buses.filter((b) => b.status === "out_of_service").length,
+    active: employees.filter((e) => e.status === "active").length,
+    inactive: employees.filter((e) => e.status === "inactive").length,
+    suspended: employees.filter((e) => e.status === "suspended").length,
   };
 
   return (
@@ -292,36 +270,35 @@ const BusPage: React.FC = () => {
         style={{ marginBottom: "16px" }}
         items={[
           {
-            title: "Quản lý phương tiện",
+            title: "Quản lý vận hành",
           },
           {
-            title: "Xe khách",
+            title: "Quản lý nhân viên",
           },
         ]}
       />
 
       <Title level={2} style={{ marginBottom: "24px" }}>
-        <CarOutlined /> Quản lý xe khách
+        <UserOutlined /> Quản lý nhân viên
       </Title>
 
-      {/* Search Form */}
       <Card style={{ marginBottom: "24px" }}>
         <Form form={form} layout="vertical" onFinish={handleSearch}>
           <Row gutter={16}>
             <Col xs={24} sm={12} lg={6}>
-              <Form.Item name="keyword" label="Từ khóa">
+              <Form.Item name="keyword" label="Tìm kiếm theo tên/email">
                 <Input
-                  placeholder="Nhập biển số, mẫu xe"
-                  prefix={<CarOutlined />}
+                  placeholder="Nhập tên hoặc email"
+                  prefix={<UserOutlined />}
                 />
               </Form.Item>
             </Col>
             <Col xs={24} sm={12} lg={6}>
               <Form.Item name="status" label="Trạng thái">
-                <Select placeholder="Chọn trạng thái" allowClear>
-                  <Option value="active">Đang hoạt động</Option>
-                  <Option value="under_maintenance">Bảo trì</Option>
-                  <Option value="out_of_service">Ngưng hoạt động</Option>
+                <Select allowClear placeholder="Chọn trạng thái">
+                  <Option value="active">Hoạt động</Option>
+                  <Option value="inactive">Ngừng hoạt động</Option>
+                  <Option value="suspended">Bị cấm</Option>
                 </Select>
               </Form.Item>
             </Col>
@@ -343,11 +320,11 @@ const BusPage: React.FC = () => {
                     icon={<PlusOutlined />}
                     type="dashed"
                     onClick={() => {
-                      busForm.resetFields();
-                      setIsBusModalVisible(true);
+                      employeeForm.resetFields();
+                      setIsEmployeeModalVisible(true);
                     }}
                   >
-                    Thêm xe
+                    Thêm nhân viên
                   </Button>
                 </Space>
               </Form.Item>
@@ -356,63 +333,61 @@ const BusPage: React.FC = () => {
         </Form>
       </Card>
 
-      {/* Statistics */}
       <Row gutter={16} style={{ marginBottom: "24px" }}>
-        <Col xs={24} sm={6}>
+        <Col xs={24} sm={6} md={6} lg={6} xl={6}>
           <Card>
             <Statistic
-              title="Tổng số xe"
+              title="Tổng số nhân viên"
               value={pagination.total}
-              prefix={<CarOutlined />}
               valueStyle={{ color: "#1890ff" }}
+              prefix={<UserOutlined />}
             />
           </Card>
         </Col>
-        <Col xs={24} sm={6}>
+        <Col xs={24} sm={6} md={6} lg={6} xl={6}>
           <Card>
             <Statistic
-              title="Đang hoạt động"
+              title="Hoạt động"
               value={stats.active}
               valueStyle={{ color: "#52c41a" }}
             />
           </Card>
         </Col>
-        <Col xs={24} sm={6}>
+        <Col xs={24} sm={6} md={6} lg={6} xl={6}>
           <Card>
             <Statistic
-              title="Đang bảo trì"
-              value={stats.maintenance}
-              valueStyle={{ color: "#faad14" }}
+              title="Ngừng hoạt động"
+              value={stats.inactive}
+              valueStyle={{ color: "#ff974d" }}
             />
           </Card>
         </Col>
-        <Col xs={24} sm={6}>
+        <Col xs={24} sm={6} md={6} lg={6} xl={6}>
           <Card>
             <Statistic
-              title="Ngưng hoạt động"
-              value={stats.out_of_service}
-              valueStyle={{ color: "#f5222d" }}
+              title="Bị cấm"
+              value={stats.suspended}
+              valueStyle={{ color: "#ff4d4f" }}
             />
           </Card>
         </Col>
       </Row>
 
-      {/* Results Table */}
       <Card>
-        {buses.length === 0 && !loading ? (
-          <Empty description="Không có xe nào" />
+        {employees.length === 0 && !loading ? (
+          <Empty description="Không có nhân viên nào" />
         ) : (
           <>
             {hasSearched ? (
               <Alert
-                message={`Tìm thấy ${pagination.total} xe phù hợp`}
+                message={`Tìm thấy ${pagination.total} nhân viên phù hợp`}
                 type="success"
                 showIcon
                 style={{ marginBottom: "16px" }}
               />
             ) : (
               <Alert
-                message={`Hiển thị tất cả ${pagination.total} xe trong hệ thống`}
+                message={`Hiển thị tất cả ${pagination.total} nhân viên trong hệ thống`}
                 type="info"
                 showIcon
                 style={{ marginBottom: "16px" }}
@@ -420,10 +395,8 @@ const BusPage: React.FC = () => {
             )}
             <Table
               columns={columns}
-              dataSource={buses}
+              dataSource={employees}
               rowKey="id"
-              loading={loading}
-              scroll={{ x: 1200 }}
               pagination={{
                 current: pagination.current,
                 pageSize: pagination.pageSize,
@@ -431,23 +404,26 @@ const BusPage: React.FC = () => {
                 showSizeChanger: true,
                 showQuickJumper: true,
                 showTotal: (total, range) =>
-                  `${range[0]}-${range[1]} của ${total} xe`,
+                  `${range[0]}-${range[1]} của ${total} nhân viên`,
               }}
               onChange={handleTableChange}
+              loading={loading}
+              scroll={{ x: 1500 }}
             />
           </>
         )}
       </Card>
-      <BusModal
-        isModalVisible={isBusModalVisible}
-        setIsModalVisible={setIsBusModalVisible}
-        form={busForm}
+
+      <EmployeeModal
+        isModalVisible={isEmployeeModalVisible}
+        setIsModalVisible={setIsEmployeeModalVisible}
+        form={employeeForm}
         onSuccess={() =>
-          loadBuses({ page: pagination.current, size: pagination.pageSize })
+          loadEmployees({ page: pagination.current, size: pagination.pageSize })
         }
       />
     </div>
   );
 };
 
-export default BusPage;
+export default EmployeePage;
