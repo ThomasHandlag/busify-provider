@@ -1,171 +1,71 @@
-import { useEffect, useState } from "react";
+import React, { useState } from "react";
+import { Form } from "antd";
+
+// Components
+import TripCard from "./components/TripCard";
+import PassengerModal from "./components/PassengerModal";
+import EditTicketModal from "./components/EditTicketModal";
+import EditTripStatusModal from "./components/EditTripStatusModal";
+import DriverListModal from "./components/DriverListModal";
+import DriverTripsModal from "./components/DriverTripsModal";
+
+// Hooks
 import {
-  Card,
-  Form,
-  Input,
-  Modal,
-  Select,
-  Space,
-  Table,
-  Button,
-  Tag,
-  Divider,
-} from "antd";
-import {
-  EditOutlined,
-  EnvironmentOutlined,
-  DollarOutlined,
-  TeamOutlined,
-  ClockCircleOutlined,
-  StarOutlined,
-  WifiOutlined,
-} from "@ant-design/icons";
-import { useGNotify } from "../../app/hooks";
-import apiClient from "../../app/api";
+  useTrips,
+  useDrivers,
+  useDriverTrips,
+  useTripPassengers,
+  useUpdateTicket,
+  useUpdateTripStatus,
+} from "./hooks/useDriverData";
 
-interface Trip {
-  trip_id: number;
-  operator_name: string;
-  route: {
-    start_location: string;
-    end_location: string;
-  };
-  amenities: {
-    wifi: boolean;
-    air_conditioner: boolean;
-  };
+// Types
+import type { Trip, Driver, Passenger } from "../../app/api/driver";
 
-  average_rating: number;
-  departure_time: string;
-  arrival_time: string;
-  status: string;
-  price_per_seat: number;
-  available_seats: number;
-  total_seats: number;
-}
-
-interface Driver {
-  id: number;
-  fullName: string;
-  email: string;
-  phoneNumber: string;
-  employeeType: string;
-  status: string;
-  driverLicenseNumber: string;
-  operatorId: number;
-  operatorName: string;
-}
-
-interface Passenger {
-  passengerName: string;
-  passengerPhone: string | null;
-  email: string;
-  seatNumber: string;
-  status: string;
-  ticketCode: string;
-  ticketId: number;
-}
-
-interface PassengerResponse {
-  tripId: number;
-  operatorName: string | null;
-  routeName: string | null;
-  departureTime: string | null;
-  passengers: Passenger[];
-}
-
-const DriverManagement = () => {
-  const [trips, setTrips] = useState<Trip[]>([]);
+const DriverManagement: React.FC = () => {
+  // State for modals
   const [selectedTrip, setSelectedTrip] = useState<Trip | null>(null);
-  const [passengers, setPassengers] = useState<Passenger[]>([]);
-  const [isPassengerModalVisible, setIsPassengerModalVisible] = useState(false);
-  const [isEditTicketModalVisible, setIsEditTicketModalVisible] =
-    useState(false);
-  const [selectedTicket, setSelectedTicket] = useState<Passenger | null>(null);
-  const [isEditTripStatusVisible, setIsEditTripStatusVisible] = useState(false);
-  const { notify } = useGNotify();
-  const [form] = Form.useForm();
-  const [statusForm] = Form.useForm();
-  const [drivers, setDrivers] = useState<Driver[]>([]);
   const [selectedDriver, setSelectedDriver] = useState<Driver | null>(null);
+  const [selectedTicket, setSelectedTicket] = useState<Passenger | null>(null);
+  
+  // Modal visibility states
+  const [isPassengerModalVisible, setIsPassengerModalVisible] = useState(false);
+  const [isEditTicketModalVisible, setIsEditTicketModalVisible] = useState(false);
+  const [isEditTripStatusVisible, setIsEditTripStatusVisible] = useState(false);
   const [isDriverListVisible, setIsDriverListVisible] = useState(false);
   const [isDriverTripsVisible, setIsDriverTripsVisible] = useState(false);
-  const [driverTrips, setDriverTrips] = useState<Trip[]>([]);
 
-  /// lấy danh sách tất cả tài xế
-  const fetchDrivers = async () => {
-    try {
-      const response = await apiClient.get("api/employees/drivers");
-      setDrivers(response.data.result);
-    } catch (error: any) {
-      notify?.error({
-        message: "Error",
-        description: error.response?.data?.message || "Failed to fetch drivers",
-        placement: "bottomRight",
-      });
-    }
-  };
+  // Forms
+  const [form] = Form.useForm();
+  const [statusForm] = Form.useForm();
 
-  /// lấy danh sách các tài xế theo id
-  const fetchDriverTrips = async (driverId: number) => {
-    try {
-      const response = await apiClient.get(`api/trips/driver/${driverId}`);
-      setDriverTrips(response.data.result);
-    } catch (error: any) {
-      notify?.error({
-        message: "Error",
-        description:
-          error.response?.data?.message || "Failed to fetch driver trips",
-        placement: "bottomRight",
-      });
-    }
-  };
+  // React Query hooks
+  const { data: trips = [], isLoading: tripsLoading } = useTrips();
+  const { 
+    data: drivers = [], 
+    refetch: refetchDrivers,
+    isLoading: driversLoading 
+  } = useDrivers();
+  
+  const { 
+    data: driverTrips = [], 
+    refetch: refetchDriverTrips 
+  } = useDriverTrips(selectedDriver?.id || 0);
+  
+  const { 
+    data: passengersData, 
+    refetch: refetchPassengers 
+  } = useTripPassengers(selectedTrip?.trip_id || 0);
 
-  const handleDriverClick = async (driver: Driver) => {
-    setSelectedDriver(driver);
-    await fetchDriverTrips(driver.id);
-    setIsDriverTripsVisible(true);
-  };
+  // Mutations
+  const updateTicketMutation = useUpdateTicket();
+  const updateTripStatusMutation = useUpdateTripStatus();
 
-  ///lấy tất cả chuyến đi
-  const fetchTrips = async () => {
-    try {
-      const response = await apiClient.get("api/trips");
-      setTrips(response.data.result);
-    } catch (error) {
-      notify?.error({
-        message: "Error",
-        description: "Failed to fetch trips",
-        placement: "bottomRight",
-      });
-    }
-  };
-
-  ///lấy danh sách khách của chuyến đi đó
-  const fetchPassengers = async (tripId: number) => {
-    try {
-      const response = await apiClient.get(
-        `api/tickets/trip/${tripId}/passengers`
-      );
-      const passengerData = response.data.result as PassengerResponse;
-      setPassengers(passengerData.passengers);
-    } catch (error) {
-      notify?.error({
-        message: "Error",
-        description: "Failed to fetch passengers",
-        placement: "bottomRight",
-      });
-    }
-  };
-
-  useEffect(() => {
-    fetchTrips();
-  }, []);
-
+  // Event handlers
   const handleTripClick = async (trip: Trip) => {
     setSelectedTrip(trip);
-    await fetchPassengers(trip.trip_id);
     setIsPassengerModalVisible(true);
+    await refetchPassengers();
   };
 
   const handleEditTicket = (passenger: Passenger) => {
@@ -180,424 +80,120 @@ const DriverManagement = () => {
     setIsEditTripStatusVisible(true);
   };
 
+  const handleDriverClick = async (driver: Driver) => {
+    setSelectedDriver(driver);
+    setIsDriverTripsVisible(true);
+    await refetchDriverTrips();
+  };
+
+  const handleManageDrivers = async () => {
+    setIsDriverListVisible(true);
+    await refetchDrivers();
+  };
+
+  // Submit handlers
   const onUpdateTicket = async (values: any) => {
-    try {
-      const updateData = {
-        passengerName: selectedTicket?.passengerName, // Giữ nguyên tên khách hàng
-        passengerPhone: values.passengerPhone,
-        email: values.email,
-        seatNumber: values.seatNumber,
-        status: values.status,
-      };
+    if (!selectedTrip || !selectedTicket) return;
 
-      ///cập nhật thông tin khách của chuyến đi đó
-      await apiClient.put(
-        `api/tickets/trip/${selectedTrip?.trip_id}/ticket/${selectedTicket?.ticketId}`,
-        updateData
-      );
+    const updateData = {
+      passengerName: selectedTicket.passengerName,
+      passengerPhone: values.passengerPhone,
+      email: values.email,
+      seatNumber: values.seatNumber,
+      status: values.status,
+    };
 
-      notify?.success({
-        message: "Success",
-        description: "Ticket updated successfully",
-        placement: "bottomRight",
-      });
-      setIsEditTicketModalVisible(false);
-      if (selectedTrip) {
-        await fetchPassengers(selectedTrip.trip_id);
-      }
-    } catch (error: any) {
-      notify?.error({
-        message: "Error",
-        description: error.response?.data?.message || "Failed to update ticket",
-        placement: "bottomRight",
-      });
-      console.error("Error updating ticket:", error.response || error);
-    }
+    updateTicketMutation.mutate({
+      tripId: selectedTrip.trip_id,
+      ticketId: selectedTicket.ticketId,
+      data: updateData,
+    });
+
+    setIsEditTicketModalVisible(false);
+    form.resetFields();
   };
 
-  ///cập nhật trạng thái chuyến đi
   const onUpdateTripStatus = async (values: { status: string }) => {
-    try {
-      await apiClient.put(`api/trips/${selectedTrip?.trip_id}/status`, values);
-      notify?.success({
-        message: "Success",
-        description: "Trip status updated successfully",
-        placement: "bottomRight",
-      });
-      setIsEditTripStatusVisible(false);
-      await fetchTrips();
-    } catch (error) {
-      notify?.error({
-        message: "Error",
-        description: "Failed to update trip status",
-        placement: "bottomRight",
-      });
-    }
-  };
+    if (!selectedTrip) return;
 
-  const passengerColumns = [
-    {
-      title: "Name",
-      dataIndex: "passengerName",
-      key: "passengerName",
-    },
-    {
-      title: "Phone",
-      dataIndex: "passengerPhone",
-      key: "passengerPhone",
-    },
-    {
-      title: "Email",
-      dataIndex: "email",
-      key: "email",
-    },
-    {
-      title: "Seat",
-      dataIndex: "seatNumber",
-      key: "seatNumber",
-    },
-    {
-      title: "Status",
-      dataIndex: "status",
-      key: "status",
-    },
-    {
-      title: "Ticket Code",
-      dataIndex: "ticketCode",
-      key: "ticketCode",
-    },
-    {
-      title: "Actions",
-      key: "actions",
-      render: (_: any, record: Passenger) => (
-        <Button
-          type="primary"
-          size="small"
-          icon={<EditOutlined />}
-          onClick={() => handleEditTicket(record)}
-          className="flex items-center justify-center"
-        >
-          Sửa
-        </Button>
-      ),
-    },
-  ];
+    updateTripStatusMutation.mutate({
+      tripId: selectedTrip.trip_id,
+      data: values,
+    });
+
+    setIsEditTripStatusVisible(false);
+    statusForm.resetFields();
+  };
 
   return (
     <div className="p-6">
+      {/* Header with manage drivers button */}
       <div className="flex justify-end mb-4">
         <button
-          onClick={() => {
-            fetchDrivers();
-            setIsDriverListVisible(true);
-          }}
-          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+          onClick={handleManageDrivers}
+          disabled={driversLoading}
+          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded disabled:bg-gray-400"
         >
-          Manage Drivers
+          {driversLoading ? "Loading..." : "Manage Drivers"}
         </button>
       </div>
+
+      {/* Trip cards grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {trips.map((trip) => (
-          <Card
-            key={trip.trip_id}
-            className="hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border-0 overflow-hidden"
-            bodyStyle={{ padding: 0 }}
-          >
-            {/* Header với gradient background */}
-            <div >
-              <div className="flex justify-between items-center">
-                <h3 className="text-lg font-bold truncate">
-                  {trip.operator_name}
-                </h3>
-                <Tag
-                  color={trip.status === "active" ? "green" : "orange"}
-                  className="border-0"
-                >
-                  {trip.status || "N/A"}
-                </Tag>
-              </div>
-              <p className="text-sm opacity-90 mt-1">ID: {trip.trip_id}</p>
-            </div>
-
-            {/* Content chính */}
-            <div className="p-4">
-              {/* Route */}
-              <div className="flex items-center mb-3">
-                <EnvironmentOutlined className="text-blue-500 mr-2" />
-                <span className="text-sm">
-                  <strong>{trip.route.start_location}</strong> →{" "}
-                  <strong>{trip.route.end_location}</strong>
-                </span>
-              </div>
-
-              {/* Thời gian */}
-              <div className="space-y-2 mb-3">
-                <div className="flex items-center">
-                  <ClockCircleOutlined className="text-green-500 mr-2" />
-                  <span className="text-xs">
-                    Khởi hành: {new Date(trip.departure_time).toLocaleString()}
-                  </span>
-                </div>
-                <div className="flex items-center">
-                  <ClockCircleOutlined className="text-red-500 mr-2" />
-                  <span className="text-xs">
-                    Đến: {new Date(trip.arrival_time).toLocaleString()}
-                  </span>
-                </div>
-              </div>
-
-              <Divider className="my-3" />
-
-              {/* Thông tin chi tiết */}
-              <div className="grid grid-cols-2 gap-2 text-xs mb-3">
-                <div className="flex items-center">
-                  <DollarOutlined className="text-yellow-500 mr-1" />
-                  <span>{trip.price_per_seat.toLocaleString()}đ</span>
-                </div>
-                <div className="flex items-center">
-                  <TeamOutlined className="text-purple-500 mr-1" />
-                  <span>
-                    {trip.available_seats}/{trip.total_seats}
-                  </span>
-                </div>
-                <div className="flex items-center">
-                  <StarOutlined className="text-orange-500 mr-1" />
-                  <span>{trip.average_rating?.toFixed(1) || "N/A"}</span>
-                </div>
-                <div className="flex items-center">
-                  <WifiOutlined className="text-blue-500 mr-1" />
-                  <span>{trip.amenities.wifi ? "Có" : "Không"}</span>
-                </div>
-              </div>
-
-              {/* Action buttons */}
-              <div className="flex gap-2">
-                <Button
-                  type="primary"
-                  size="small"
-                  icon={<TeamOutlined />}
-                  onClick={() => handleTripClick(trip)}
-                  className="flex-1"
-                >
-                  Xem khách
-                </Button>
-                <Button
-                  size="small"
-                  icon={<EditOutlined />}
-                  onClick={() => handleEditTripStatus(trip)}
-                  className="flex-1"
-                >
-                  Sửa TT
-                </Button>
-              </div>
-            </div>
-          </Card>
-        ))}
+        {tripsLoading ? (
+          <div className="col-span-full text-center py-8">Loading trips...</div>
+        ) : (
+          trips.map((trip) => (
+            <TripCard
+              key={trip.trip_id}
+              trip={trip}
+              onViewPassengers={handleTripClick}
+              onEditStatus={handleEditTripStatus}
+            />
+          ))
+        )}
       </div>
 
-      <Modal
-        title="Passenger List"
-        open={isPassengerModalVisible}
+      {/* Modals */}
+      <PassengerModal
+        visible={isPassengerModalVisible}
         onCancel={() => setIsPassengerModalVisible(false)}
-        width={1000}
-        footer={null}
-      >
-        <Table
-          dataSource={passengers}
-          columns={passengerColumns}
-          rowKey={(record) => record.ticketId}
-        />
-      </Modal>
+        passengers={passengersData?.passengers || []}
+        onEditTicket={handleEditTicket}
+      />
 
-      <Modal
-        title="Edit Ticket"
-        open={isEditTicketModalVisible}
+      <EditTicketModal
+        visible={isEditTicketModalVisible}
         onCancel={() => setIsEditTicketModalVisible(false)}
         onOk={() => form.submit()}
-      >
-        <Form form={form} onFinish={onUpdateTicket} layout="vertical">
-          <Form.Item
-            name="passengerPhone"
-            label="Phone Number"
-            rules={[{ required: true }]}
-          >
-            <Input />
-          </Form.Item>
-          <Form.Item name="email" label="Email" rules={[{ required: true }]}>
-            <Input />
-          </Form.Item>
-          <Form.Item
-            name="seatNumber"
-            label="Seat Number"
-            rules={[{ required: true }]}
-          >
-            <Input />
-          </Form.Item>
-          <Form.Item name="status" label="Status" rules={[{ required: true }]}>
-            <Select>
-              <Select.Option value="cancelled">Cancelled</Select.Option>
-              <Select.Option value="valid">Valid</Select.Option>
-              <Select.Option value="used">Used</Select.Option>
-            </Select>
-          </Form.Item>
-        </Form>
-      </Modal>
+        form={form}
+        passenger={selectedTicket}
+      />
 
-      <Modal
-        title="Edit Trip Status"
-        open={isEditTripStatusVisible}
+      <EditTripStatusModal
+        visible={isEditTripStatusVisible}
         onCancel={() => setIsEditTripStatusVisible(false)}
         onOk={() => statusForm.submit()}
-      >
-        <Form form={statusForm} onFinish={onUpdateTripStatus} layout="vertical">
-          <Form.Item name="status" label="Status" rules={[{ required: true }]}>
-            <Select>
-              <Select.Option value="cancelled">Cancelled</Select.Option>
-              <Select.Option value="delayed">Delayed</Select.Option>
-              <Select.Option value="ontime">On Time</Select.Option>
-              <Select.Option value="arrived">Arrived</Select.Option>
-              <Select.Option value="scheduled">Scheduled</Select.Option>
-              <Select.Option value="departed">Departed</Select.Option>
-            </Select>
-          </Form.Item>
-        </Form>
-      </Modal>
+        form={statusForm}
+      />
 
-      <Modal
-        title="Driver List"
-        open={isDriverListVisible}
+      <DriverListModal
+        visible={isDriverListVisible}
         onCancel={() => setIsDriverListVisible(false)}
-        width={1200}
-        footer={null}
-      >
-        <Table
-          dataSource={drivers}
-          columns={[
-            {
-              title: "ID",
-              dataIndex: "id",
-              key: "id",
-              width: 60,
-            },
-            {
-              title: "Name",
-              dataIndex: "fullName",
-              key: "fullName",
-              width: 150,
-              ellipsis: true,
-            },
-            {
-              title: "Email",
-              dataIndex: "email",
-              key: "email",
-              width: 180,
-              ellipsis: true,
-            },
-            {
-              title: "Phone",
-              dataIndex: "phoneNumber",
-              key: "phoneNumber",
-              width: 120,
-            },
-            {
-              title: "License",
-              dataIndex: "driverLicenseNumber",
-              key: "driverLicenseNumber",
-              width: 120,
-              ellipsis: true,
-            },
-            {
-              title: "Status",
-              dataIndex: "status",
-              key: "status",
-              width: 100,
-            },
-            {
-              title: "Operator",
-              dataIndex: "operatorName",
-              key: "operatorName",
-              width: 150,
-              ellipsis: true,
-            },
-            {
-              title: "Actions",
-              key: "actions",
-              width: 140,
-              fixed: "right",
-              render: (_: any, record: Driver) => (
-                <Space direction="vertical" size={2}>
-                  <Button
-                    type="primary"
-                    size="small"
-                    style={{ width: "100%", fontSize: "10px", height: "22px" }}
-                    onClick={() => handleDriverClick(record)}
-                  >
-                    View Trips
-                  </Button>
-                </Space>
-              ),
-            },
-          ]}
-          rowKey="id"
-          scroll={{ x: 1000, y: 400 }}
-          pagination={{ pageSize: 10 }}
-        />
-      </Modal>
+        drivers={drivers}
+        onViewDriverTrips={handleDriverClick}
+      />
 
-      <Modal
-        title={`Trips for ${selectedDriver?.fullName}`}
-        open={isDriverTripsVisible}
+      <DriverTripsModal
+        visible={isDriverTripsVisible}
         onCancel={() => setIsDriverTripsVisible(false)}
-        width={1000}
-        footer={null}
-      >
-        <Table
-          dataSource={driverTrips}
-          columns={[
-            {
-              title: "Trip ID",
-              dataIndex: "tripId",
-              key: "tripId",
-            },
-            {
-              title: "From",
-              dataIndex: ["startAddress"],
-              key: "startAddress",
-            },
-            {
-              title: "To",
-              dataIndex: ["endAddress"],
-              key: "endAddress",
-            },
-            {
-              title: "Departure",
-              dataIndex: "departureTime",
-              key: "departureTime",
-              render: (text: string) => new Date(text).toLocaleString(),
-            },
+        selectedDriver={selectedDriver}
+        driverTrips={driverTrips}
+      />
 
-            {
-              title: "Arrival Time",
-              dataIndex: "estimatedArrivalTime",
-              key: "estimatedArrivalTime",
-              render: (text: string) => new Date(text).toLocaleString(),
-            },
-
-            {
-              title: "Status",
-              dataIndex: "status",
-              key: "status",
-            },
-            {
-              title: "Rating",
-              dataIndex: "averageRating",
-              key: "averageRating",
-              render: (rating: number) => rating?.toFixed(1) || "N/A",
-            },
-          ]}
-          rowKey="tripId"
-        />
-      </Modal>
+      {/* Hidden forms for mutation callbacks */}
+      <Form form={form} onFinish={onUpdateTicket} style={{ display: 'none' }} />
+      <Form form={statusForm} onFinish={onUpdateTripStatus} style={{ display: 'none' }} />
     </div>
   );
 };
