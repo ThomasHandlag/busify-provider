@@ -37,7 +37,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
   onMenuToggle,
   showMenuButton = false,
   currentPage = "Dashboard",
-  companyName = "Busify Transport",
+  companyName,
 }) => {
   const { report } = weeklyReportStore();
 
@@ -66,7 +66,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
     },
   ];
 
-  const {notifications} = notificationStore();
+  const { notifications } = notificationStore();
 
   const notificationMenuItems: MenuProps["items"] = [
     ...notifications.map((notification) => ({
@@ -80,7 +80,6 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
           </Text>
         </div>
       ),
-      
     })),
     {
       type: "divider",

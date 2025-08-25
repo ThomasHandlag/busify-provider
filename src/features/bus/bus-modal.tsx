@@ -203,18 +203,6 @@ const BusModal: React.FC<BusModalProps> = ({
                 <Input placeholder="Nhập ID mẫu xe" type="number" />
               </Form.Item>
             </Col>
-          </Row>
-
-          <Row gutter={16}>
-            <Col span={12}>
-              <Form.Item
-                name="operatorId"
-                label="Nhà xe"
-                rules={[{ required: true, message: "Vui lòng chọn nhà xe!" }]}
-              >
-                <Input placeholder="Nhập ID nhà xe" type="number" />
-              </Form.Item>
-            </Col>
             <Col span={12}>
               <Form.Item
                 name="seatLayoutId"
@@ -227,7 +215,6 @@ const BusModal: React.FC<BusModalProps> = ({
               </Form.Item>
             </Col>
           </Row>
-
           <Row gutter={16}>
             <Col span={12}>
               <Form.Item name="amenities" label="Tiện ích">

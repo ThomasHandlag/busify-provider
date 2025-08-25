@@ -175,13 +175,20 @@ const EmployeeModal: React.FC<EmployeeModalProps> = ({
                 </Col>
                 <Col span={12}>
                   <Form.Item
-                    name="operatorId"
-                    label="ID nhà xe"
+                    name="phoneNumber"
+                    label="Số điện thoại"
                     rules={[
-                      { required: true, message: "Nhà xe không được để trống" },
+                      {
+                        required: true,
+                        message: "Số điện thoại không được để trống",
+                      },
+                      //   {
+                      //     pattern: /^(0|\+84)[0-9]{9,10}$/,
+                      //     message: "Số điện thoại không hợp lệ",
+                      //   },
                     ]}
                   >
-                    <Input type="number" placeholder="Nhập ID nhà xe" />
+                    <Input placeholder="Nhập số điện thoại" />
                   </Form.Item>
                 </Col>
               </Row>
@@ -224,24 +231,6 @@ const EmployeeModal: React.FC<EmployeeModalProps> = ({
                 </Col>
               </Row>
               <Row gutter={16}>
-                <Col span={12}>
-                  <Form.Item
-                    name="phoneNumber"
-                    label="Số điện thoại"
-                    rules={[
-                      {
-                        required: true,
-                        message: "Số điện thoại không được để trống",
-                      },
-                      //   {
-                      //     pattern: /^(0|\+84)[0-9]{9,10}$/,
-                      //     message: "Số điện thoại không hợp lệ",
-                      //   },
-                    ]}
-                  >
-                    <Input placeholder="Nhập số điện thoại" />
-                  </Form.Item>
-                </Col>
                 <Col span={12}>
                   <Form.Item
                     name="status"

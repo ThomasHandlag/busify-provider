@@ -3,7 +3,8 @@ import { create } from "zustand";
 export interface BusData {
   id: number;
   licensePlate: string;
-  modelId: number; // Changed from modelName
+  modelId: number;
+  modelName: string;
   totalSeats: number;
   operatorId: number;
   seatLayoutId: number;

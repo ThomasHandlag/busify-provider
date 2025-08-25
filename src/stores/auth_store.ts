@@ -39,52 +39,35 @@ export const useAuthStore = create<AuthState>()(
           loading: false,
           error: null,
           login: async ({ username, password, navigate }) => {
-            try {
-              set(
-                {
-                  user: undefined,
-                  accessToken: "",
-                  refreshToken: "",
-                },
-                false,
-                { type: "@AUTH/LOGIN/LOADING" }
-              );
+            set(
+              {
+                user: undefined,
+                accessToken: "",
+                refreshToken: "",
+              },
+              false,
+              { type: "@AUTH/LOGIN/LOADING" }
+            );
 
-              const response = await login({
-                username,
-                password,
-              });
+            const response = await login({
+              username,
+              password,
+            });
 
-              console.log(response);
+            console.log(response);
 
-              set(
-                {
-                  accessToken: response?.accessToken,
-                  refreshToken: response?.refreshToken,
-                  user: response?.user as User,
-                  loading: false,
-                  error: null,
-                },
-                false,
-                { type: "@AUTH/LOGIN/SUCCESS" }
-              );
-              navigate("/dashboard");
-            } catch (error) {
-              console.error("Login error:", error);
-              set(
-                {
-                  error:
-                    error instanceof Error ? error.message : "Login failed",
-                  accessToken: "",
-                  refreshToken: "",
-                  user: undefined,
-                },
-                false,
-                {
-                  type: "@AUTH/LOGIN/ERROR",
-                }
-              );
-            }
+            set(
+              {
+                accessToken: response?.accessToken,
+                refreshToken: response?.refreshToken,
+                user: response?.user as User,
+                loading: false,
+                error: null,
+              },
+              false,
+              { type: "@AUTH/LOGIN/SUCCESS" }
+            );
+            navigate("/dashboard");
           },
 
           logOut: async () => {

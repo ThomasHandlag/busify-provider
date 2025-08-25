@@ -11,6 +11,8 @@ import RoleGuard from "../components/RoleGuard";
 import TripPage from "../features/trip/trip";
 import RoutePage from "../features/route/route_feature";
 import EmployeePage from "../features/employee/employee";
+import ProfilePage from "../features/profile/Profile";
+import TicketPage from "../features/tickets/Ticket";
 
 export const AuthRoute: RouteObject = {
   path: "dashboard",
@@ -93,6 +95,30 @@ export const AuthRoute: RouteObject = {
       element: (
         <RoleGuard roles={["STAFF", "OPERATOR"]}>
           <ReportPage />
+        </RoleGuard>
+      ),
+    },
+    {
+      path: "financial-reports",
+      element: (
+        <RoleGuard roles={["STAFF", "OPERATOR"]}>
+          <ReportPage />
+        </RoleGuard>
+      ),
+    },
+    {
+      path: "profile",
+      element: (
+        <RoleGuard roles={["OPERATOR"]}>
+          <ProfilePage />
+        </RoleGuard>
+      ),
+    },
+    {
+      path: "tickets",
+      element: (
+        <RoleGuard roles={["STAFF", "OPERATOR"]}>
+          <TicketPage />
         </RoleGuard>
       ),
     },

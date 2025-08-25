@@ -4,13 +4,13 @@ import {
   Col,
   Card,
   Statistic,
-  Progress,
   Table,
   Badge,
   Space,
   Typography,
   List,
   Avatar,
+  Empty,
 } from "antd";
 import {
   CarOutlined,
@@ -22,13 +22,18 @@ import {
   EnvironmentOutlined,
 } from "@ant-design/icons";
 import { getBusesByOperator } from "../../app/api/bus";
-import { busStore, type BusData } from "../../stores/bus_store";
+import { busStore } from "../../stores/bus_store";
 import { operatorStore } from "../../stores/operator_store";
 import { weeklyReportStore } from "../../stores/report_store";
 import { getWeeklyOperatorReport } from "../../app/api/report";
 import { tripStore } from "../../stores/trip_store";
+import { getNextTripsOfOperator } from "../../app/api/trip";
 
 const { Title, Text } = Typography;
+
+const toLocalTime = (date: string) => {
+  return new Date(date).toLocaleString();
+};
 
 export interface WeeklyReportData {
   totalRevenue: number;
@@ -45,17 +50,17 @@ const DashboardIndex: React.FC = () => {
   const weeklyData = weeklyReportStore();
 
   useEffect(() => {
-      // Simulate an API call to fetch weekly data
-      const fetchWeeklyData = async () => {
-        if (!operatorData.operator) {
-          return;
-        }
-        const response = await getWeeklyOperatorReport(operatorData.operator?.id);
-        weeklyData?.setReport(response);
-      };
-  
-      fetchWeeklyData();
-    }, [operatorData]);
+    // Simulate an API call to fetch weekly data
+    const fetchWeeklyData = async () => {
+      if (!operatorData.operator) {
+        return;
+      }
+      const response = await getWeeklyOperatorReport(operatorData.operator?.id);
+      weeklyData?.setReport(response);
+    };
+
+    fetchWeeklyData();
+  }, [operatorData]);
 
   useEffect(() => {
     // Fetch bus data from API or other sources
@@ -68,6 +73,19 @@ const DashboardIndex: React.FC = () => {
     };
 
     fetchBusData();
+  }, [operatorData]);
+
+  useEffect(() => {
+    // Fetch next trips data from API or other sources
+    const fetchNextTripsData = async () => {
+      if (!operatorData.operator) {
+        return;
+      }
+      const data = await getNextTripsOfOperator(operatorData?.operator?.id);
+      nextTripsData.setNextTrips(data);
+    };
+
+    fetchNextTripsData();
   }, [operatorData]);
 
   const maintenanceAlerts = [
@@ -120,68 +138,46 @@ const DashboardIndex: React.FC = () => {
 
   const nextTripsColumns = [
     {
-      title: "Trip ID",
-      dataIndex: "trip_id",
-      key: "trip_id",
-    },
-    {
-      title: "Bus Number",
-      dataIndex: "busNumber",
-      key: "busNumber",
+      title: "License Plate",
+      dataIndex: "license_plate",
+      key: "license_plate",
     },
     {
       title: "Departure Time",
-      dataIndex: "departureTime",
-      key: "departureTime",
+      dataIndex: "departure_time",
+      key: "departure_time",
+      render: (text: string) => toLocalTime(text),
     },
     {
-      title: "Status",
-      dataIndex: "status",
-      key: "status",
-    },
-  ];
-
-  const busStatusColumns = [
-    {
-      title: "License Plate",
-      dataIndex: "licensePlate",
-      key: "licensePlate",
-      render: (text: string) => <Text strong>{text}</Text>,
+      title: " Arrival Time",
+      dataIndex: "arrival_time",
+      key: "arrival_time",
+      render: (text: string) => toLocalTime(text),
     },
     {
-      title: "Model",
-      dataIndex: "model",
-      key: "model",
+      title: "Trip Duration/Minutes",
+      dataIndex: "duration_minutes",
+      key: "duration_minutes",
     },
     {
-      title: "Status",
+      title: "Available Seats",
+      dataIndex: "available_seats",
+      key: "available_seats",
+      render: (value: number) => <Text strong>{value}</Text>,
+    },
+    {
+      title: "TripStatus",
       dataIndex: "status",
       key: "status",
       render: (status: string) => {
         const color =
-          status === "Active"
+          status === "active"
             ? "success"
             : status === "under_maintenance"
             ? "warning"
             : "default";
         return <Badge status={color} text={status} />;
       },
-    },
-    {
-      title: "Occupancy",
-      key: "occupancy",
-      render: (_: unknown, record: BusData) => (
-        <Space direction="vertical" size="small">
-          <Text>
-            {12}/{record.totalSeats}
-          </Text>
-          <Progress
-            percent={Math.round((12 / record.totalSeats) * 100)}
-            size="small"
-            status={12 / record.totalSeats > 0.8 ? "exception" : "normal"}
-          />
-        </Space>
-      ),
     },
   ];
 
@@ -258,12 +254,17 @@ const DashboardIndex: React.FC = () => {
             title="Real-time Fleet Status"
             extra={<Badge status="processing" text="Live Updates" />}
           >
-            <Table
-              columns={busStatusColumns}
-              dataSource={busesData.buses}
-              pagination={false}
-              size="small"
-            />
+            {nextTripsData.nextTrips.length < 0 ||
+            nextTripsData.nextTrips[0] ? (
+              <Empty />
+            ) : (
+              <Table
+                columns={nextTripsColumns}
+                dataSource={nextTripsData.nextTrips}
+                pagination={false}
+                size="small"
+              />
+            )}
           </Card>
         </Col>
 
