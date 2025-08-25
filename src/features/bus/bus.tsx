@@ -28,11 +28,17 @@ import {
   ClearOutlined,
   DeleteOutlined,
   PlusOutlined,
+  WifiOutlined,
+  VideoCameraOutlined,
+  RestOutlined,
+  ThunderboltOutlined,
+  DesktopOutlined,
 } from "@ant-design/icons";
 import type { TableProps } from "antd";
 import { getBuses, deleteBus } from "../../app/api/bus";
 import type { BusData, BusResponse } from "../../stores/bus_store";
 import BusModal from "./bus-modal";
+import BusDetailModal from "./bus-detail";
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -43,6 +49,8 @@ const BusPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
   const [isBusModalVisible, setIsBusModalVisible] = useState(false);
+  const [selectedBus, setSelectedBus] = useState<BusData | null>(null);
+  const [isBusDetailVisible, setIsBusDetailVisible] = useState(false);
   const [busForm] = Form.useForm();
 
   const [pagination, setPagination] = useState({
@@ -90,6 +98,11 @@ const BusPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleViewBus = (bus: BusData) => {
+    setSelectedBus(bus);
+    setIsBusDetailVisible(true);
   };
 
   // Search
@@ -189,10 +202,10 @@ const BusPage: React.FC = () => {
       width: 150,
     },
     {
-      title: "Mẫu xe",
-      dataIndex: "modelName",
-      key: "modelName",
-      width: 180,
+      title: "Mã mẫu xe",
+      dataIndex: "modelId",
+      key: "modelId",
+      width: 140,
     },
     {
       title: "Số ghế",
@@ -201,15 +214,15 @@ const BusPage: React.FC = () => {
       width: 100,
     },
     {
-      title: "Nhà xe",
-      dataIndex: "operatorName",
-      key: "operatorName",
-      width: 200,
+      title: "Mã nhà xe",
+      dataIndex: "operatorId",
+      key: "operatorId",
+      width: 140,
     },
     {
-      title: "Bố trí ghế",
-      dataIndex: "seatLayoutName",
-      key: "seatLayoutName",
+      title: "Mã sơ đồ ghế",
+      dataIndex: "seatLayoutId",
+      key: "seatLayoutId",
       width: 150,
     },
     {
@@ -225,15 +238,42 @@ const BusPage: React.FC = () => {
       title: "Tiện ích",
       key: "amenities",
       render: (_, record) => (
-        <Space>
-          {record.amenities.wifi && <Tag color="blue">WiFi</Tag>}
-          {record.amenities.tv && <Tag color="geekblue">TV</Tag>}
-          {record.amenities.toilet && <Tag color="volcano">Toilet</Tag>}
-          {record.amenities.charging && <Tag color="purple">Sạc</Tag>}
-          {record.amenities.air_conditioner && <Tag color="cyan">Điều hòa</Tag>}
+        <Space direction="vertical" size={0}>
+          {record.amenities.wifi && (
+            <Tag color="blue" style={{ border: "none", background: "none" }}>
+              <WifiOutlined style={{ marginRight: 4 }} />
+              WiFi
+            </Tag>
+          )}
+          {record.amenities.tv && (
+            <Tag
+              color="geekblue"
+              style={{ border: "none", background: "none" }}
+            >
+              <VideoCameraOutlined style={{ marginRight: 4 }} />
+              TV
+            </Tag>
+          )}
+          {record.amenities.toilet && (
+            <Tag color="volcano" style={{ border: "none", background: "none" }}>
+              <RestOutlined style={{ marginRight: 4 }} />
+              Toilet
+            </Tag>
+          )}
+          {record.amenities.charging && (
+            <Tag color="purple" style={{ border: "none", background: "none" }}>
+              <ThunderboltOutlined style={{ marginRight: 4 }} />
+              Sạc
+            </Tag>
+          )}
+          {record.amenities.air_conditioner && (
+            <Tag color="cyan" style={{ border: "none", background: "none" }}>
+              <DesktopOutlined style={{ marginRight: 4 }} />
+              Điều hòa
+            </Tag>
+          )}
         </Space>
       ),
-      width: 250,
     },
     {
       title: "Thao tác",
@@ -244,11 +284,10 @@ const BusPage: React.FC = () => {
             <Button
               type="text"
               icon={<EyeOutlined />}
-              onClick={() =>
-                message.info(`Chi tiết xe: ${record.licensePlate}`)
-              }
+              onClick={() => handleViewBus(record)}
             />
           </Tooltip>
+
           <Tooltip title="Chỉnh sửa">
             <Button
               type="text"
@@ -445,6 +484,11 @@ const BusPage: React.FC = () => {
         onSuccess={() =>
           loadBuses({ page: pagination.current, size: pagination.pageSize })
         }
+      />
+      <BusDetailModal
+        bus={selectedBus}
+        isVisible={isBusDetailVisible}
+        onClose={() => setIsBusDetailVisible(false)}
       />
     </div>
   );

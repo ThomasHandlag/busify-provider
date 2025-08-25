@@ -5,25 +5,27 @@ export const login = async (credentials: {
   username: string;
   password: string;
 }): Promise<
-  | { accessToken: string; refreshToken: string; user: User }
-  | undefined
+  { accessToken: string; refreshToken: string; user: User } | undefined
 > => {
   const response = await apiClient.post("/api/auth/login", credentials);
-  if (response.status !== 200) {
-    console.error("Login failed:", response);
-    throw new Error("Login failed");
+  if (response.data.code === 200) {
+    const result = response.data.result;
+
+    return {
+      accessToken: result.accessToken,
+      refreshToken: result.refreshToken,
+      user: {
+        email: result.email,
+        role: result.role,
+        userId: 1,
+      },
+    };
   }
 
-  const result = response.data.result;
-  return {
-    accessToken: result.accessToken,
-    refreshToken: result.refreshToken,
-    user: {
-      email: result.email,
-      role: result.role,
-      userId: 1
-    },
-  };
+  const message = response.data.message || "Unknown error";
+
+  console.error("Login failed:", response);
+  throw new Error(message);
 };
 
 export const signup = async (userData: {

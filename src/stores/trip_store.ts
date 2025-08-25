@@ -9,7 +9,13 @@ export interface TripData {
   driverId: number;
   departureTime: string;
   estimatedArrivalTime: string;
-  status: "scheduled" | "on_time" | "delayed" | "departed" | "arrived" | "cancelled";
+  status:
+    | "scheduled"
+    | "on_time"
+    | "delayed"
+    | "departed"
+    | "arrived"
+    | "cancelled";
   pricePerSeat: number;
 }
 
@@ -26,7 +32,6 @@ export interface TripResponse {
     hasNext: boolean;
   };
 }
-
 
 interface TripStoreState {
   nextTrips: NextTrip[];
@@ -48,8 +53,8 @@ export const tripStore = create<TripStoreState>((set) => ({
       error: null,
     })),
   setNextTrips: (trips: NextTrip[]) =>
-    set((state) => ({
-      nextTrips: [...state.nextTrips, ...trips],
+    set(() => ({
+      nextTrips: [...trips],
       loading: false,
       error: null,
     })),

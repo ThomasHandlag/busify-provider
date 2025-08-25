@@ -1,16 +1,7 @@
 // src/components/Sidebar.tsx
 import React, { useState } from "react";
 import temp from "../assets/logo.png";
-import {
-  Layout,
-  Menu,
-  Grid,
-  Typography,
-  Badge,
-  Avatar,
-  Space,
-  Image,
-} from "antd";
+import { Layout, Menu, Grid, Typography, Avatar, Space, Image } from "antd";
 import {
   DashboardOutlined,
   UserOutlined,
@@ -26,6 +17,7 @@ import {
   LeftOutlined,
   RightOutlined,
   SwapOutlined,
+  ProfileTwoTone,
 } from "@ant-design/icons";
 import { useAuthStore } from "../stores/auth_store";
 import { operatorStore } from "../stores/operator_store";
@@ -135,6 +127,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onMenuSelect, selectedKey }) => {
         label: "Driver Management",
       },
       {
+
         key: "bookings",
         icon: <FileTextOutlined />,
         label: "Booking System",
@@ -179,6 +172,14 @@ const Sidebar: React.FC<SidebarProps> = ({ onMenuSelect, selectedKey }) => {
         ],
       }
     );
+
+    if (user?.role === "OPERATOR") {
+      menuItems.push({
+        key: "profile",
+        icon: <ProfileTwoTone />,
+        label: "Profile",
+      });
+    }
   }
 
   return (
@@ -270,30 +271,6 @@ const Sidebar: React.FC<SidebarProps> = ({ onMenuSelect, selectedKey }) => {
               </Text>
               <Text type="secondary" style={{ fontSize: "12px" }}>
                 {user?.role}
-              </Text>
-            </div>
-          </Space>
-        </div>
-      )}
-
-      {/* Quick Stats */}
-      {!collapsed && (
-        <div
-          style={{
-            padding: "12px 16px",
-            borderBottom: "1px solid #f0f0f0",
-            background: "#f9f9f9",
-          }}
-        >
-          <Space direction="vertical" size="small" style={{ width: "100%" }}>
-            <div style={{ display: "flex", justifyContent: "space-between" }}>
-              <Text style={{ fontSize: "12px" }}>Active Buses</Text>
-              <Badge count={24} style={{ backgroundColor: "#52c41a" }} />
-            </div>
-            <div style={{ display: "flex", justifyContent: "space-between" }}>
-              <Text style={{ fontSize: "12px" }}>Today's Revenue</Text>
-              <Text strong style={{ fontSize: "12px", color: "#1890ff" }}>
-                $2,340
               </Text>
             </div>
           </Space>

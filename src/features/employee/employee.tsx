@@ -27,6 +27,7 @@ import {
   SearchOutlined,
   ClearOutlined,
   PlusOutlined,
+  TeamOutlined,
 } from "@ant-design/icons";
 import { getEmployees, deleteEmployee } from "../../app/api/employee";
 import type { TableProps } from "antd";
@@ -279,7 +280,7 @@ const EmployeePage: React.FC = () => {
       />
 
       <Title level={2} style={{ marginBottom: "24px" }}>
-        <UserOutlined /> Quản lý nhân viên
+        <TeamOutlined /> Quản lý nhân viên
       </Title>
 
       <Card style={{ marginBottom: "24px" }}>
@@ -340,7 +341,7 @@ const EmployeePage: React.FC = () => {
               title="Tổng số nhân viên"
               value={pagination.total}
               valueStyle={{ color: "#1890ff" }}
-              prefix={<UserOutlined />}
+              prefix={<TeamOutlined />}
             />
           </Card>
         </Col>
