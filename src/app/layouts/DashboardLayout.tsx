@@ -132,8 +132,7 @@ const DashboardLayout = () => {
           onMenuToggle={showMobileDrawer}
           showMenuButton={true}
           currentPage={getCurrentPageName()}
-          userName="Admin"
-          companyName="Busify Transport"
+          companyName={operatorData.operator?.name}
         />
 
         <Drawer
