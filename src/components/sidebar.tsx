@@ -100,6 +100,34 @@ const Sidebar: React.FC<SidebarProps> = ({ onMenuSelect, selectedKey }) => {
         ],
       },
       {
+        key: "finance",
+        icon: <DollarOutlined />,
+        label: "Financial Management",
+        children: [
+          {
+            key: "revenue",
+            icon: <DollarOutlined />,
+            label: "Revenue Tracking",
+          },
+          {
+            key: "expenses",
+            icon: <FileTextOutlined />,
+            label: "Expense Management",
+          },
+          {
+            key: "payroll",
+            icon: <UserOutlined />,
+            label: "Payroll",
+          },
+        ],
+      },
+      {
+        key: "driver",
+        icon: <UserOutlined />,
+        label: "Driver Management",
+      },
+      {
+
         key: "bookings",
         icon: <FileTextOutlined />,
         label: "Booking System",
