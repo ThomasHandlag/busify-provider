@@ -1,13 +1,16 @@
 import React from "react";
 import { Card, Button, Tag, Divider } from "antd";
 import {
-  EditOutlined,
   EnvironmentOutlined,
   DollarOutlined,
   TeamOutlined,
   ClockCircleOutlined,
   StarOutlined,
   WifiOutlined,
+  CarOutlined,
+  ThunderboltOutlined,
+  PlayCircleOutlined,
+  EditOutlined,
 } from "@ant-design/icons";
 import type { Trip } from "../../../app/api/driver";
 
@@ -29,7 +32,7 @@ const TripCard: React.FC<TripCardProps> = ({
       bodyStyle={{ padding: 0 }}
     >
       {/* Header với gradient background */}
-      <div className="bg-gradient-to-r from-blue-500 to-purple-600 text-white p-4">
+      <div className=" text-black p-4">
         <div className="flex justify-between items-center">
           <h3 className="text-lg font-bold truncate">{trip.operator_name}</h3>
           <Tag
@@ -89,7 +92,24 @@ const TripCard: React.FC<TripCardProps> = ({
           </div>
           <div className="flex items-center">
             <WifiOutlined className="text-blue-500 mr-1" />
-            <span>{trip.amenities.wifi ? "Có" : "Không"}</span>
+            <span>{trip.amenities.wifi ? "WiFi" : ""}</span>
+          </div>
+          <div className="flex items-center">
+            <CarOutlined className="text-green-500 mr-1" />
+            <span>{trip.amenities.air_conditioner ? "AC" : ""}</span>
+          </div>
+          <div className="flex items-center">
+            <ThunderboltOutlined className="text-yellow-600 mr-1" />
+            <span>{trip.amenities.charging ? "Sạc" : ""}</span>
+          </div>
+          <div className="flex items-center">
+            <PlayCircleOutlined className="text-red-500 mr-1" />
+            <span>{trip.amenities.tv ? "TV" : ""}</span>
+          </div>
+          <div className="flex items-center">
+            <span className="text-xs text-gray-500">
+              {trip.amenities.toilet ? "🚽 WC" : ""}
+            </span>
           </div>
         </div>
 
@@ -102,7 +122,7 @@ const TripCard: React.FC<TripCardProps> = ({
             onClick={() => onViewPassengers(trip)}
             className="flex-1"
           >
-            Xem khách
+            Xem khách hàng
           </Button>
           <Button
             size="small"
@@ -110,7 +130,7 @@ const TripCard: React.FC<TripCardProps> = ({
             onClick={() => onEditStatus(trip)}
             className="flex-1"
           >
-            Sửa TT
+            Sửa trạng thái
           </Button>
         </div>
       </div>
