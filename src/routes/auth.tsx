@@ -21,39 +21,39 @@ export const AuthRoute: RouteObject = {
     {
       index: true,
       element: (
-        <RoleGuard roles={["STAFF", "OPERATOR", "DRIVER"]}>
+        <RoleGuard roles={["STAFF", "OPERATOR"]}>
           <DashboardIndex />
         </RoleGuard>
       ),
     },
-    {
-      path: "analysis",
-      element: (
-        <RoleGuard roles={["STAFF", "OPERATOR"]}>
-          <AnalysisPage />
-        </RoleGuard>
-      ),
-    },
-    {
-      path: "settings",
-      element: (
-        <RoleGuard roles={["STAFF", "OPERATOR"]}>
-          <SettingsPage />
-        </RoleGuard>
-      ),
-    },
-    {
-      path: "users",
-      element: (
-        <RoleGuard roles={["STAFF", "OPERATOR"]}>
-          <UsersPage />
-        </RoleGuard>
-      ),
-    },
+    // {
+    //   path: "analysis",
+    //   element: (
+    //     <RoleGuard roles={["STAFF", "OPERATOR"]}>
+    //       <AnalysisPage />
+    //     </RoleGuard>
+    //   ),
+    // },
+    // {
+    //   path: "settings",
+    //   element: (
+    //     <RoleGuard roles={["STAFF", "OPERATOR"]}>
+    //       <SettingsPage />
+    //     </RoleGuard>
+    //   ),
+    // },
+    // {
+    //   path: "users",
+    //   element: (
+    //     <RoleGuard roles={["STAFF", "OPERATOR"]}>
+    //       <UsersPage />
+    //     </RoleGuard>
+    //   ),
+    // },
     {
       path: "buses",
       element: (
-        <RoleGuard roles={["STAFF", "OPERATOR"]}>
+        <RoleGuard roles={["OPERATOR"]}>
           <BusPage />
         </RoleGuard>
       ),
@@ -61,7 +61,7 @@ export const AuthRoute: RouteObject = {
     {
       path: "trips",
       element: (
-        <RoleGuard roles={["STAFF", "OPERATOR"]}>
+        <RoleGuard roles={["OPERATOR"]}>
           <TripPage />
         </RoleGuard>
       ),
@@ -69,7 +69,7 @@ export const AuthRoute: RouteObject = {
     {
       path: "routes",
       element: (
-        <RoleGuard roles={["STAFF", "OPERATOR"]}>
+        <RoleGuard roles={["OPERATOR"]}>
           <RoutePage />
         </RoleGuard>
       ),
@@ -77,31 +77,31 @@ export const AuthRoute: RouteObject = {
     {
       path: "employees",
       element: (
-        <RoleGuard roles={["STAFF", "OPERATOR"]}>
+        <RoleGuard roles={["OPERATOR"]}>
           <EmployeePage />
         </RoleGuard>
       ),
     },
-    {
-      path: "customer",
-      element: (
-        <RoleGuard roles={["STAFF", "OPERATOR", "DRIVER"]}>
-          <CustomerPage />
-        </RoleGuard>
-      ),
-    },
-    {
-      path: "report",
-      element: (
-        <RoleGuard roles={["STAFF", "OPERATOR"]}>
-          <ReportPage />
-        </RoleGuard>
-      ),
-    },
+    // {
+    //   path: "customer",
+    //   element: (
+    //     <RoleGuard roles={["STAFF", "OPERATOR", "DRIVER"]}>
+    //       <CustomerPage />
+    //     </RoleGuard>
+    //   ),
+    // },
+    // {
+    //   path: "report",
+    //   element: (
+    //     <RoleGuard roles={["OPERATOR"]}>
+    //       <ReportPage />
+    //     </RoleGuard>
+    //   ),
+    // },
     {
       path: "financial-reports",
       element: (
-        <RoleGuard roles={["STAFF", "OPERATOR"]}>
+        <RoleGuard roles={["OPERATOR"]}>
           <ReportPage />
         </RoleGuard>
       ),
@@ -114,13 +114,13 @@ export const AuthRoute: RouteObject = {
         </RoleGuard>
       ),
     },
-    {
-      path: "tickets",
-      element: (
-        <RoleGuard roles={["STAFF", "OPERATOR"]}>
-          <TicketPage />
-        </RoleGuard>
-      ),
-    },
+    // {
+    //   path: "tickets",
+    //   element: (
+    //     <RoleGuard roles={["STAFF", "OPERATOR"]}>
+    //       <TicketPage />
+    //     </RoleGuard>
+    //   ),
+    // },
   ],
 };

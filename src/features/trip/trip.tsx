@@ -196,15 +196,15 @@ const TripPage: React.FC = () => {
       width: 200,
     },
     {
-      title: "Xe",
-      dataIndex: "busId",
-      key: "busId",
+      title: "Biển số xe",
+      dataIndex: "licensePlate",
+      key: "licensePlate",
       width: 120,
     },
     {
       title: "Tài xế",
-      dataIndex: "driverId",
-      key: "driverId",
+      dataIndex: "driverName",
+      key: "driverName",
       width: 120,
     },
     {
