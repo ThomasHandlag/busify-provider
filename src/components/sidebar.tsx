@@ -137,6 +137,11 @@ const Sidebar: React.FC<SidebarProps> = ({ onMenuSelect, selectedKey }) => {
             label: "Trips Management",
           },
           {
+            key: "driver",
+            icon: <CarOutlined />,
+            label: "Driver Management",
+          },
+          {
             key: "employees",
             icon: <TeamOutlined />,
             label: "Employees Management",
