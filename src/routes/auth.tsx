@@ -99,10 +99,10 @@ export const AuthRoute: RouteObject = {
     //     </RoleGuard>
     //   ),
     // },
-    {
+     {
       path: "driver",
       element: (
-        <RoleGuard roles={["STAFF"]}>
+        <RoleGuard roles={["STAFF", "OPERATOR"]}>
           <DriverManagement />
         </RoleGuard>
       ),

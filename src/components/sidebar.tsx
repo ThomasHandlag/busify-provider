@@ -157,6 +157,15 @@ const Sidebar: React.FC<SidebarProps> = ({ onMenuSelect, selectedKey }) => {
         label: "Profile",
       });
     }
+
+    // Driver Management riêng cho STAFF (bên ngoài Operations menu)
+    if (user?.role === "STAFF") {
+      menuItems.push({
+        key: "driver",
+        icon: <CarOutlined />,
+        label: "Driver Management",
+      });
+    }
   }
 
   return (
