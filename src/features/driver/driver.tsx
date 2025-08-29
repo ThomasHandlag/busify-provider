@@ -6,34 +6,27 @@ import TripCard from "./components/TripCard";
 import PassengerModal from "./components/PassengerModal";
 import EditTicketModal from "./components/EditTicketModal";
 import EditTripStatusModal from "./components/EditTripStatusModal";
-import DriverListModal from "./components/DriverListModal";
-import DriverTripsModal from "./components/DriverTripsModal";
 
 // Hooks
 import {
   useTrips,
-  useDrivers,
-  useDriverTrips,
   useTripPassengers,
   useUpdateTicket,
   useUpdateTripStatus,
 } from "./hooks/useDriverData";
 
 // Types
-import type { Trip, Driver, Passenger } from "../../app/api/driver";
+import type { Trip, Passenger } from "../../app/api/driver";
 
 const DriverManagement: React.FC = () => {
   // State for modals
   const [selectedTrip, setSelectedTrip] = useState<Trip | null>(null);
-  const [selectedDriver, setSelectedDriver] = useState<Driver | null>(null);
   const [selectedTicket, setSelectedTicket] = useState<Passenger | null>(null);
   
   // Modal visibility states
   const [isPassengerModalVisible, setIsPassengerModalVisible] = useState(false);
   const [isEditTicketModalVisible, setIsEditTicketModalVisible] = useState(false);
   const [isEditTripStatusVisible, setIsEditTripStatusVisible] = useState(false);
-  const [isDriverListVisible, setIsDriverListVisible] = useState(false);
-  const [isDriverTripsVisible, setIsDriverTripsVisible] = useState(false);
 
   // Forms
   const [form] = Form.useForm();
@@ -41,16 +34,6 @@ const DriverManagement: React.FC = () => {
 
   // React Query hooks
   const { data: trips = [], isLoading: tripsLoading } = useTrips();
-  const { 
-    data: drivers = [], 
-    refetch: refetchDrivers,
-    isLoading: driversLoading 
-  } = useDrivers();
-  
-  const { 
-    data: driverTrips = [], 
-    refetch: refetchDriverTrips 
-  } = useDriverTrips(selectedDriver?.id || 0);
   
   const { 
     data: passengersData, 
@@ -78,17 +61,6 @@ const DriverManagement: React.FC = () => {
     setSelectedTrip(trip);
     statusForm.setFieldsValue({ status: trip.status });
     setIsEditTripStatusVisible(true);
-  };
-
-  const handleDriverClick = async (driver: Driver) => {
-    setSelectedDriver(driver);
-    setIsDriverTripsVisible(true);
-    await refetchDriverTrips();
-  };
-
-  const handleManageDrivers = async () => {
-    setIsDriverListVisible(true);
-    await refetchDrivers();
   };
 
   // Submit handlers
@@ -127,17 +99,6 @@ const DriverManagement: React.FC = () => {
 
   return (
     <div className="p-6">
-      {/* Header with manage drivers button */}
-      <div className="flex justify-end mb-4">
-        <button
-          onClick={handleManageDrivers}
-          disabled={driversLoading}
-          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded disabled:bg-gray-400"
-        >
-          {driversLoading ? "Loading..." : "Manage Drivers"}
-        </button>
-      </div>
-
       {/* Trip cards grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {tripsLoading ? (
@@ -175,20 +136,6 @@ const DriverManagement: React.FC = () => {
         onCancel={() => setIsEditTripStatusVisible(false)}
         onOk={() => statusForm.submit()}
         form={statusForm}
-      />
-
-      <DriverListModal
-        visible={isDriverListVisible}
-        onCancel={() => setIsDriverListVisible(false)}
-        drivers={drivers}
-        onViewDriverTrips={handleDriverClick}
-      />
-
-      <DriverTripsModal
-        visible={isDriverTripsVisible}
-        onCancel={() => setIsDriverTripsVisible(false)}
-        selectedDriver={selectedDriver}
-        driverTrips={driverTrips}
       />
 
       {/* Hidden forms for mutation callbacks */}

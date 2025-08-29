@@ -8,7 +8,10 @@ export interface Trip {
     end_location: string;
   };
   amenities: {
+    tv: boolean;
     wifi: boolean;
+    toilet: boolean;
+    charging: boolean;
     air_conditioner: boolean;
   };
   average_rating: number;
@@ -74,7 +77,7 @@ export interface UpdateTripStatusData {
 
 // API Functions
 export async function getAllTrips(): Promise<Trip[]> {
-  const response = await apiClient.get("api/trips");
+  const response = await apiClient.get("api/trips/driver/my-trips");
   return response.data.result;
 }
 
