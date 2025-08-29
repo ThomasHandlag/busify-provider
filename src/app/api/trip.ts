@@ -69,3 +69,8 @@ export async function deleteTrip(
   );
   return response.data;
 }
+
+export async function addPointsByTrip(tripId: number) {
+  const response = await apiClient.post(`api/scores/${tripId}`);
+  return response.data;
+}

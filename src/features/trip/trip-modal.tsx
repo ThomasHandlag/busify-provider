@@ -13,7 +13,7 @@ import {
 } from "antd";
 import { CarOutlined } from "@ant-design/icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { createTrip, updateTrip } from "../../app/api/trip";
+import { addPointsByTrip, createTrip, updateTrip } from "../../app/api/trip";
 import type { FormInstance } from "antd";
 import type { TripData } from "../../stores/trip_store";
 import dayjs from "dayjs";
@@ -90,10 +90,25 @@ const TripModal: React.FC<TripModalProps> = ({
       const response = await updateTrip(id, data);
       return response;
     },
-    onSuccess: (response) => {
+    onSuccess: async (response) => {
       if (response.code === 200) {
         message.success("Cập nhật chuyến xe thành công!");
         queryClient.invalidateQueries({ queryKey: ["trips"] });
+
+        // nếu trạng thái chuyến đi vừa cập nhật là "arrived" thì gọi API cộng điểm
+        if (form.getFieldValue("status") === "arrived") {
+          try {
+            const tripId = form.getFieldValue("id");
+            await addPointsByTrip(tripId);
+            message.success("Điểm đã được cộng cho khách hàng!");
+          } catch (err: any) {
+            message.error(
+              "Không thể cộng điểm: " +
+                (err.response?.data?.message || err.message)
+            );
+          }
+        }
+
         if (onSuccess) onSuccess();
         form.resetFields();
         setIsModalVisible(false);
@@ -286,8 +301,10 @@ const TripModal: React.FC<TripModalProps> = ({
                 initialValue="scheduled"
                 rules={[{ required: true }]}
               >
-                <Select>
-                  <Option value="scheduled">Đã lên lịch</Option>
+                <Select disabled={!form.getFieldValue("id")}>
+                  <Option disabled={form.getFieldValue("id")} value="scheduled">
+                    Đã lên lịch
+                  </Option>
                   <Option value="on_time">Đúng giờ</Option>
                   <Option value="delayed">Bị hoãn</Option>
                   <Option value="departed">Đã khởi hành</Option>
