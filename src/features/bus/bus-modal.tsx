@@ -12,9 +12,13 @@ import {
   Checkbox,
 } from "antd";
 import { CarOutlined } from "@ant-design/icons";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createBus, updateBus } from "../../app/api/bus";
 import type { FormInstance } from "antd";
+import type { BusModelForOperatorResponse } from "../../stores/bus_model_store";
+import { getBusModels } from "../../app/api/bus_models";
+import type { SeatLayoutForOperatorResponse } from "../../stores/seat_layout_store";
+import { getSeatLayouts } from "../../app/api/seat_layout";
 
 const { Option } = Select;
 
@@ -65,8 +69,23 @@ const BusModal: React.FC<BusModalProps> = ({
         message.error(response.message || "Thêm xe thất bại!");
       }
     },
-    onError: (error: Error) => {
-      message.error(`Lỗi thêm xe: ${error.message}`);
+    onError: (error: any) => {
+      const fieldErrors = error.response?.data?.fieldErrors;
+
+      if (fieldErrors) {
+        const fields = Object.entries(fieldErrors).map(([field, messages]) => ({
+          name: field,
+          errors: messages as string[],
+        }));
+
+        form.setFields(fields);
+      } else {
+        const errorMsg =
+          error?.response?.data?.message ||
+          error.message ||
+          "Đã xảy ra lỗi không xác định";
+        message.error(`Lỗi thêm xe: ${errorMsg}`);
+      }
     },
   });
 
@@ -89,12 +108,22 @@ const BusModal: React.FC<BusModalProps> = ({
       }
     },
     onError: (error: any) => {
-      const errorMsg =
-        error?.response?.data?.message ||
-        error.message ||
-        "Đã xảy ra lỗi không xác định";
+      const fieldErrors = error.response?.data?.fieldErrors;
 
-      message.error(`Lỗi cập nhật xe: ${errorMsg}`);
+      if (fieldErrors) {
+        const fields = Object.entries(fieldErrors).map(([field, messages]) => ({
+          name: field,
+          errors: messages as string[],
+        }));
+
+        form.setFields(fields);
+      } else {
+        const errorMsg =
+          error?.response?.data?.message ||
+          error.message ||
+          "Đã xảy ra lỗi không xác định";
+        message.error(`Lỗi thêm xe: ${errorMsg}`);
+      }
     },
   });
 
@@ -129,6 +158,22 @@ const BusModal: React.FC<BusModalProps> = ({
       }
     });
   };
+
+  // Fetch bus models
+  const { data: busModels = [], isLoading: loadingModels } = useQuery<
+    BusModelForOperatorResponse[]
+  >({
+    queryKey: ["busModels"],
+    queryFn: getBusModels,
+  });
+
+  //Fetch seat layouts
+  const { data: seatLayouts = [], isLoading: loadingLayouts } = useQuery<
+    SeatLayoutForOperatorResponse[]
+  >({
+    queryKey: ["seatLayouts"],
+    queryFn: getSeatLayouts,
+  });
 
   return (
     <Modal
@@ -197,10 +242,26 @@ const BusModal: React.FC<BusModalProps> = ({
             <Col span={12}>
               <Form.Item
                 name="modelId"
-                label="Mã mẫu xe"
-                rules={[{ required: true }]}
+                label="Mẫu xe"
+                rules={[{ required: true, message: "Vui lòng chọn mẫu xe!" }]}
               >
-                <Input placeholder="Nhập ID mẫu xe" type="number" />
+                <Select
+                  showSearch
+                  placeholder="Chọn mẫu xe"
+                  optionFilterProp="children"
+                  loading={loadingModels}
+                  filterOption={(input, option) =>
+                    (option?.children as unknown as string)
+                      .toLowerCase()
+                      .includes(input.toLowerCase())
+                  }
+                >
+                  {busModels.map((model) => (
+                    <Option key={model.modelId} value={model.modelId}>
+                      {model.modelName}
+                    </Option>
+                  ))}
+                </Select>
               </Form.Item>
             </Col>
             <Col span={12}>
@@ -211,7 +272,23 @@ const BusModal: React.FC<BusModalProps> = ({
                   { required: true, message: "Vui lòng chọn bố trí ghế!" },
                 ]}
               >
-                <Input placeholder="Nhập ID bố trí ghế" type="number" />
+                <Select
+                  showSearch
+                  placeholder="Chọn bố trí ghế"
+                  optionFilterProp="children"
+                  loading={loadingLayouts}
+                  filterOption={(input, option) =>
+                    (option?.children as unknown as string)
+                      .toLowerCase()
+                      .includes(input.toLowerCase())
+                  }
+                >
+                  {seatLayouts.map((layout) => (
+                    <Option key={layout.id} value={layout.id}>
+                      {layout.name}
+                    </Option>
+                  ))}
+                </Select>
               </Form.Item>
             </Col>
           </Row>

@@ -149,15 +149,15 @@ const RoutePage: React.FC = () => {
     },
     {
       title: "Điểm xuất phát",
-      dataIndex: "startLocationName",
-      key: "startLocationName",
-      width: 180,
+      dataIndex: "startLocationAddress",
+      key: "startLocationAddress",
+      width: 250,
     },
     {
       title: "Điểm kết thúc",
-      dataIndex: "endLocationName",
-      key: "endLocationName",
-      width: 180,
+      dataIndex: "endLocationAddress",
+      key: "endLocationAddress",
+      width: 250,
     },
     {
       title: "Thời gian dự kiến (phút)",
@@ -213,10 +213,10 @@ const RoutePage: React.FC = () => {
     <div style={{ padding: "24px" }}>
       <Breadcrumb
         style={{ marginBottom: "16px" }}
-        items={[{ title: "Quản lý tuyến đường" }, { title: "Tuyến xe" }]}
+        items={[{ title: "Nhà xe" }, { title: "Quản lý tuyến đường" }]}
       />
       <Title level={2} style={{ marginBottom: "24px" }}>
-        <SwapOutlined /> Quản lý tuyến xe
+        <SwapOutlined /> Quản lý tuyến đường
       </Title>
       <Card style={{ marginBottom: "24px" }}>
         <Form form={form} layout="vertical" onFinish={handleSearch}>
