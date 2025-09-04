@@ -8,6 +8,7 @@ import ReportPage from "../features/report/report";
 import DashboardIndex from "../features/dashboard";
 import AnalysisPage from "../features/analysis/Analysis";
 import RoleGuard from "../components/RoleGuard";
+import DriverManagement from "../features/driver/driver";
 import TripPage from "../features/trip/trip";
 import RoutePage from "../features/route/route_feature";
 import EmployeePage from "../features/employee/employee";
@@ -99,7 +100,15 @@ export const AuthRoute: RouteObject = {
     //   ),
     // },
     {
-      path: "financial-reports",
+      path: "driver",
+      element: (
+        <RoleGuard roles={["STAFF", "OPERATOR"]}>
+          <DriverManagement />
+        </RoleGuard>
+      ),
+    },
+     
+    {  path: "financial-reports",
       element: (
         <RoleGuard roles={["OPERATOR"]}>
           <ReportPage />

@@ -33,9 +33,14 @@ export const useAuthStore = create<AuthState>()(
     persist(
       (set) => {
         return {
+          // Set mock data để luôn ở trạng thái đã đăng nhập
           accessToken: "",
-          refreshToken: "",
-          user: undefined,
+          refreshToken: "mock_refresh_token",
+          user: {
+            role: "STAFF",
+            userId: 1,
+            email: "staff@example.com"
+          },
           loading: false,
           error: null,
           login: async ({ username, password, navigate }) => {

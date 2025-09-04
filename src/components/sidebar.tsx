@@ -5,7 +5,6 @@ import { Layout, Menu, Grid, Typography, Avatar, Space, Image } from "antd";
 import {
   DashboardOutlined,
   UserOutlined,
-  SettingOutlined,
   CarOutlined,
   BarChartOutlined,
   TeamOutlined,
@@ -13,7 +12,6 @@ import {
   DollarOutlined,
   FileTextOutlined,
   SafetyCertificateOutlined,
-  ClockCircleOutlined,
   LeftOutlined,
   RightOutlined,
   SwapOutlined,
@@ -62,21 +60,10 @@ const Sidebar: React.FC<SidebarProps> = ({ onMenuSelect, selectedKey }) => {
         },
       ],
     },
-
-    // {
-    //   key: "settings",
-    //   icon: <SettingOutlined />,
-    //   label: "System Settings",
-    // },
   ];
 
   if (user?.role === "OPERATOR" || user?.role === "STAFF") {
     menuItems.push(
-      // {
-      //   key: "customers",
-      //   icon: <TeamOutlined />,
-      //   label: "Customer Management",
-      // },
       {
         key: "analytics",
         icon: <BarChartOutlined />,
@@ -87,35 +74,62 @@ const Sidebar: React.FC<SidebarProps> = ({ onMenuSelect, selectedKey }) => {
             icon: <DollarOutlined />,
             label: "Financial Reports",
           },
-          // {
-          //   key: "operational-reports",
-          //   icon: <BarChartOutlined />,
-          //   label: "Operational Reports",
-          // },
-          // {
-          //   key: "performance",
-          //   icon: <BarChartOutlined />,
-          //   label: "Performance Metrics",
-          // },
+          {
+            key: "operational-reports",
+            icon: <BarChartOutlined />,
+            label: "Operational Reports",
+          },
+          {
+            key: "performance",
+            icon: <BarChartOutlined />,
+            label: "Performance Metrics",
+          },
         ],
       },
-      // {
-      //   key: "bookings",
-      //   icon: <FileTextOutlined />,
-      //   label: "Booking System",
-      //   children: [
-      //     {
-      //       key: "reservations",
-      //       icon: <FileTextOutlined />,
-      //       label: "Reservations",
-      //     },
-      //     {
-      //       key: "tickets",
-      //       icon: <SafetyCertificateOutlined />,
-      //       label: "Ticket Management",
-      //     },
-      //   ],
-      // },
+      {
+        key: "finance",
+        icon: <DollarOutlined />,
+        label: "Financial Management",
+        children: [
+          {
+            key: "revenue",
+            icon: <DollarOutlined />,
+            label: "Revenue Tracking",
+          },
+          {
+            key: "expenses",
+            icon: <FileTextOutlined />,
+            label: "Expense Management",
+          },
+          {
+            key: "payroll",
+            icon: <UserOutlined />,
+            label: "Payroll",
+          },
+        ],
+      },
+      {
+        key: "driver",
+        icon: <UserOutlined />,
+        label: "Driver Management",
+      },
+      {
+        key: "bookings",
+        icon: <FileTextOutlined />,
+        label: "Booking System",
+        children: [
+          {
+            key: "reservations",
+            icon: <FileTextOutlined />,
+            label: "Reservations",
+          },
+          {
+            key: "tickets",
+            icon: <SafetyCertificateOutlined />,
+            label: "Ticket Management",
+          },
+        ],
+      },
       {
         key: "operations",
         icon: <ScheduleOutlined />,
@@ -126,11 +140,6 @@ const Sidebar: React.FC<SidebarProps> = ({ onMenuSelect, selectedKey }) => {
             icon: <SwapOutlined />,
             label: "Routes Management",
           },
-          // {
-          //   key: "schedules",
-          //   icon: <ClockCircleOutlined />,
-          //   label: "Schedules",
-          // },
           {
             key: "trips",
             icon: <FileTextOutlined />,
