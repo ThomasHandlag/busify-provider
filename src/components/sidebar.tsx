@@ -5,7 +5,6 @@ import { Layout, Menu, Grid, Typography, Avatar, Space, Image } from "antd";
 import {
   DashboardOutlined,
   UserOutlined,
-  SettingOutlined,
   CarOutlined,
   BarChartOutlined,
   TeamOutlined,
@@ -13,7 +12,6 @@ import {
   DollarOutlined,
   FileTextOutlined,
   SafetyCertificateOutlined,
-  ClockCircleOutlined,
   LeftOutlined,
   RightOutlined,
   SwapOutlined,
@@ -62,21 +60,10 @@ const Sidebar: React.FC<SidebarProps> = ({ onMenuSelect, selectedKey }) => {
         },
       ],
     },
-
-    {
-      key: "settings",
-      icon: <SettingOutlined />,
-      label: "System Settings",
-    },
   ];
 
   if (user?.role === "OPERATOR" || user?.role === "STAFF") {
     menuItems.push(
-      {
-        key: "customers",
-        icon: <TeamOutlined />,
-        label: "Customer Management",
-      },
       {
         key: "analytics",
         icon: <BarChartOutlined />,
@@ -127,7 +114,6 @@ const Sidebar: React.FC<SidebarProps> = ({ onMenuSelect, selectedKey }) => {
         label: "Driver Management",
       },
       {
-
         key: "bookings",
         icon: <FileTextOutlined />,
         label: "Booking System",
@@ -153,11 +139,6 @@ const Sidebar: React.FC<SidebarProps> = ({ onMenuSelect, selectedKey }) => {
             key: "routes",
             icon: <SwapOutlined />,
             label: "Routes Management",
-          },
-          {
-            key: "schedules",
-            icon: <ClockCircleOutlined />,
-            label: "Schedules",
           },
           {
             key: "trips",

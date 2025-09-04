@@ -6,7 +6,9 @@ export interface TripData {
   routeId: number;
   routeName: string;
   busId: number | null;
+  licensePlate: string | null;
   driverId: number;
+  driverName: string;
   departureTime: string;
   estimatedArrivalTime: string;
   status:

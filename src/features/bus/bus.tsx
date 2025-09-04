@@ -202,10 +202,10 @@ const BusPage: React.FC = () => {
       width: 150,
     },
     {
-      title: "Mã mẫu xe",
-      dataIndex: "modelId",
-      key: "modelId",
-      width: 140,
+      title: "Mẫu xe",
+      dataIndex: "modelName",
+      key: "modelName",
+      width: 180,
     },
     {
       title: "Số ghế",
@@ -214,15 +214,15 @@ const BusPage: React.FC = () => {
       width: 100,
     },
     {
-      title: "Mã nhà xe",
-      dataIndex: "operatorId",
-      key: "operatorId",
+      title: "Tên nhà xe",
+      dataIndex: "operatorName",
+      key: "operatorName",
       width: 140,
     },
     {
-      title: "Mã sơ đồ ghế",
-      dataIndex: "seatLayoutId",
-      key: "seatLayoutId",
+      title: "Tên sơ đồ ghế",
+      dataIndex: "seatLayoutName",
+      key: "seatLayoutName",
       width: 150,
     },
     {

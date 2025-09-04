@@ -9,27 +9,42 @@ export interface BusQuery {
   status?: string;
 }
 
+export async function getBusesForOperator(): Promise<BusData[]> {
+  const response = await apiClient.get("api/bus");
+  return response.data.result;
+}
+
 export async function getBuses(query: BusQuery): Promise<BusResponse> {
   const response = await apiClient.get("api/bus-management", { params: query });
   return response.data.result;
 }
 
-export async function getBusesByOperator(operatorId: number): Promise<BusData[]> {
+export async function getBusesByOperator(
+  operatorId: number
+): Promise<BusData[]> {
   const response = await apiClient.get(`api/bus/operator/${operatorId}`);
   return response.data.result;
 }
 
 export async function createBus(data: Partial<BusData>): Promise<BusResponse> {
-  const response = await apiClient.post('api/bus-management', data);
+  const response = await apiClient.post("api/bus-management", data);
   return response.data;
 }
 
-export async function updateBus(id: number, data: Partial<BusData>): Promise<BusResponse> {
+export async function updateBus(
+  id: number,
+  data: Partial<BusData>
+): Promise<BusResponse> {
   const response = await apiClient.put(`api/bus-management/${id}`, data);
   return response.data;
 }
 
-export async function deleteBus(id: number, isDelete: boolean = false): Promise<BusResponse> {
-  const response = await apiClient.delete(`api/bus-management/${id}?isDelete=${isDelete}`);
+export async function deleteBus(
+  id: number,
+  isDelete: boolean = false
+): Promise<BusResponse> {
+  const response = await apiClient.delete(
+    `api/bus-management/${id}?isDelete=${isDelete}`
+  );
   return response.data;
 }
