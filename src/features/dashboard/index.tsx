@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import {
   Row,
   Col,
@@ -42,7 +42,7 @@ export interface WeeklyReportData {
   totalPassengers: number;
 }
 
-const DashboardIndex: React.FC = () => {
+const DashboardIndex = () => {
   const busesData = busStore();
   const operatorData = operatorStore();
   const nextTripsData = tripStore();
@@ -50,7 +50,6 @@ const DashboardIndex: React.FC = () => {
   const weeklyData = weeklyReportStore();
 
   useEffect(() => {
-    // Simulate an API call to fetch weekly data
     const fetchWeeklyData = async () => {
       if (!operatorData.operator) {
         return;
@@ -251,20 +250,16 @@ const DashboardIndex: React.FC = () => {
         {/* Fleet Status */}
         <Col xs={24} lg={16}>
           <Card
-            title="Real-time Fleet Status"
+            title="Up coming Trips"
             extra={<Badge status="processing" text="Live Updates" />}
           >
-            {nextTripsData.nextTrips.length < 0 ||
-            nextTripsData.nextTrips[0] ? (
-              <Empty />
-            ) : (
-              <Table
-                columns={nextTripsColumns}
-                dataSource={nextTripsData.nextTrips}
-                pagination={false}
-                size="small"
-              />
-            )}
+            <Table
+              columns={nextTripsColumns}
+              dataSource={nextTripsData.nextTrips}
+              pagination={false}
+              loading={nextTripsData.loading}
+              size="small"
+            />
           </Card>
         </Col>
 
@@ -360,8 +355,11 @@ const DashboardIndex: React.FC = () => {
                 <Card
                   hoverable
                   size="small"
-                  style={{ textAlign: "center", cursor: "pointer" }}
-                  bodyStyle={{ padding: "16px" }}
+                  style={{
+                    textAlign: "center",
+                    cursor: "pointer",
+                    padding: "16px",
+                  }}
                 >
                   <CarOutlined
                     style={{
@@ -394,8 +392,11 @@ const DashboardIndex: React.FC = () => {
                 <Card
                   hoverable
                   size="small"
-                  style={{ textAlign: "center", cursor: "pointer" }}
-                  bodyStyle={{ padding: "16px" }}
+                  style={{
+                    textAlign: "center",
+                    cursor: "pointer",
+                    padding: "16px",
+                  }}
                 >
                   <ClockCircleOutlined
                     style={{
@@ -411,8 +412,11 @@ const DashboardIndex: React.FC = () => {
                 <Card
                   hoverable
                   size="small"
-                  style={{ textAlign: "center", cursor: "pointer" }}
-                  bodyStyle={{ padding: "16px" }}
+                  style={{
+                    textAlign: "center",
+                    cursor: "pointer",
+                    padding: "16px",
+                  }}
                 >
                   <TrophyOutlined
                     style={{

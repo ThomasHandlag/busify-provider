@@ -30,7 +30,7 @@ export const AuthRoute: RouteObject = {
     {
       path: "analysis",
       element: (
-        <RoleGuard roles={["STAFF", "OPERATOR"]}>
+        <RoleGuard roles={["OPERATOR"]}>
           <AnalysisPage />
         </RoleGuard>
       ),
@@ -38,7 +38,7 @@ export const AuthRoute: RouteObject = {
     {
       path: "settings",
       element: (
-        <RoleGuard roles={["STAFF", "OPERATOR"]}>
+        <RoleGuard roles={["OPERATOR"]}>
           <SettingsPage />
         </RoleGuard>
       ),
@@ -46,7 +46,7 @@ export const AuthRoute: RouteObject = {
     {
       path: "users",
       element: (
-        <RoleGuard roles={["STAFF", "OPERATOR"]}>
+        <RoleGuard roles={["OPERATOR"]}>
           <UsersPage />
         </RoleGuard>
       ),
@@ -54,7 +54,7 @@ export const AuthRoute: RouteObject = {
     {
       path: "buses",
       element: (
-        <RoleGuard roles={["STAFF", "OPERATOR"]}>
+        <RoleGuard roles={["OPERATOR"]}>
           <BusPage />
         </RoleGuard>
       ),
@@ -78,7 +78,7 @@ export const AuthRoute: RouteObject = {
     {
       path: "employees",
       element: (
-        <RoleGuard roles={["STAFF", "OPERATOR"]}>
+        <RoleGuard roles={["OPERATOR"]}>
           <EmployeePage />
         </RoleGuard>
       ),
@@ -94,7 +94,7 @@ export const AuthRoute: RouteObject = {
     {
       path: "report",
       element: (
-        <RoleGuard roles={["STAFF", "OPERATOR"]}>
+        <RoleGuard roles={["OPERATOR"]}>
           <ReportPage />
         </RoleGuard>
       ),
@@ -107,10 +107,11 @@ export const AuthRoute: RouteObject = {
         </RoleGuard>
       ),
     },
-     
-    {  path: "financial-reports",
+
+    {
+      path: "financial-reports",
       element: (
-        <RoleGuard roles={["STAFF", "OPERATOR"]}>
+        <RoleGuard roles={["OPERATOR"]}>
           <ReportPage />
         </RoleGuard>
       ),

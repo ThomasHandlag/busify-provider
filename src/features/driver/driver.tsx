@@ -64,6 +64,7 @@ const DriverManagement: React.FC = () => {
   };
 
   // Submit handlers
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const onUpdateTicket = async (values: any) => {
     if (!selectedTrip || !selectedTicket) return;
 
@@ -96,7 +97,6 @@ const DriverManagement: React.FC = () => {
     setIsEditTripStatusVisible(false);
     statusForm.resetFields();
   };
-
   return (
     <div className="p-6">
       {/* Trip cards grid */}

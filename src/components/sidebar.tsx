@@ -21,7 +21,7 @@ import {
 } from "@ant-design/icons";
 import { useAuthStore } from "../stores/auth_store";
 import { operatorStore } from "../stores/operator_store";
-
+import type { ItemType, MenuItemType } from "antd/es/menu/interface";
 const { Sider } = Layout;
 const { useBreakpoint } = Grid;
 const { Text } = Typography;
@@ -44,33 +44,15 @@ const Sidebar: React.FC<SidebarProps> = ({ onMenuSelect, selectedKey }) => {
   const { user } = useAuthStore();
 
   // Bus Enterprise Management Menu Items
-  const menuItems = [
+  const menuItems: ItemType<MenuItemType>[] = [
     {
       key: "/dashboard",
       icon: <DashboardOutlined />,
       label: "Dashboard Overview",
     },
-    {
-      key: "fleet",
-      icon: <CarOutlined />,
-      label: "Fleet Management",
-      children: [
-        {
-          key: "buses",
-          icon: <CarOutlined />,
-          label: "Buses Management",
-        },
-      ],
-    },
-
-    {
-      key: "settings",
-      icon: <SettingOutlined />,
-      label: "System Settings",
-    },
   ];
 
-  if (user?.role === "OPERATOR" || user?.role === "STAFF") {
+  if (user?.role === "OPERATOR") {
     menuItems.push(
       {
         key: "customers",
@@ -87,47 +69,14 @@ const Sidebar: React.FC<SidebarProps> = ({ onMenuSelect, selectedKey }) => {
             icon: <DollarOutlined />,
             label: "Financial Reports",
           },
-          {
-            key: "operational-reports",
-            icon: <BarChartOutlined />,
-            label: "Operational Reports",
-          },
-          {
-            key: "performance",
-            icon: <BarChartOutlined />,
-            label: "Performance Metrics",
-          },
+          // {
+          //   key: "operational-reports",
+          //   icon: <BarChartOutlined />,
+          //   label: "Operational Reports",
+          // },
         ],
       },
       {
-        key: "finance",
-        icon: <DollarOutlined />,
-        label: "Financial Management",
-        children: [
-          {
-            key: "revenue",
-            icon: <DollarOutlined />,
-            label: "Revenue Tracking",
-          },
-          {
-            key: "expenses",
-            icon: <FileTextOutlined />,
-            label: "Expense Management",
-          },
-          {
-            key: "payroll",
-            icon: <UserOutlined />,
-            label: "Payroll",
-          },
-        ],
-      },
-      {
-        key: "driver",
-        icon: <UserOutlined />,
-        label: "Driver Management",
-      },
-      {
-
         key: "bookings",
         icon: <FileTextOutlined />,
         label: "Booking System",
@@ -170,16 +119,39 @@ const Sidebar: React.FC<SidebarProps> = ({ onMenuSelect, selectedKey }) => {
             label: "Employees Management",
           },
         ],
-      }
-    );
-
-    if (user?.role === "OPERATOR") {
-      menuItems.push({
+      },
+      {
         key: "profile",
         icon: <ProfileTwoTone />,
         label: "Profile",
-      });
-    }
+      },
+      {
+        key: "fleet",
+        icon: <CarOutlined />,
+        label: "Fleet Management",
+        children: [
+          {
+            key: "buses",
+            icon: <CarOutlined />,
+            label: "Buses Management",
+          },
+        ],
+      },
+
+      {
+        key: "settings",
+        icon: <SettingOutlined />,
+        label: "System Settings",
+      }
+    );
+  }
+
+  if (user?.role === "STAFF") {
+    menuItems.push({
+      key: "driver",
+      icon: <UserOutlined />,
+      label: "Driver Management",
+    });
   }
 
   return (
