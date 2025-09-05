@@ -26,7 +26,7 @@ const EditTripStatusModal: React.FC<EditTripStatusModalProps> = ({
           <Select>
             <Select.Option value="cancelled">Cancelled</Select.Option>
             <Select.Option value="delayed">Delayed</Select.Option>
-            <Select.Option value="ontime">On Time</Select.Option>
+            <Select.Option value="on_time">On Time</Select.Option>
             <Select.Option value="arrived">Arrived</Select.Option>
             <Select.Option value="scheduled">Scheduled</Select.Option>
             <Select.Option value="departed">Departed</Select.Option>
