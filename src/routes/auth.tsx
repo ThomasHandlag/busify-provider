@@ -1,9 +1,7 @@
 import { type RouteObject } from "react-router";
 import DashboardPage from "../features/dashboard/dashboard";
 import SettingsPage from "../features/settings/settings";
-import UsersPage from "../features/users/users";
 import BusPage from "../features/bus/bus";
-import CustomerPage from "../features/customer/customer";
 import ReportPage from "../features/report/report";
 import DashboardIndex from "../features/dashboard";
 import AnalysisPage from "../features/analysis/Analysis";
@@ -22,7 +20,7 @@ export const AuthRoute: RouteObject = {
     {
       index: true,
       element: (
-        <RoleGuard roles={["STAFF", "OPERATOR", "DRIVER"]}>
+        <RoleGuard roles={["STAFF", "OPERATOR"]}>
           <DashboardIndex />
         </RoleGuard>
       ),
@@ -44,14 +42,6 @@ export const AuthRoute: RouteObject = {
       ),
     },
     {
-      path: "users",
-      element: (
-        <RoleGuard roles={["OPERATOR"]}>
-          <UsersPage />
-        </RoleGuard>
-      ),
-    },
-    {
       path: "buses",
       element: (
         <RoleGuard roles={["OPERATOR"]}>
@@ -62,7 +52,7 @@ export const AuthRoute: RouteObject = {
     {
       path: "trips",
       element: (
-        <RoleGuard roles={["STAFF", "OPERATOR"]}>
+        <RoleGuard roles={["OPERATOR"]}>
           <TripPage />
         </RoleGuard>
       ),
@@ -70,7 +60,7 @@ export const AuthRoute: RouteObject = {
     {
       path: "routes",
       element: (
-        <RoleGuard roles={["STAFF", "OPERATOR"]}>
+        <RoleGuard roles={["OPERATOR"]}>
           <RoutePage />
         </RoleGuard>
       ),
@@ -84,43 +74,10 @@ export const AuthRoute: RouteObject = {
       ),
     },
     {
-      path: "customer",
-      element: (
-        <RoleGuard roles={["STAFF", "OPERATOR", "DRIVER"]}>
-          <CustomerPage />
-        </RoleGuard>
-      ),
-    },
-    {
       path: "report",
       element: (
         <RoleGuard roles={["OPERATOR"]}>
           <ReportPage />
-        </RoleGuard>
-      ),
-    },
-    {
-      path: "driver",
-      element: (
-        <RoleGuard roles={["STAFF", "OPERATOR"]}>
-          <DriverManagement />
-        </RoleGuard>
-      ),
-    },
-
-    {
-      path: "financial-reports",
-      element: (
-        <RoleGuard roles={["OPERATOR"]}>
-          <ReportPage />
-        </RoleGuard>
-      ),
-    },
-    {
-      path: "profile",
-      element: (
-        <RoleGuard roles={["OPERATOR"]}>
-          <ProfilePage />
         </RoleGuard>
       ),
     },
@@ -132,5 +89,29 @@ export const AuthRoute: RouteObject = {
         </RoleGuard>
       ),
     },
+    {
+      path: "driver",
+      element: (
+        <RoleGuard roles={["STAFF", "OPERATOR"]}>
+          <DriverManagement />
+        </RoleGuard>
+      ),
+    },
+    {
+      path: "profile",
+      element: (
+        <RoleGuard roles={["OPERATOR"]}>
+          <ProfilePage />
+        </RoleGuard>
+      ),
+    },
+    // {
+    //   path: "tickets",
+    //   element: (
+    //     <RoleGuard roles={["STAFF", "OPERATOR"]}>
+    //       <TicketPage />
+    //     </RoleGuard>
+    //   ),
+    // },
   ],
 };

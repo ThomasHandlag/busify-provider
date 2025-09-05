@@ -184,6 +184,7 @@ const TripPage: React.FC = () => {
     {
       title: "ID",
       dataIndex: "id",
+      fixed: "left",
       key: "id",
       width: 80,
       sorter: (a, b) => a.id - b.id,
@@ -196,15 +197,15 @@ const TripPage: React.FC = () => {
       width: 200,
     },
     {
-      title: "Xe",
-      dataIndex: "busId",
-      key: "busId",
+      title: "Biển số xe",
+      dataIndex: "licensePlate",
+      key: "licensePlate",
       width: 120,
     },
     {
       title: "Tài xế",
-      dataIndex: "driverId",
-      key: "driverId",
+      dataIndex: "driverName",
+      key: "driverName",
       width: 120,
     },
     {
@@ -320,7 +321,10 @@ const TripPage: React.FC = () => {
               <Form.Item name="status" label="Trạng thái">
                 <Select allowClear placeholder="Chọn trạng thái">
                   <Option value="scheduled">Đã lên lịch</Option>
-                  <Option value="completed">Đã hoàn thành</Option>
+                  <Option value="on_time">Đúng giờ</Option>
+                  <Option value="delayed">Bị hoãn</Option>
+                  <Option value="departed">Đã khởi hành</Option>
+                  <Option value="arrived">Đã đến nơi</Option>
                   <Option value="cancelled">Đã hủy</Option>
                 </Select>
               </Form.Item>
@@ -391,7 +395,7 @@ const TripPage: React.FC = () => {
         <Col xs={24} sm={12} lg={6}>
           <Card>
             <Statistic
-              title="Bị trễ"
+              title="Bị hoãn"
               value={stats.delayed}
               valueStyle={{ color: "#ff974d" }}
             />

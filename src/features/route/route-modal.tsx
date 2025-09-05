@@ -1,12 +1,24 @@
 import React from "react";
-import { Modal, Form, Input, Button, Row, Col, Card, message } from "antd";
+import {
+  Modal,
+  Form,
+  Input,
+  Button,
+  Row,
+  Col,
+  Card,
+  message,
+  Select,
+} from "antd";
 import { SwapOutlined } from "@ant-design/icons";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createRoute, updateRoute } from "../../app/api/route_api";
 import type { FormInstance } from "antd";
+import type { LocationForOperatorResponse } from "../../stores/location_store";
+import { getLocations } from "../../app/api/location";
+const { Option } = Select;
 
 export interface RouteFormData {
-  name: string;
   startLocationId: number;
   startLocationName: string;
   endLocationId: number;
@@ -111,6 +123,14 @@ const RouteModal: React.FC<RouteModalProps> = ({
     }
   };
 
+  // fetch locations
+  const { data: locations = [], isLoading: loadingLocations } = useQuery<
+    LocationForOperatorResponse[]
+  >({
+    queryKey: ["locations"],
+    queryFn: getLocations,
+  });
+
   return (
     <Modal
       title={
@@ -140,23 +160,8 @@ const RouteModal: React.FC<RouteModalProps> = ({
         <Form.Item name="id" hidden>
           <Input />
         </Form.Item>
-        <Card title="Thông tin tuyến xe" className="mb-4">
+        <Card title="Thông tin tuyến đường" className="mb-4">
           <Row gutter={16}>
-            <Col span={12}>
-              <Form.Item
-                name="name"
-                label="Tên tuyến"
-                rules={[
-                  { required: true, message: "Nhập tên tuyến!" },
-                  {
-                    pattern: /^[\p{L}\s.-]+ - [\p{L}\s.-]+$/u,
-                    message: "Phải có định dạng: 'Hà Nội - Đà Nẵng'",
-                  },
-                ]}
-              >
-                <Input placeholder="VD: Hà Nội - Đà Nẵng" />
-              </Form.Item>
-            </Col>
             <Col span={12}>
               <Form.Item
                 name="defaultPrice"
@@ -166,38 +171,6 @@ const RouteModal: React.FC<RouteModalProps> = ({
                 <Input type="number" placeholder="VD: 200000" prefix="VND" />
               </Form.Item>
             </Col>
-          </Row>
-          <Row gutter={16}>
-            <Col span={12}>
-              <Form.Item
-                name="startLocationId"
-                label="ID điểm xuất phát"
-                rules={[
-                  {
-                    required: true,
-                    message: "Nhập ID điểm xuất phát!",
-                  },
-                ]}
-              >
-                <Input type="number" placeholder="VD: 1" />
-              </Form.Item>
-            </Col>
-            <Col span={12}>
-              <Form.Item
-                name="endLocationId"
-                label="ID điểm kết thúc"
-                rules={[
-                  {
-                    required: true,
-                    message: "Nhập ID điểm kết thúc!",
-                  },
-                ]}
-              >
-                <Input type="number" placeholder="VD: 2" />
-              </Form.Item>
-            </Col>
-          </Row>
-          <Row gutter={16}>
             <Col span={12}>
               <Form.Item
                 name="defaultDurationMinutes"
@@ -210,6 +183,63 @@ const RouteModal: React.FC<RouteModalProps> = ({
                 ]}
               >
                 <Input type="number" placeholder="VD: 600" />
+              </Form.Item>
+            </Col>
+          </Row>
+          <Row gutter={16}>
+            <Col span={12}>
+              <Form.Item
+                name="startLocationId"
+                label="Điểm xuất phát"
+                rules={[
+                  { required: true, message: "Vui lòng chọn điểm xuất phát!" },
+                ]}
+              >
+                <Select
+                  showSearch
+                  placeholder="Chọn điểm xuất phát"
+                  optionFilterProp="children"
+                  loading={loadingLocations}
+                  filterOption={(input, option) =>
+                    (option?.children as unknown as string)
+                      .toLowerCase()
+                      .includes(input.toLowerCase())
+                  }
+                >
+                  {locations.map((loc) => (
+                    <Option key={loc.locationId} value={loc.locationId}>
+                      {loc.locationName}
+                    </Option>
+                  ))}
+                </Select>
+              </Form.Item>
+            </Col>
+
+            <Col span={12}>
+              <Form.Item
+                name="endLocationId"
+                label="Điểm kết thúc"
+                rules={[
+                  { required: true, message: "Vui lòng chọn điểm kết thúc!" },
+                ]}
+              >
+                <Select
+                  showSearch
+                  placeholder="Chọn điểm kết thúc"
+                  optionFilterProp="children"
+                  loading={loadingLocations}
+                  filterOption={(input, option) =>
+                    (option?.children as unknown as string)
+                      .toLowerCase()
+                      .includes(input.toLowerCase())
+                  }
+                >
+                  {locations.map((loc) => (
+                    <Option key={loc.locationId} value={loc.locationId}>
+                      {loc.locationName}
+                    </Option>
+                  ))}
+                </Select>
               </Form.Item>
             </Col>
           </Row>

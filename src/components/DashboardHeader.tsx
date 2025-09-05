@@ -158,7 +158,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
               type="secondary"
               style={{ fontSize: "12px", display: "block" }}
             >
-              Today's Trips
+              Total Trips
             </Text>
             <Text strong style={{ fontSize: "16px", color: "#1890ff" }}>
               {report?.totalTrips}

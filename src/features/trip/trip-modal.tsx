@@ -12,11 +12,17 @@ import {
   DatePicker,
 } from "antd";
 import { CarOutlined } from "@ant-design/icons";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { createTrip, updateTrip } from "../../app/api/trip";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { addPointsByTrip, createTrip, updateTrip } from "../../app/api/trip";
 import type { FormInstance } from "antd";
 import type { TripData } from "../../stores/trip_store";
 import dayjs from "dayjs";
+import type { RouteData } from "../../stores/route_store";
+import { getRoutesForOperator } from "../../app/api/route_api";
+import { getBusesForOperator } from "../../app/api/bus";
+import type { BusData } from "../../stores/bus_store";
+import { getDrivers } from "../../app/api/employee";
+import type { DriverData } from "../../stores/employee_store";
 
 const { Option } = Select;
 
@@ -84,10 +90,25 @@ const TripModal: React.FC<TripModalProps> = ({
       const response = await updateTrip(id, data);
       return response;
     },
-    onSuccess: (response) => {
+    onSuccess: async (response) => {
       if (response.code === 200) {
         message.success("Cập nhật chuyến xe thành công!");
         queryClient.invalidateQueries({ queryKey: ["trips"] });
+
+        // nếu trạng thái chuyến đi vừa cập nhật là "arrived" thì gọi API cộng điểm
+        if (form.getFieldValue("status") === "arrived") {
+          try {
+            const tripId = form.getFieldValue("id");
+            await addPointsByTrip(tripId);
+            message.success("Điểm đã được cộng cho khách hàng!");
+          } catch (err: any) {
+            message.error(
+              "Không thể cộng điểm: " +
+                (err.response?.data?.message || err.message)
+            );
+          }
+        }
+
         if (onSuccess) onSuccess();
         form.resetFields();
         setIsModalVisible(false);
@@ -139,6 +160,28 @@ const TripModal: React.FC<TripModalProps> = ({
     }
   };
 
+  // fetch locations
+  const { data: routes = [], isLoading: loadingRoutes } = useQuery<RouteData[]>(
+    {
+      queryKey: ["routes"],
+      queryFn: getRoutesForOperator,
+    }
+  );
+
+  // fetch buses
+  const { data: buses = [], isLoading: loadingBuses } = useQuery<BusData[]>({
+    queryKey: ["buses"],
+    queryFn: getBusesForOperator,
+  });
+
+  // fetch drivers
+  const { data: drivers = [], isLoading: loadingDrivers } = useQuery<
+    DriverData[]
+  >({
+    queryKey: ["drivers"],
+    queryFn: getDrivers,
+  });
+
   return (
     <Modal
       title={
@@ -176,10 +219,26 @@ const TripModal: React.FC<TripModalProps> = ({
                 name="routeId"
                 label="Tuyến đường"
                 rules={[
-                  { required: true, message: "Vui lòng chọn tuyến đường!" },
+                  { required: true, message: "Vui lòng chọn điểm xuất phát!" },
                 ]}
               >
-                <Input type="number" placeholder="Nhập ID tuyến đường" />
+                <Select
+                  showSearch
+                  placeholder="Chọn tuyến đường"
+                  optionFilterProp="children"
+                  loading={loadingRoutes}
+                  filterOption={(input, option) =>
+                    (option?.children as unknown as string)
+                      .toLowerCase()
+                      .includes(input.toLowerCase())
+                  }
+                >
+                  {routes.map((route) => (
+                    <Option key={route.id} value={route.id}>
+                      {route.name}
+                    </Option>
+                  ))}
+                </Select>
               </Form.Item>
             </Col>
             <Col span={12}>
@@ -188,7 +247,23 @@ const TripModal: React.FC<TripModalProps> = ({
                 label="Xe"
                 rules={[{ required: true, message: "Vui lòng chọn xe!" }]}
               >
-                <Input type="number" placeholder="Nhập ID xe" />
+                <Select
+                  showSearch
+                  placeholder="Chọn biển số xe"
+                  optionFilterProp="children"
+                  loading={loadingBuses}
+                  filterOption={(input, option) =>
+                    (option?.children as unknown as string)
+                      .toLowerCase()
+                      .includes(input.toLowerCase())
+                  }
+                >
+                  {buses.map((bus) => (
+                    <Option key={bus.id} value={bus.id}>
+                      {bus.licensePlate}
+                    </Option>
+                  ))}
+                </Select>
               </Form.Item>
             </Col>
           </Row>
@@ -200,7 +275,23 @@ const TripModal: React.FC<TripModalProps> = ({
                 label="Tài xế"
                 rules={[{ required: true, message: "Vui lòng chọn tài xế!" }]}
               >
-                <Input type="number" placeholder="Nhập ID tài xế" />
+                <Select
+                  showSearch
+                  placeholder="Chọn tài xế"
+                  optionFilterProp="children"
+                  loading={loadingDrivers}
+                  filterOption={(input, option) =>
+                    (option?.children as unknown as string)
+                      .toLowerCase()
+                      .includes(input.toLowerCase())
+                  }
+                >
+                  {drivers.map((driver) => (
+                    <Option key={driver.driverId} value={driver.driverId}>
+                      {driver.driverName}
+                    </Option>
+                  ))}
+                </Select>
               </Form.Item>
             </Col>
             <Col span={12}>
@@ -210,8 +301,10 @@ const TripModal: React.FC<TripModalProps> = ({
                 initialValue="scheduled"
                 rules={[{ required: true }]}
               >
-                <Select>
-                  <Option value="scheduled">Đã lên lịch</Option>
+                <Select disabled={!form.getFieldValue("id")}>
+                  <Option disabled={form.getFieldValue("id")} value="scheduled">
+                    Đã lên lịch
+                  </Option>
                   <Option value="on_time">Đúng giờ</Option>
                   <Option value="delayed">Bị hoãn</Option>
                   <Option value="departed">Đã khởi hành</Option>
@@ -238,6 +331,7 @@ const TripModal: React.FC<TripModalProps> = ({
                   showTime
                   format="YYYY-MM-DD HH:mm:ss"
                   style={{ width: "100%" }}
+                  disabledDate={(current) => current && current < dayjs()}
                 />
               </Form.Item>
             </Col>

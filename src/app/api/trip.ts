@@ -28,7 +28,6 @@ export interface NextTrip {
   departure_time: string;
   end_city: string;
   available_seats: number;
-  status: "active" | "under_maintenance" | "out_of_service";
 }
 
 export async function getNextTripsOfOperator(
@@ -67,5 +66,10 @@ export async function deleteTrip(
   const response = await apiClient.delete(
     `api/trip-management/${id}?isDelete=${isDelete}`
   );
+  return response.data;
+}
+
+export async function addPointsByTrip(tripId: number) {
+  const response = await apiClient.post(`api/scores/${tripId}`);
   return response.data;
 }

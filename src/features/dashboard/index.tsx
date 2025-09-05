@@ -10,16 +10,15 @@ import {
   Typography,
   List,
   Avatar,
-  Empty,
 } from "antd";
 import {
   CarOutlined,
   UserOutlined,
   ClockCircleOutlined,
-  WarningOutlined,
   CheckCircleOutlined,
   TrophyOutlined,
   EnvironmentOutlined,
+  NotificationOutlined,
 } from "@ant-design/icons";
 import { getBusesByOperator } from "../../app/api/bus";
 import { busStore } from "../../stores/bus_store";
@@ -28,6 +27,8 @@ import { weeklyReportStore } from "../../stores/report_store";
 import { getWeeklyOperatorReport } from "../../app/api/report";
 import { tripStore } from "../../stores/trip_store";
 import { getNextTripsOfOperator } from "../../app/api/trip";
+import { notificationStore } from "../../stores/notification_store";
+import { Link } from "react-router";
 
 const { Title, Text } = Typography;
 
@@ -87,53 +88,7 @@ const DashboardIndex = () => {
     fetchNextTripsData();
   }, [operatorData]);
 
-  const maintenanceAlerts = [
-    {
-      id: 1,
-      bus: "BUS-003",
-      issue: "Engine maintenance due",
-      priority: "high",
-      time: "2 hours ago",
-    },
-    {
-      id: 2,
-      bus: "BUS-007",
-      issue: "Tire replacement needed",
-      priority: "medium",
-      time: "5 hours ago",
-    },
-    {
-      id: 3,
-      bus: "BUS-012",
-      issue: "Regular inspection due",
-      priority: "low",
-      time: "1 day ago",
-    },
-  ];
-
-  const recentBookings = [
-    {
-      id: 1,
-      customer: "John Doe",
-      route: "Downtown - Airport",
-      time: "10:30 AM",
-      status: "confirmed",
-    },
-    {
-      id: 2,
-      customer: "Jane Smith",
-      route: "Mall - University",
-      time: "11:15 AM",
-      status: "pending",
-    },
-    {
-      id: 3,
-      customer: "Mike Johnson",
-      route: "Station - Hospital",
-      time: "12:00 PM",
-      status: "confirmed",
-    },
-  ];
+  const notifications = notificationStore();
 
   const nextTripsColumns = [
     {
@@ -163,20 +118,6 @@ const DashboardIndex = () => {
       dataIndex: "available_seats",
       key: "available_seats",
       render: (value: number) => <Text strong>{value}</Text>,
-    },
-    {
-      title: "TripStatus",
-      dataIndex: "status",
-      key: "status",
-      render: (status: string) => {
-        const color =
-          status === "active"
-            ? "success"
-            : status === "under_maintenance"
-            ? "warning"
-            : "default";
-        return <Badge status={color} text={status} />;
-      },
     },
   ];
 
@@ -262,78 +203,24 @@ const DashboardIndex = () => {
             />
           </Card>
         </Col>
-
-        {/* Maintenance Alerts */}
         <Col xs={24} lg={8}>
           <Card
-            title="Maintenance Alerts"
-            extra={<Badge count={maintenanceAlerts.length} />}
-            style={{ marginBottom: "16px" }}
-          >
-            <List
-              itemLayout="horizontal"
-              dataSource={maintenanceAlerts}
-              renderItem={(item) => (
-                <List.Item>
-                  <List.Item.Meta
-                    avatar={
-                      <Avatar
-                        icon={<WarningOutlined />}
-                        style={{
-                          backgroundColor:
-                            item.priority === "high"
-                              ? "#ff4d4f"
-                              : item.priority === "medium"
-                              ? "#fa8c16"
-                              : "#52c41a",
-                        }}
-                      />
-                    }
-                    title={<Text strong>{item.bus}</Text>}
-                    description={
-                      <div>
-                        <div>{item.issue}</div>
-                        <Text type="secondary" style={{ fontSize: "12px" }}>
-                          {item.time}
-                        </Text>
-                      </div>
-                    }
-                  />
-                </List.Item>
-              )}
-            />
-          </Card>
-
-          {/* Recent Bookings */}
-          <Card
-            title="Recent Bookings"
+            title="Recent Notifications"
             extra={<CheckCircleOutlined style={{ color: "#52c41a" }} />}
           >
             <List
               itemLayout="horizontal"
-              dataSource={recentBookings}
+              dataSource={notifications.notifications.slice(-5).reverse()}
               renderItem={(item) => (
                 <List.Item>
                   <List.Item.Meta
                     avatar={<Avatar icon={<UserOutlined />} />}
-                    title={<Text strong>{item.customer}</Text>}
+                    title={<Text strong>{item.title}</Text>}
                     description={
                       <div>
                         <Space direction="vertical" size="small">
                           <div>
-                            <EnvironmentOutlined /> {item.route}
-                          </div>
-                          <div>
-                            <ClockCircleOutlined /> {item.time}
-                            <Badge
-                              status={
-                                item.status === "confirmed"
-                                  ? "success"
-                                  : "processing"
-                              }
-                              text={item.status}
-                              style={{ marginLeft: "8px" }}
-                            />
+                            <NotificationOutlined /> {item.message}
                           </div>
                         </Space>
                       </div>
@@ -352,81 +239,92 @@ const DashboardIndex = () => {
           <Card title="Quick Actions">
             <Row gutter={[16, 16]}>
               <Col xs={24} sm={12} md={6}>
-                <Card
-                  hoverable
-                  size="small"
-                  style={{
-                    textAlign: "center",
-                    cursor: "pointer",
-                    padding: "16px",
-                  }}
-                >
-                  <CarOutlined
+                <Link to="/dashboard/buses">
+                  <Card
+                    hoverable
+                    size="small"
                     style={{
-                      fontSize: "24px",
-                      color: "#1890ff",
-                      marginBottom: "8px",
+                      textAlign: "center",
+                      cursor: "pointer",
+                      padding: "16px",
                     }}
-                  />
-                  <div>Add New Bus</div>
-                </Card>
+                  >
+                    <CarOutlined
+                      style={{
+                        fontSize: "24px",
+                        color: "#1890ff",
+                        marginBottom: "8px",
+                      }}
+                    />
+                    <div>Add New Bus</div>
+                  </Card>
+                </Link>
               </Col>
               <Col xs={24} sm={12} md={6}>
-                <Card
-                  hoverable
-                  size="small"
-                  style={{ textAlign: "center", cursor: "pointer" }}
-                  bodyStyle={{ padding: "16px" }}
-                >
-                  <EnvironmentOutlined
+                <Link to="/dashboard/routes">
+                  <Card
+                    hoverable
+                    size="small"
                     style={{
-                      fontSize: "24px",
-                      color: "#52c41a",
-                      marginBottom: "8px",
+                      textAlign: "center",
+                      cursor: "pointer",
+                      padding: "16px",
                     }}
-                  />
-                  <div>Create Route</div>
-                </Card>
+                  >
+                    <EnvironmentOutlined
+                      style={{
+                        fontSize: "24px",
+                        color: "#52c41a",
+                        marginBottom: "8px",
+                      }}
+                    />
+                    <div>Create Route</div>
+                  </Card>
+                </Link>
               </Col>
               <Col xs={24} sm={12} md={6}>
-                <Card
-                  hoverable
-                  size="small"
-                  style={{
-                    textAlign: "center",
-                    cursor: "pointer",
-                    padding: "16px",
-                  }}
-                >
-                  <ClockCircleOutlined
+                <Link to="/dashboard/trips">
+                  <Card
+                    hoverable
+                    size="small"
                     style={{
-                      fontSize: "24px",
-                      color: "#fa8c16",
-                      marginBottom: "8px",
+                      textAlign: "center",
+                      cursor: "pointer",
+                      padding: "16px",
                     }}
-                  />
-                  <div>Schedule Trip</div>
-                </Card>
+                  >
+                    <ClockCircleOutlined
+                      style={{
+                        fontSize: "24px",
+                        color: "#fa8c16",
+                        marginBottom: "8px",
+                      }}
+                    />
+                    <div>Schedule Trip</div>
+                  </Card>
+                </Link>
               </Col>
               <Col xs={24} sm={12} md={6}>
-                <Card
-                  hoverable
-                  size="small"
-                  style={{
-                    textAlign: "center",
-                    cursor: "pointer",
-                    padding: "16px",
-                  }}
-                >
-                  <TrophyOutlined
+                <Link to="/dashboard/reports">
+                  <Card
+                    hoverable
+                    size="small"
                     style={{
-                      fontSize: "24px",
-                      color: "#722ed1",
-                      marginBottom: "8px",
+                      textAlign: "center",
+                      cursor: "pointer",
+                      padding: "16px",
                     }}
-                  />
-                  <div>View Reports</div>
-                </Card>
+                  >
+                    <TrophyOutlined
+                      style={{
+                        fontSize: "24px",
+                        color: "#722ed1",
+                        marginBottom: "8px",
+                      }}
+                    />
+                    <div>View Reports</div>
+                  </Card>
+                </Link>
               </Col>
             </Row>
           </Card>

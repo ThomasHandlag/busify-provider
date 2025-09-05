@@ -5,19 +5,16 @@ import { Layout, Menu, Grid, Typography, Avatar, Space, Image } from "antd";
 import {
   DashboardOutlined,
   UserOutlined,
-  SettingOutlined,
   CarOutlined,
   BarChartOutlined,
   TeamOutlined,
   ScheduleOutlined,
-  DollarOutlined,
   FileTextOutlined,
   SafetyCertificateOutlined,
-  ClockCircleOutlined,
   LeftOutlined,
   RightOutlined,
   SwapOutlined,
-  ProfileTwoTone,
+  ProfileOutlined,
 } from "@ant-design/icons";
 import { useAuthStore } from "../stores/auth_store";
 import { operatorStore } from "../stores/operator_store";
@@ -55,43 +52,14 @@ const Sidebar: React.FC<SidebarProps> = ({ onMenuSelect, selectedKey }) => {
   if (user?.role === "OPERATOR") {
     menuItems.push(
       {
-        key: "customers",
-        icon: <TeamOutlined />,
-        label: "Customer Management",
-      },
-      {
-        key: "analytics",
+        key: "report",
         icon: <BarChartOutlined />,
         label: "Analytics & Reports",
-        children: [
-          {
-            key: "financial-reports",
-            icon: <DollarOutlined />,
-            label: "Financial Reports",
-          },
-          // {
-          //   key: "operational-reports",
-          //   icon: <BarChartOutlined />,
-          //   label: "Operational Reports",
-          // },
-        ],
       },
       {
-        key: "bookings",
-        icon: <FileTextOutlined />,
-        label: "Booking System",
-        children: [
-          {
-            key: "reservations",
-            icon: <FileTextOutlined />,
-            label: "Reservations",
-          },
-          {
-            key: "tickets",
-            icon: <SafetyCertificateOutlined />,
-            label: "Ticket Management",
-          },
-        ],
+        key: "tickets",
+        icon: <SafetyCertificateOutlined />,
+        label: "Ticket Management",
       },
       {
         key: "operations",
@@ -102,11 +70,6 @@ const Sidebar: React.FC<SidebarProps> = ({ onMenuSelect, selectedKey }) => {
             key: "routes",
             icon: <SwapOutlined />,
             label: "Routes Management",
-          },
-          {
-            key: "schedules",
-            icon: <ClockCircleOutlined />,
-            label: "Schedules",
           },
           {
             key: "trips",
@@ -122,7 +85,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onMenuSelect, selectedKey }) => {
       },
       {
         key: "profile",
-        icon: <ProfileTwoTone />,
+        icon: <ProfileOutlined />,
         label: "Profile",
       },
       {
@@ -136,13 +99,13 @@ const Sidebar: React.FC<SidebarProps> = ({ onMenuSelect, selectedKey }) => {
             label: "Buses Management",
           },
         ],
-      },
-
-      {
-        key: "settings",
-        icon: <SettingOutlined />,
-        label: "System Settings",
       }
+
+      // {
+      //   key: "settings",
+      //   icon: <SettingOutlined />,
+      //   label: "System Settings",
+      // }
     );
   }
 
