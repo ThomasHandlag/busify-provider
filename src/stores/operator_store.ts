@@ -8,12 +8,17 @@ export interface OperatorData {
   email: string;
   description: string;
   status: "active" | "inactive" | "maintenance";
+  avatarUrl?: string;
 }
 
+export type OperatorUpdatePayload = Partial<OperatorData> & {
+  avatar?: File;
+};
+
 export const operatorStore = create<{
-    operator: OperatorData | null;
-    setOperator: (operator: OperatorData | null) => void;
+  operator: OperatorData | null;
+  setOperator: (operator: OperatorData | null) => void;
 }>((set) => ({
-    operator: null,
-    setOperator: (operator) => set({ operator })
+  operator: null,
+  setOperator: (operator) => set({ operator }),
 }));

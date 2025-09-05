@@ -1,19 +1,14 @@
 import { type RouteObject } from "react-router";
 import DashboardPage from "../features/dashboard/dashboard";
-import SettingsPage from "../features/settings/settings";
-import UsersPage from "../features/users/users";
 import BusPage from "../features/bus/bus";
-import CustomerPage from "../features/customer/customer";
 import ReportPage from "../features/report/report";
 import DashboardIndex from "../features/dashboard";
-import AnalysisPage from "../features/analysis/Analysis";
 import RoleGuard from "../components/RoleGuard";
 import DriverManagement from "../features/driver/driver";
 import TripPage from "../features/trip/trip";
 import RoutePage from "../features/route/route_feature";
 import EmployeePage from "../features/employee/employee";
 import ProfilePage from "../features/profile/Profile";
-import TicketPage from "../features/tickets/Ticket";
 
 export const AuthRoute: RouteObject = {
   path: "dashboard",
@@ -27,30 +22,6 @@ export const AuthRoute: RouteObject = {
         </RoleGuard>
       ),
     },
-    // {
-    //   path: "analysis",
-    //   element: (
-    //     <RoleGuard roles={["STAFF", "OPERATOR"]}>
-    //       <AnalysisPage />
-    //     </RoleGuard>
-    //   ),
-    // },
-    // {
-    //   path: "settings",
-    //   element: (
-    //     <RoleGuard roles={["STAFF", "OPERATOR"]}>
-    //       <SettingsPage />
-    //     </RoleGuard>
-    //   ),
-    // },
-    // {
-    //   path: "users",
-    //   element: (
-    //     <RoleGuard roles={["STAFF", "OPERATOR"]}>
-    //       <UsersPage />
-    //     </RoleGuard>
-    //   ),
-    // },
     {
       path: "buses",
       element: (
@@ -83,22 +54,6 @@ export const AuthRoute: RouteObject = {
         </RoleGuard>
       ),
     },
-    // {
-    //   path: "customer",
-    //   element: (
-    //     <RoleGuard roles={["STAFF", "OPERATOR", "DRIVER"]}>
-    //       <CustomerPage />
-    //     </RoleGuard>
-    //   ),
-    // },
-    // {
-    //   path: "report",
-    //   element: (
-    //     <RoleGuard roles={["OPERATOR"]}>
-    //       <ReportPage />
-    //     </RoleGuard>
-    //   ),
-    // },
     {
       path: "driver",
       element: (
@@ -107,8 +62,9 @@ export const AuthRoute: RouteObject = {
         </RoleGuard>
       ),
     },
-     
-    {  path: "financial-reports",
+
+    {
+      path: "financial-reports",
       element: (
         <RoleGuard roles={["OPERATOR"]}>
           <ReportPage />
@@ -123,13 +79,5 @@ export const AuthRoute: RouteObject = {
         </RoleGuard>
       ),
     },
-    // {
-    //   path: "tickets",
-    //   element: (
-    //     <RoleGuard roles={["STAFF", "OPERATOR"]}>
-    //       <TicketPage />
-    //     </RoleGuard>
-    //   ),
-    // },
   ],
 };

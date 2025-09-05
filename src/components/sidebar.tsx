@@ -11,7 +11,6 @@ import {
   ScheduleOutlined,
   DollarOutlined,
   FileTextOutlined,
-  SafetyCertificateOutlined,
   LeftOutlined,
   RightOutlined,
   SwapOutlined,
@@ -74,61 +73,12 @@ const Sidebar: React.FC<SidebarProps> = ({ onMenuSelect, selectedKey }) => {
             icon: <DollarOutlined />,
             label: "Financial Reports",
           },
-          {
-            key: "operational-reports",
-            icon: <BarChartOutlined />,
-            label: "Operational Reports",
-          },
-          {
-            key: "performance",
-            icon: <BarChartOutlined />,
-            label: "Performance Metrics",
-          },
-        ],
-      },
-      {
-        key: "finance",
-        icon: <DollarOutlined />,
-        label: "Financial Management",
-        children: [
-          {
-            key: "revenue",
-            icon: <DollarOutlined />,
-            label: "Revenue Tracking",
-          },
-          {
-            key: "expenses",
-            icon: <FileTextOutlined />,
-            label: "Expense Management",
-          },
-          {
-            key: "payroll",
-            icon: <UserOutlined />,
-            label: "Payroll",
-          },
         ],
       },
       {
         key: "driver",
         icon: <UserOutlined />,
         label: "Driver Management",
-      },
-      {
-        key: "bookings",
-        icon: <FileTextOutlined />,
-        label: "Booking System",
-        children: [
-          {
-            key: "reservations",
-            icon: <FileTextOutlined />,
-            label: "Reservations",
-          },
-          {
-            key: "tickets",
-            icon: <SafetyCertificateOutlined />,
-            label: "Ticket Management",
-          },
-        ],
       },
       {
         key: "operations",
