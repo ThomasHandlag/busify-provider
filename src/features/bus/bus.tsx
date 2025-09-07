@@ -36,7 +36,7 @@ import {
 } from "@ant-design/icons";
 import type { TableProps } from "antd";
 import { getBuses, deleteBus } from "../../app/api/bus";
-import type { BusData, BusResponse } from "../../stores/bus_store";
+import type { BusData } from "../../stores/bus_store";
 import BusModal from "./bus-modal";
 import BusDetailModal from "./bus-detail";
 
@@ -74,21 +74,21 @@ const BusPage: React.FC = () => {
         status: params.status,
       };
 
-      const response: BusResponse = await getBuses(query);
+      const response = await getBuses(query);
 
-      setBuses(response.result);
+      setBuses(response.result.result); // Lưu ý: response.result.result
       setPagination({
-        current: response.pageNumber,
-        pageSize: response.pageSize,
-        total: response.totalRecords,
+        current: response.result.pageNumber,
+        pageSize: response.result.pageSize,
+        total: response.result.totalRecords,
       });
 
       if (params.licensePlate || params.status) {
         setHasSearched(true);
-        if (response.result.length === 0) {
+        if (response.result.result.length === 0) {
           message.info("Không tìm thấy xe nào");
         } else {
-          message.success(`Tìm thấy ${response.totalRecords} xe`);
+          message.success(`Tìm thấy ${response.result.totalRecords} xe`);
         }
       }
     } catch (error) {
@@ -192,7 +192,6 @@ const BusPage: React.FC = () => {
       key: "id",
       width: 80,
       sorter: (a, b) => a.id - b.id,
-      // defaultSortOrder: "ascend",
     },
     {
       title: "Biển số",
@@ -287,7 +286,6 @@ const BusPage: React.FC = () => {
               onClick={() => handleViewBus(record)}
             />
           </Tooltip>
-
           <Tooltip title="Chỉnh sửa">
             <Button
               type="text"
@@ -299,6 +297,7 @@ const BusPage: React.FC = () => {
                     (key) => record.amenities[key] === true
                   ),
                 });
+                setSelectedBus(record);
                 setIsBusModalVisible(true);
               }}
             />
@@ -383,6 +382,7 @@ const BusPage: React.FC = () => {
                     type="dashed"
                     onClick={() => {
                       busForm.resetFields();
+                      setSelectedBus(null);
                       setIsBusModalVisible(true);
                     }}
                   >
@@ -481,6 +481,7 @@ const BusPage: React.FC = () => {
         isModalVisible={isBusModalVisible}
         setIsModalVisible={setIsBusModalVisible}
         form={busForm}
+        busData={selectedBus} // Pass the selected bus data
         onSuccess={() =>
           loadBuses({ page: pagination.current, size: pagination.pageSize })
         }
