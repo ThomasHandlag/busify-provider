@@ -15,6 +15,12 @@ export type OperatorUpdatePayload = Partial<OperatorData> & {
   avatar?: File;
 };
 
+export interface ChangePasswordPayload {
+  oldPassword: string;
+  newPassword: string;
+  confirmPassword: string;
+}
+
 export const operatorStore = create<{
   operator: OperatorData | null;
   setOperator: (operator: OperatorData | null) => void;

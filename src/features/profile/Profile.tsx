@@ -13,17 +13,22 @@ import {
 } from "antd";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
+  changePassword,
   getOperatorDataByUser,
   updateOperatorProfile,
 } from "../../app/api/operator";
+import { useAuthStore } from "../../stores/auth_store";
 
 const { Title, Text } = Typography;
 
 const ProfilePage: React.FC = () => {
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
+  const [isPasswordModalVisible, setIsPasswordModalVisible] = useState(false);
   const [editForm] = Form.useForm();
   const queryClient = useQueryClient();
+  const [passwordForm] = Form.useForm();
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const { logOut } = useAuthStore();
 
   // Fetch operator data
   const {
@@ -63,6 +68,20 @@ const ProfilePage: React.FC = () => {
     },
   });
 
+  // Mutation change password
+  const changePasswordMutation = useMutation({
+    mutationFn: changePassword,
+    onSuccess: () => {
+      message.success("Đổi mật khẩu thành công, vui lòng đăng nhập lại.");
+      setIsPasswordModalVisible(false);
+      passwordForm.resetFields();
+      logOut();
+    },
+    onError: (error: any) => {
+      message.error(error.response?.data?.message || "Đổi mật khẩu thất bại!");
+    },
+  });
+
   const handleUpdate = () => {
     editForm.setFieldsValue(operator || {});
     setIsEditModalVisible(true);
@@ -75,6 +94,13 @@ const ProfilePage: React.FC = () => {
         ...values,
         avatar: avatarFile || undefined, // thêm avatar file
       });
+    } catch {}
+  };
+
+  const handlePasswordSubmit = async () => {
+    try {
+      const values = await passwordForm.validateFields();
+      changePasswordMutation.mutate(values);
     } catch {}
   };
 
@@ -188,6 +214,11 @@ const ProfilePage: React.FC = () => {
             </Button>
           </Col>
           <Col>
+            <Button onClick={() => setIsPasswordModalVisible(true)}>
+              Đổi mật khẩu
+            </Button>
+          </Col>
+          <Col>
             <Button
               danger
               onClick={handleCancelContract}
@@ -213,6 +244,7 @@ const ProfilePage: React.FC = () => {
         </Row>
       </Card>
 
+      {/* Modal Edit Profile */}
       <Modal
         title="Cập nhật thông tin nhà xe"
         open={isEditModalVisible}
@@ -263,6 +295,42 @@ const ProfilePage: React.FC = () => {
                 }
               }}
             />
+          </Form.Item>
+        </Form>
+      </Modal>
+
+      {/* Modal Đổi mật khẩu */}
+      <Modal
+        title="Đổi mật khẩu"
+        open={isPasswordModalVisible}
+        onCancel={() => setIsPasswordModalVisible(false)}
+        onOk={handlePasswordSubmit}
+        okText="Lưu"
+        cancelText="Hủy"
+        confirmLoading={changePasswordMutation.isPending}
+      >
+        <Form form={passwordForm} layout="vertical">
+          <Form.Item
+            name="oldPassword"
+            label="Mật khẩu cũ"
+            rules={[{ required: true, message: "Vui lòng nhập mật khẩu cũ" }]}
+          >
+            <Input.Password />
+          </Form.Item>
+          <Form.Item
+            name="newPassword"
+            label="Mật khẩu mới"
+            rules={[{ required: true, message: "Vui lòng nhập mật khẩu mới" }]}
+          >
+            <Input.Password />
+          </Form.Item>
+          <Form.Item
+            name="confirmPassword"
+            label="Xác nhận mật khẩu"
+            dependencies={["newPassword"]}
+            rules={[{ required: true, message: "Vui lòng nhập lại mật khẩu" }]}
+          >
+            <Input.Password />
           </Form.Item>
         </Form>
       </Modal>

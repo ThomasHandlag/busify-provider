@@ -1,5 +1,8 @@
 import apiClient from ".";
-import type { OperatorData } from "../../stores/operator_store";
+import type {
+  ChangePasswordPayload,
+  OperatorData,
+} from "../../stores/operator_store";
 
 export async function getOperatorDataByUser(): Promise<OperatorData> {
   const response = await apiClient.get(`api/bus-operators/profile`);
@@ -21,5 +24,15 @@ export async function updateOperatorProfile(
   const response = await apiClient.put(`api/bus-operators/profile`, formData, {
     headers: { "Content-Type": "multipart/form-data" },
   });
+  return response.data.result;
+}
+
+export async function changePassword(
+  data: ChangePasswordPayload
+): Promise<OperatorData> {
+  const response = await apiClient.put(
+    `api/bus-operators/profile/change-password`,
+    data
+  );
   return response.data.result;
 }

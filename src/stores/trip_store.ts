@@ -13,7 +13,7 @@ export interface TripData {
   estimatedArrivalTime: string;
   status:
     | "scheduled"
-    | "on_time"
+    | "on_sell"
     | "delayed"
     | "departed"
     | "arrived"

@@ -173,6 +173,7 @@ const EmployeePage: React.FC = () => {
       title: "ID",
       dataIndex: "id",
       key: "id",
+      fixed: "left",
       width: 80,
       sorter: (a, b) => a.id - b.id,
     },

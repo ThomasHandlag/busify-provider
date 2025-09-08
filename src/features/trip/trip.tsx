@@ -146,7 +146,7 @@ const TripPage: React.FC = () => {
     switch (status) {
       case "scheduled":
         return "default";
-      case "on_time":
+      case "on_sell":
         return "green";
       case "delayed":
         return "orange";
@@ -165,8 +165,8 @@ const TripPage: React.FC = () => {
     switch (status) {
       case "scheduled":
         return "Đã lên lịch";
-      case "on_time":
-        return "Đúng giờ";
+      case "on_sell":
+        return "Đang mở bán";
       case "delayed":
         return "Bị hoãn";
       case "departed":
@@ -281,7 +281,7 @@ const TripPage: React.FC = () => {
 
   const stats = {
     scheduled: trips.filter((t) => t.status === "scheduled").length,
-    onTime: trips.filter((t) => t.status === "on_time").length,
+    onTime: trips.filter((t) => t.status === "on_sell").length,
     delayed: trips.filter((t) => t.status === "delayed").length,
     departed: trips.filter((t) => t.status === "departed").length,
     arrived: trips.filter((t) => t.status === "arrived").length,
@@ -321,7 +321,7 @@ const TripPage: React.FC = () => {
               <Form.Item name="status" label="Trạng thái">
                 <Select allowClear placeholder="Chọn trạng thái">
                   <Option value="scheduled">Đã lên lịch</Option>
-                  <Option value="on_time">Đúng giờ</Option>
+                  <Option value="on_sell">Đang mở bán</Option>
                   <Option value="delayed">Bị hoãn</Option>
                   <Option value="departed">Đã khởi hành</Option>
                   <Option value="arrived">Đã đến nơi</Option>
@@ -385,7 +385,7 @@ const TripPage: React.FC = () => {
         <Col xs={24} sm={12} lg={6}>
           <Card>
             <Statistic
-              title="Đúng giờ"
+              title="Đang mở bán"
               value={stats.onTime}
               valueStyle={{ color: "#52c41a" }}
             />
