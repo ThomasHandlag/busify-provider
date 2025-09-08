@@ -12,6 +12,7 @@ import RoutePage from "../features/route/route_feature";
 import EmployeePage from "../features/employee/employee";
 import ProfilePage from "../features/profile/Profile";
 import TicketPage from "../features/tickets/Ticket";
+import CreateTicket from "../features/tickets/CreateTicket";
 
 export const AuthRoute: RouteObject = {
   path: "dashboard",
@@ -86,6 +87,14 @@ export const AuthRoute: RouteObject = {
       element: (
         <RoleGuard roles={["STAFF", "OPERATOR"]}>
           <TicketPage />
+        </RoleGuard>
+      ),
+    },
+    {
+      path: "create-ticket",
+      element: (
+        <RoleGuard roles={["STAFF", "OPERATOR"]}>
+          <CreateTicket />
         </RoleGuard>
       ),
     },

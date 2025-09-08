@@ -4,7 +4,6 @@ import {
   Card,
   Button,
   Space,
-  Modal,
   message,
   Typography,
   Tag,
@@ -15,94 +14,57 @@ import {
   Row,
   Col,
   Breadcrumb,
-  DatePicker,
+  Alert,
+  Empty,
 } from "antd";
 import {
   BookOutlined,
-  EditOutlined,
-  CloseCircleOutlined,
   SearchOutlined,
   ClearOutlined,
+  DollarOutlined,
+  PhoneOutlined,
+  UserOutlined,
+  EyeOutlined,
 } from "@ant-design/icons";
 import {
-  getTickets,
-  updateTicketStatus,
-  cancelTicket,
+  getTicketsByOperatorId,
+  type TicketSearchParams,
 } from "../../app/api/ticket";
-import type { TableProps } from "antd";
-import type { TicketData } from "../../stores/ticket_store";
-import dayjs from "dayjs";
+import type { FormProps, TableProps } from "antd";
+import { operatorStore } from "../../stores/operator_store";
+import type { Ticket } from "../../stores/ticket_store";
+import TicketDetailModal from "./TicketDetailModel";
 
 const { Title, Text } = Typography;
 const { Option } = Select;
-const { RangePicker } = DatePicker;
 
 const TicketPage: React.FC = () => {
   const [form] = Form.useForm();
-  const [tickets, setTickets] = useState<TicketData[]>([]);
+  const [tickets, setTickets] = useState<Ticket[]>([]);
   const [loading, setLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
+  const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
+  const [isModalVisible, setIsModalVisible] = useState(false);
 
-  const [pagination, setPagination] = useState({
-    current: 1,
-    pageSize: 10,
-    total: 0,
-  });
+  const operator = operatorStore();
 
   useEffect(() => {
-    loadTickets({ page: 1, size: 10 });
-  }, []);
+    if (operator.operator) {
+      loadTickets(operator?.operator?.id);
+    }
+  }, [operator.operator]);
 
-  const loadTickets = async (params: any = {}) => {
+  const loadTickets = async (operatorId: number) => {
     setLoading(true);
     try {
-      const response = await getTickets(params);
-      setTickets(response.result);
-      setPagination({
-        current: response.pageNumber,
-        pageSize: response.pageSize,
-        total: response.totalRecords,
-      });
+      const response = await getTicketsByOperatorId(operatorId);
+      setTickets(response.result.map((item) => item.tickets));
     } catch (error) {
       console.error("Error loading tickets:", error);
       message.error("Không thể tải danh sách vé");
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleSearch = async (values: any) => {
-    const { dateRange, ...rest } = values;
-    const params = {
-      ...rest,
-      fromDate: dateRange?.[0]?.format("YYYY-MM-DD"),
-      toDate: dateRange?.[1]?.format("YYYY-MM-DD"),
-      page: 1,
-      size: pagination.pageSize,
-    };
-    await loadTickets(params);
-  };
-
-  const handleCancel = (record: TicketData) => {
-    Modal.confirm({
-      title: "Xác nhận hủy vé",
-      content: `Bạn có chắc chắn muốn hủy vé ${record.id}?`,
-      okText: "Hủy vé",
-      okType: "danger",
-      cancelText: "Đóng",
-      onOk: async () => {
-        try {
-          await cancelTicket(record.id);
-          message.success("Hủy vé thành công");
-          loadTickets({
-            page: pagination.current,
-            size: pagination.pageSize,
-          });
-        } catch (error) {
-          message.error("Không thể hủy vé");
-        }
-      },
-    });
   };
 
   const getStatusColor = (status: string) => {
@@ -135,50 +97,60 @@ const TicketPage: React.FC = () => {
     }
   };
 
-  const columns: TableProps<TicketData>["columns"] = [
+  const handleViewDetail = (record: Ticket) => {
+    setSelectedTicket(record);
+    setIsModalVisible(true);
+  };
+
+  const columns: TableProps<Ticket>["columns"] = [
     {
       title: "Mã vé",
-      dataIndex: "id",
-      key: "id",
-      width: 100,
+      dataIndex: "ticketCode",
+      key: "ticketCode",
+      render: (code) => (
+        <Text strong style={{ color: "#1890ff" }}>
+          {code}
+        </Text>
+      ),
     },
     {
-      title: "Tuyến xe",
-      dataIndex: "routeName",
-      key: "routeName",
-      width: 200,
+      title: "Tên hành khách",
+      dataIndex: "passengerName",
+      key: "passengerName",
+      render: (name) => (
+        <Space>
+          <UserOutlined />
+          {name}
+        </Space>
+      ),
     },
     {
-      title: "Khách hàng",
-      dataIndex: "customerName",
-      key: "customerName",
-      width: 150,
-    },
-    {
-      title: "SĐT",
-      dataIndex: "customerPhone",
-      key: "customerPhone",
-      width: 120,
+      title: "Số điện thoại",
+      dataIndex: "passengerPhone",
+      key: "passengerPhone",
+      render: (phone) => (
+        <Space>
+          <PhoneOutlined />
+          {phone}
+        </Space>
+      ),
     },
     {
       title: "Số ghế",
       dataIndex: "seatNumber",
       key: "seatNumber",
-      width: 100,
+      render: (seat) => <Tag color="cyan">{seat}</Tag>,
     },
     {
       title: "Giá vé",
       dataIndex: "price",
       key: "price",
-      render: (price) => `${price.toLocaleString()} VND`,
-      width: 120,
-    },
-    {
-      title: "Ngày đặt",
-      dataIndex: "purchaseDate",
-      key: "purchaseDate",
-      render: (date) => dayjs(date).format("DD/MM/YYYY HH:mm"),
-      width: 150,
+      render: (price) => (
+        <Space>
+          <DollarOutlined />
+          {price.toLocaleString("vi-VN")} VNĐ
+        </Space>
+      ),
     },
     {
       title: "Trạng thái",
@@ -187,38 +159,83 @@ const TicketPage: React.FC = () => {
       render: (status) => (
         <Tag color={getStatusColor(status)}>{getStatusText(status)}</Tag>
       ),
-      width: 120,
+    },
+    {
+      title: "Người bán",
+      dataIndex: "sellerName",
+      key: "sellerName",
+      render: (name) => (
+        <Space>
+          <UserOutlined />
+          {name ?? "System"}
+        </Space>
+      ),
     },
     {
       title: "Thao tác",
       key: "action",
-      fixed: "right",
-      width: 120,
       render: (_, record) => (
-        <Space>
-          {record.status === "pending" && (
-            <Tooltip title="Xác nhận">
-              <Button
-                type="link"
-                icon={<EditOutlined />}
-                onClick={() => updateTicketStatus(record.id, "confirmed")}
-              />
-            </Tooltip>
-          )}
-          {["pending", "confirmed"].includes(record.status) && (
-            <Tooltip title="Hủy vé">
-              <Button
-                type="link"
-                danger
-                icon={<CloseCircleOutlined />}
-                onClick={() => handleCancel(record)}
-              />
-            </Tooltip>
-          )}
-        </Space>
+        <Tooltip title="Xem chi tiết">
+          <Button
+            type="text"
+            icon={<EyeOutlined />}
+            onClick={() => handleViewDetail(record)}
+          />
+        </Tooltip>
       ),
     },
   ];
+
+  const handleSearch: FormProps<TicketSearchParams>["onFinish"] = async (
+    values: TicketSearchParams
+  ) => {
+    const { keyword, code, sellerName, status } = values;
+
+    setLoading(true);
+    setHasSearched(true);
+
+    const filteredTickets = tickets.filter((ticket) => {
+      const matchesName = keyword
+        ? ticket.passengerName.toLowerCase().includes(keyword.toLowerCase()) ||
+          ticket.passengerPhone.includes(keyword)
+        : true;
+      const matchesCode = code
+        ? ticket.ticketCode.toLowerCase().includes(code.toLowerCase())
+        : true;
+      const matchesSeller = sellerName
+        ? ticket.sellerName.toLowerCase().includes(sellerName.toLowerCase())
+        : true;
+      const matchesStatus = status
+        ? ticket.status.toLowerCase().includes(status.toLowerCase())
+        : true;
+      return matchesCode && matchesName && matchesSeller && matchesStatus;
+    });
+
+    setTickets(filteredTickets);
+    setLoading(false);
+  };
+
+  const handleReset = async () => {
+    form.resetFields();
+    setHasSearched(false);
+    setLoading(true);
+
+    if (operator.operator) {
+      try {
+        const response = await getTicketsByOperatorId(operator.operator.id);
+        if (response.result && response.result.length > 0) {
+          const tickets = response.result.flatMap((item) => item.tickets);
+          setTickets(tickets);
+        } else {
+          setTickets([]);
+        }
+      } catch (error) {
+        message.error("Không thể tải danh sách vé");
+        console.error(error);
+      }
+    }
+    setLoading(false);
+  };
 
   return (
     <div style={{ padding: "24px" }}>
@@ -230,11 +247,14 @@ const TicketPage: React.FC = () => {
       <Title level={2} style={{ marginBottom: "24px" }}>
         <BookOutlined /> Quản lý vé
       </Title>
-
       <Card style={{ marginBottom: "24px" }}>
-        <Form form={form} layout="vertical" onFinish={handleSearch}>
+        <Form<TicketSearchParams>
+          form={form}
+          layout="vertical"
+          onFinish={handleSearch}
+        >
           <Row gutter={16}>
-            <Col xs={24} sm={12} lg={6}>
+            <Col xs={24} sm={12} lg={12}>
               <Form.Item name="keyword" label="Tìm kiếm">
                 <Input placeholder="Tên/SĐT khách hàng" />
               </Form.Item>
@@ -249,9 +269,14 @@ const TicketPage: React.FC = () => {
                 </Select>
               </Form.Item>
             </Col>
+            <Col xs={24} sm={24} lg={6}>
+              <Form.Item name="code" label="Mã vé">
+                <Input placeholder="Mã vé" />
+              </Form.Item>
+            </Col>
             <Col xs={24} sm={24} lg={12}>
-              <Form.Item name="dateRange" label="Thời gian">
-                <RangePicker style={{ width: "100%" }} />
+              <Form.Item name="sellerName" label="Người bán">
+                <Input placeholder="Người bán" />
               </Form.Item>
             </Col>
           </Row>
@@ -269,8 +294,7 @@ const TicketPage: React.FC = () => {
                   <Button
                     icon={<ClearOutlined />}
                     onClick={() => {
-                      form.resetFields();
-                      loadTickets({ page: 1, size: 10 });
+                      handleReset();
                     }}
                   >
                     Xóa bộ lọc
@@ -282,16 +306,52 @@ const TicketPage: React.FC = () => {
         </Form>
       </Card>
 
+      {/* Search Results Table */}
       <Card>
-        <Table
-          columns={columns}
-          dataSource={tickets}
-          rowKey="id"
-          pagination={pagination}
-          loading={loading}
-          scroll={{ x: 1500 }}
-        />
+        {tickets.length === 0 ? (
+          <Empty description="Không có dữ liệu vé" />
+        ) : (
+          <>
+            {hasSearched && (
+              <Alert
+                message={`Tìm thấy ${tickets.length} kết quả phù hợp`}
+                type="success"
+                showIcon
+                style={{ marginBottom: "16px" }}
+              />
+            )}
+            {!hasSearched && (
+              <Alert
+                message={`Hiển thị tất cả ${tickets.length} vé trong hệ thống`}
+                type="info"
+                showIcon
+                style={{ marginBottom: "16px" }}
+              />
+            )}
+            <Table
+              columns={columns}
+              dataSource={tickets}
+              rowKey="ticketId"
+              loading={loading}
+              pagination={{
+                pageSize: 10,
+                showSizeChanger: true,
+                showQuickJumper: true,
+                showTotal: (total, range) =>
+                  `${range[0]}-${range[1]} của ${total} vé`,
+              }}
+            />
+          </>
+        )}
       </Card>
+      <TicketDetailModal
+        ticket={selectedTicket}
+        visible={isModalVisible}
+        onClose={() => {
+          setIsModalVisible(false);
+          setSelectedTicket(null);
+        }}
+      />
     </div>
   );
 };

@@ -13,7 +13,7 @@ type LoginFieldType = {
 
 const LoginPage = () => {
   const { notify } = useGNotify();
-  const { login, error } = useAuthStore();
+  const { login } = useAuthStore();
   const navigate = useNavigate();
 
   const onFinish: FormProps<LoginFieldType>["onFinish"] = async (

@@ -67,3 +67,11 @@ export const tripStore = create<TripStoreState>((set) => ({
       error: null,
     })),
 }));
+
+export const selectedTripStore = create<{
+  selectedTrip: TripData | null;
+  setSelectedTrip: (trip: TripData | null) => void;
+}>((set) => ({
+  selectedTrip: null,
+  setSelectedTrip: (trip) => set(() => ({ selectedTrip: trip })),
+}));

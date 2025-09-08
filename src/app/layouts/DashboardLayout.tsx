@@ -60,7 +60,9 @@ const DashboardLayout = () => {
         message: newNotification.title || "New Notification",
         description: newNotification.message,
       });
-      messaging.sendMessage(`/app/message-received`, { notificationId: message.id });
+      messaging.sendMessage(`/app/message-received`, {
+        notificationId: message.id,
+      });
     },
   });
 
@@ -69,19 +71,6 @@ const DashboardLayout = () => {
       navigate("/login");
     }
   }, [user, navigate, location.pathname]);
-
-  // Get current selected key from location pathname
-  const getSelectedKey = () => {
-    const path = location.pathname;
-    // Remove leading slash and use the first segment as the key
-    const pathSegments = path.split("/").filter(Boolean);
-    if (pathSegments.length === 0 || pathSegments[0] === "dashboard") {
-      return "dashboard";
-    }
-    return pathSegments[0];
-  };
-
-  const selectedKey = getSelectedKey();
 
   // Get current page name for breadcrumb
   const getCurrentPageName = () => {
@@ -103,7 +92,7 @@ const DashboardLayout = () => {
       employees: "Employees Management",
       // bookings: "Booking System",
       // reservations: "Reservations",
-      // tickets: "Ticket Management",
+      tickets: "Ticket Management",
       // customers: "Customer Management",
       drivers: "Driver Management",
       analytics: "Analytics & Reports",
@@ -153,7 +142,7 @@ const DashboardLayout = () => {
             },
           }}
         >
-          <Sidebar onMenuSelect={onSelectItem} selectedKey={selectedKey} />
+          <Sidebar onMenuSelect={onSelectItem} />
         </Drawer>
 
         <Content
@@ -180,7 +169,7 @@ const DashboardLayout = () => {
   // For desktop screens (lg breakpoint and above)
   return (
     <Layout className="responsive-layout">
-      <Sidebar onMenuSelect={onSelectItem} selectedKey={selectedKey} />
+      <Sidebar onMenuSelect={onSelectItem} />
       <Layout>
         <DashboardHeader
           showMenuButton={false}

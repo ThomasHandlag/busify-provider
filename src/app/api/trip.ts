@@ -1,6 +1,14 @@
 import apiClient from ".";
 import type { TripData, TripResponse } from "../../stores/trip_store";
 
+export const SStatus = {
+  AVAILABLE: "available",
+  BOOKED: "booked",
+  LOCKED: "locked",
+} as const;
+
+export type SStatus = typeof SStatus[keyof typeof SStatus];
+
 export interface TripQuery {
   page?: number;
   size?: number;
@@ -72,4 +80,26 @@ export async function deleteTrip(
 export async function addPointsByTrip(tripId: number) {
   const response = await apiClient.post(`api/scores/${tripId}`);
   return response.data;
+}
+
+export interface SeatStatus {
+  seatNumber: string;
+  status: SStatus;
+}
+
+export interface TripSeatsStatus {
+  tripId: number;
+  seatsStatus: SeatStatus[];
+}
+
+export async function getTripSeatById(
+  tripId: number
+): Promise<TripSeatsStatus | null> {
+  try {
+    const res = await apiClient.get(`api/trip-seats/${tripId}`);
+    return res.data.result as TripSeatsStatus;
+  } catch (error) {
+    console.error("Error fetching trip seat layout:", error);
+    return null;
+  }
 }

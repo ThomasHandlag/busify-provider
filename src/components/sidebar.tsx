@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import temp from "../assets/logo.png";
 import { Layout, Menu, Grid, Typography, Avatar, Space, Image } from "antd";
+import "./sidebar.css";
 import {
   DashboardOutlined,
   UserOutlined,
@@ -28,17 +29,16 @@ interface SidebarProps {
   selectedKey?: string;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ onMenuSelect, selectedKey }) => {
+const Sidebar: React.FC<SidebarProps> = ({ onMenuSelect }) => {
   const screens = useBreakpoint();
   const [collapsed, setCollapsed] = useState(false);
+  const path = window.location.pathname;
+  const operatorData = operatorStore();
+  const { user } = useAuthStore();
 
   const handleCollapse = (value: boolean) => {
     setCollapsed(value);
   };
-
-  const operatorData = operatorStore();
-
-  const { user } = useAuthStore();
 
   // Bus Enterprise Management Menu Items
   const menuItems: ItemType<MenuItemType>[] = [
@@ -216,7 +216,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onMenuSelect, selectedKey }) => {
       <Menu
         theme="light"
         mode="inline"
-        selectedKeys={selectedKey ? [selectedKey] : ["dashboard"]}
+        selectedKeys={path.split("/")}
         onClick={(e) => onMenuSelect?.(e.key)}
         items={menuItems}
         style={{
@@ -226,6 +226,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onMenuSelect, selectedKey }) => {
           paddingBottom: "48px", // Thêm padding bottom để tránh content bị che
           overflow: "auto",
         }}
+        className="custom-sidebar-menu"
       />
     </Sider>
   );
