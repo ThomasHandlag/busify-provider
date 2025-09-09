@@ -7,7 +7,7 @@ const RoleGuard = ({ children, roles }: { children: ReactNode, roles: Role[] }) 
   const { user } = useAuthStore();
 
   if (!user?.role || !roles.includes(user.role)) {
-    return <Navigate to="/unauthorized" />;
+    return <Navigate to="/login" />;
   }
 
   return <>{children}</>;

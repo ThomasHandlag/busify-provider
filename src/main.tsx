@@ -6,7 +6,6 @@ import "./index.css";
 import "@ant-design/v5-patch-for-react-19";
 import { RouterProvider } from "react-router";
 import { AppRoute } from "./routes/app.tsx";
-import { RecoilRoot } from "recoil";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 const queryClient = new QueryClient({

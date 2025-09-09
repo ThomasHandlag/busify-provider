@@ -78,6 +78,7 @@ export interface UpdateTripStatusData {
 // API Functions
 export async function getAllTrips(): Promise<Trip[]> {
   const response = await apiClient.get("api/trips/driver/my-trips");
+  console.log("Trips Data:", response);
   return response.data.result;
 }
 

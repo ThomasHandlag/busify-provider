@@ -11,7 +11,7 @@
   .mobile-header {
     padding: 0 12px !important;
   }
-  
+
   .mobile-content {
     margin: 12px !important;
     padding: 16px !important;
@@ -111,15 +111,15 @@
   .ant-typography h1 {
     font-size: 20px !important;
   }
-  
+
   .ant-typography h2 {
     font-size: 18px !important;
   }
-  
+
   .ant-typography h3 {
     font-size: 16px !important;
   }
-  
+
   .ant-typography h4 {
     font-size: 14px !important;
   }
@@ -285,4 +285,38 @@
 
 .route-indicator.inactive {
   background-color: #d9d9d9;
+}
+
+/* Ticket Print Styles */
+@media print {
+  .print-container * {
+    visibility: visible;
+  }
+  .print-container {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
+  .ant-modal-content,
+  .ant-modal-body {
+    box-shadow: none;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+  .ticket-card {
+    page-break-inside: avoid;
+    width: 100%;
+    border: 2px dashed #000 !important;
+  }
+  .ant-card-body {
+    padding: 0 !important;
+  }
+
+  /* Hide Modal elements when printing */
+  .ant-modal-header,
+  .ant-modal-footer,
+  .ant-modal-close {
+    display: none !important;
+  }
 }

@@ -22,10 +22,11 @@ const DriverManagement: React.FC = () => {
   // State for modals
   const [selectedTrip, setSelectedTrip] = useState<Trip | null>(null);
   const [selectedTicket, setSelectedTicket] = useState<Passenger | null>(null);
-  
+
   // Modal visibility states
   const [isPassengerModalVisible, setIsPassengerModalVisible] = useState(false);
-  const [isEditTicketModalVisible, setIsEditTicketModalVisible] = useState(false);
+  const [isEditTicketModalVisible, setIsEditTicketModalVisible] =
+    useState(false);
   const [isEditTripStatusVisible, setIsEditTripStatusVisible] = useState(false);
 
   // Forms
@@ -34,11 +35,9 @@ const DriverManagement: React.FC = () => {
 
   // React Query hooks
   const { data: trips = [], isLoading: tripsLoading } = useTrips();
-  
-  const { 
-    data: passengersData, 
-    refetch: refetchPassengers 
-  } = useTripPassengers(selectedTrip?.trip_id || 0);
+
+  const { data: passengersData, refetch: refetchPassengers } =
+    useTripPassengers(selectedTrip?.trip_id || 0);
 
   // Mutations
   const updateTicketMutation = useUpdateTicket();
@@ -64,6 +63,7 @@ const DriverManagement: React.FC = () => {
   };
 
   // Submit handlers
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const onUpdateTicket = async (values: any) => {
     if (!selectedTrip || !selectedTicket) return;
 
@@ -96,7 +96,6 @@ const DriverManagement: React.FC = () => {
     setIsEditTripStatusVisible(false);
     statusForm.resetFields();
   };
-
   return (
     <div className="p-6">
       {/* Trip cards grid */}
@@ -104,7 +103,7 @@ const DriverManagement: React.FC = () => {
         {tripsLoading ? (
           <div className="col-span-full text-center py-8">Loading trips...</div>
         ) : (
-          trips.map((trip) => (
+          trips.map((trip: Trip) => (
             <TripCard
               key={trip.trip_id}
               trip={trip}
@@ -139,8 +138,12 @@ const DriverManagement: React.FC = () => {
       />
 
       {/* Hidden forms for mutation callbacks */}
-      <Form form={form} onFinish={onUpdateTicket} style={{ display: 'none' }} />
-      <Form form={statusForm} onFinish={onUpdateTripStatus} style={{ display: 'none' }} />
+      <Form form={form} onFinish={onUpdateTicket} style={{ display: "none" }} />
+      <Form
+        form={statusForm}
+        onFinish={onUpdateTripStatus}
+        style={{ display: "none" }}
+      />
     </div>
   );
 };

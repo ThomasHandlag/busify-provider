@@ -5,14 +5,13 @@ const apiClient = axios.create({
   headers: {
     "Content-Type": "application/json",
   },
-  timeout: 10000,
 });
 
 apiClient.interceptors.request.use(
   (config) => {
     const storage = localStorage.getItem("auth-storage");
     const authToken = storage ? JSON.parse(storage).state.accessToken : null;
-    if (authToken) {
+    if (authToken && authToken !== "") {
       config.headers.Authorization = `Bearer ${authToken}`;
     }
     return config;

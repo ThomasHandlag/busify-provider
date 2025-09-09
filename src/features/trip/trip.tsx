@@ -18,6 +18,7 @@ import {
   Empty,
   Statistic,
   Alert,
+  Flex,
 } from "antd";
 import {
   CarOutlined,
@@ -33,6 +34,8 @@ import type { TableProps } from "antd";
 import type { TripData } from "../../stores/trip_store";
 import TripModal from "./trip-modal";
 import dayjs from "dayjs";
+import { useNavigate } from "react-router";
+import { globStore } from "../../stores/glob_store";
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -142,6 +145,15 @@ const TripPage: React.FC = () => {
     });
   };
 
+  const navigate = useNavigate();
+
+  const { setData } = globStore();
+
+  const handleCreate = (trip: TripData) => {
+    setData({ tripId: trip.id, busId: trip.busId, price: trip.pricePerSeat });
+    navigate("/dashboard/create-ticket");
+  };
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case "scheduled":
@@ -245,35 +257,44 @@ const TripPage: React.FC = () => {
       width: 120,
       render: (_, record) => (
         <Space>
-          <Tooltip title="Xem chi tiết">
-            <Button
-              type="text"
-              icon={<EyeOutlined />}
-              onClick={() => message.info(`Chi tiết chuyến xe: ${record.id}`)}
-            />
-          </Tooltip>
-          <Tooltip title="Chỉnh sửa">
-            <Button
-              type="text"
-              icon={<EditOutlined />}
-              onClick={() => {
-                tripForm.setFieldsValue({
-                  ...record,
-                  departureTime: dayjs(record.departureTime),
-                  estimatedArrivalTime: dayjs(record.estimatedArrivalTime),
-                });
-                setIsTripModalVisible(true);
-              }}
-            />
-          </Tooltip>
-          <Tooltip title="Xóa">
-            <Button
-              type="text"
-              danger
-              icon={<DeleteOutlined />}
-              onClick={() => handleDelete(record)}
-            />
-          </Tooltip>
+          <Flex justify="center" align="center">
+            <Tooltip title="Xem chi tiết">
+              <Button
+                type="text"
+                icon={<EyeOutlined />}
+                onClick={() => message.info(`Chi tiết chuyến xe: ${record.id}`)}
+              />
+            </Tooltip>
+            <Tooltip title="Chỉnh sửa">
+              <Button
+                type="text"
+                icon={<EditOutlined />}
+                onClick={() => {
+                  tripForm.setFieldsValue({
+                    ...record,
+                    departureTime: dayjs(record.departureTime),
+                    estimatedArrivalTime: dayjs(record.estimatedArrivalTime),
+                  });
+                  setIsTripModalVisible(true);
+                }}
+              />
+            </Tooltip>
+            <Tooltip title="Xóa">
+              <Button
+                type="text"
+                danger
+                icon={<DeleteOutlined />}
+                onClick={() => handleDelete(record)}
+              />
+            </Tooltip>
+            <Tooltip title="Thêm vé">
+              <Button
+                type="text"
+                icon={<PlusOutlined />}
+                onClick={() => handleCreate(record)}
+              />
+            </Tooltip>
+          </Flex>
         </Space>
       ),
     },
