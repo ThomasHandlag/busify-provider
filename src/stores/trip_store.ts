@@ -13,7 +13,7 @@ export interface TripData {
   estimatedArrivalTime: string;
   status:
     | "scheduled"
-    | "on_time"
+    | "on_sell"
     | "delayed"
     | "departed"
     | "arrived"
@@ -66,4 +66,12 @@ export const tripStore = create<TripStoreState>((set) => ({
       loading: false,
       error: null,
     })),
+}));
+
+export const selectedTripStore = create<{
+  selectedTrip: TripData | null;
+  setSelectedTrip: (trip: TripData | null) => void;
+}>((set) => ({
+  selectedTrip: null,
+  setSelectedTrip: (trip) => set(() => ({ selectedTrip: trip })),
 }));

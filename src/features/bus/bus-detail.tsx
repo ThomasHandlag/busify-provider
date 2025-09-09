@@ -1,5 +1,5 @@
 import React from "react";
-import { Modal, Descriptions, Tag } from "antd";
+import { Modal, Descriptions, Tag, Image } from "antd";
 import type { BusData } from "../../stores/bus_store";
 import {
   DesktopOutlined,
@@ -54,6 +54,7 @@ const BusDetailModal: React.FC<BusDetailModalProps> = ({
       open={isVisible}
       onCancel={onClose}
       footer={null}
+      width={800}
     >
       <Descriptions bordered column={1} size="small">
         <Descriptions.Item label="ID">{bus.id}</Descriptions.Item>
@@ -104,6 +105,31 @@ const BusDetailModal: React.FC<BusDetailModalProps> = ({
               <DesktopOutlined style={{ marginRight: 4 }} />
               Điều hòa
             </Tag>
+          )}
+        </Descriptions.Item>
+        <Descriptions.Item label="Hình ảnh">
+          {bus.images && bus.images.length > 0 ? (
+            <Image.PreviewGroup>
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(3, 1fr)",
+                  gap: "8px",
+                }}
+              >
+                {bus.images.map((img) => (
+                  <Image
+                    key={img.id}
+                    src={img.imageUrl}
+                    width="100%"
+                    height={100}
+                    style={{ objectFit: "cover", borderRadius: 4 }}
+                  />
+                ))}
+              </div>
+            </Image.PreviewGroup>
+          ) : (
+            <span>Không có hình ảnh</span>
           )}
         </Descriptions.Item>
       </Descriptions>

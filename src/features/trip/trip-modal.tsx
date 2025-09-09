@@ -305,7 +305,7 @@ const TripModal: React.FC<TripModalProps> = ({
                   <Option disabled={form.getFieldValue("id")} value="scheduled">
                     Đã lên lịch
                   </Option>
-                  <Option value="on_time">Đúng giờ</Option>
+                  <Option value="on_sell">Đang mở bán</Option>
                   <Option value="delayed">Bị hoãn</Option>
                   <Option value="departed">Đã khởi hành</Option>
                   <Option value="arrived">Đã đến nơi</Option>

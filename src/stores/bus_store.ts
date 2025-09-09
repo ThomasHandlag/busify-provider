@@ -1,5 +1,11 @@
 import { create } from "zustand";
 
+export interface BusImage {
+  id: number;
+  imageUrl: string;
+  primary: boolean;
+}
+
 export interface BusData {
   id: number;
   licensePlate: string;
@@ -14,18 +20,21 @@ export interface BusData {
   amenities: {
     [key: string]: boolean | string | number; // Changed to support any amenity type
   };
+  images?: BusImage[];
 }
 
 export interface BusResponse {
   code: number;
   message: string;
-  result: BusData[];
-  totalRecords: number;
-  pageNumber: number;
-  totalPages: number;
-  pageSize: number;
-  hasPrevious: boolean;
-  hasNext: boolean;
+  result: {
+    result: BusData[];
+    totalRecords: number;
+    pageNumber: number;
+    totalPages: number;
+    pageSize: number;
+    hasPrevious: boolean;
+    hasNext: boolean;
+  };
 }
 
 export const busStore = create<{
