@@ -1,6 +1,6 @@
 const Role = {
-  OPERATOR: "OPERATOR",
   DRIVER: "DRIVER",
+  OPERATOR: "OPERATOR",
   STAFF: "STAFF",
 } as const;
 

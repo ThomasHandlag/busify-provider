@@ -18,6 +18,7 @@ import {
   Empty,
   Statistic,
   Alert,
+  Flex,
 } from "antd";
 import {
   CarOutlined,
@@ -33,6 +34,8 @@ import type { TableProps } from "antd";
 import type { TripData } from "../../stores/trip_store";
 import TripModal from "./trip-modal";
 import dayjs from "dayjs";
+import { useNavigate } from "react-router";
+import { globStore } from "../../stores/glob_store";
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -142,11 +145,20 @@ const TripPage: React.FC = () => {
     });
   };
 
+  const navigate = useNavigate();
+
+  const { setData } = globStore();
+
+  const handleCreate = (trip: TripData) => {
+    setData({ tripId: trip.id, busId: trip.busId, price: trip.pricePerSeat });
+    navigate("/dashboard/create-ticket");
+  };
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case "scheduled":
         return "default";
-      case "on_time":
+      case "on_sell":
         return "green";
       case "delayed":
         return "orange";
@@ -165,8 +177,8 @@ const TripPage: React.FC = () => {
     switch (status) {
       case "scheduled":
         return "Đã lên lịch";
-      case "on_time":
-        return "Đúng giờ";
+      case "on_sell":
+        return "Đang mở bán";
       case "delayed":
         return "Bị hoãn";
       case "departed":
@@ -184,6 +196,7 @@ const TripPage: React.FC = () => {
     {
       title: "ID",
       dataIndex: "id",
+      fixed: "left",
       key: "id",
       width: 80,
       sorter: (a, b) => a.id - b.id,
@@ -244,35 +257,44 @@ const TripPage: React.FC = () => {
       width: 120,
       render: (_, record) => (
         <Space>
-          <Tooltip title="Xem chi tiết">
-            <Button
-              type="text"
-              icon={<EyeOutlined />}
-              onClick={() => message.info(`Chi tiết chuyến xe: ${record.id}`)}
-            />
-          </Tooltip>
-          <Tooltip title="Chỉnh sửa">
-            <Button
-              type="text"
-              icon={<EditOutlined />}
-              onClick={() => {
-                tripForm.setFieldsValue({
-                  ...record,
-                  departureTime: dayjs(record.departureTime),
-                  estimatedArrivalTime: dayjs(record.estimatedArrivalTime),
-                });
-                setIsTripModalVisible(true);
-              }}
-            />
-          </Tooltip>
-          <Tooltip title="Xóa">
-            <Button
-              type="text"
-              danger
-              icon={<DeleteOutlined />}
-              onClick={() => handleDelete(record)}
-            />
-          </Tooltip>
+          <Flex justify="center" align="center">
+            <Tooltip title="Xem chi tiết">
+              <Button
+                type="text"
+                icon={<EyeOutlined />}
+                onClick={() => message.info(`Chi tiết chuyến xe: ${record.id}`)}
+              />
+            </Tooltip>
+            <Tooltip title="Chỉnh sửa">
+              <Button
+                type="text"
+                icon={<EditOutlined />}
+                onClick={() => {
+                  tripForm.setFieldsValue({
+                    ...record,
+                    departureTime: dayjs(record.departureTime),
+                    estimatedArrivalTime: dayjs(record.estimatedArrivalTime),
+                  });
+                  setIsTripModalVisible(true);
+                }}
+              />
+            </Tooltip>
+            <Tooltip title="Xóa">
+              <Button
+                type="text"
+                danger
+                icon={<DeleteOutlined />}
+                onClick={() => handleDelete(record)}
+              />
+            </Tooltip>
+            <Tooltip title="Thêm vé">
+              <Button
+                type="text"
+                icon={<PlusOutlined />}
+                onClick={() => handleCreate(record)}
+              />
+            </Tooltip>
+          </Flex>
         </Space>
       ),
     },
@@ -280,7 +302,7 @@ const TripPage: React.FC = () => {
 
   const stats = {
     scheduled: trips.filter((t) => t.status === "scheduled").length,
-    onTime: trips.filter((t) => t.status === "on_time").length,
+    onTime: trips.filter((t) => t.status === "on_sell").length,
     delayed: trips.filter((t) => t.status === "delayed").length,
     departed: trips.filter((t) => t.status === "departed").length,
     arrived: trips.filter((t) => t.status === "arrived").length,
@@ -320,7 +342,10 @@ const TripPage: React.FC = () => {
               <Form.Item name="status" label="Trạng thái">
                 <Select allowClear placeholder="Chọn trạng thái">
                   <Option value="scheduled">Đã lên lịch</Option>
-                  <Option value="completed">Đã hoàn thành</Option>
+                  <Option value="on_sell">Đang mở bán</Option>
+                  <Option value="delayed">Bị hoãn</Option>
+                  <Option value="departed">Đã khởi hành</Option>
+                  <Option value="arrived">Đã đến nơi</Option>
                   <Option value="cancelled">Đã hủy</Option>
                 </Select>
               </Form.Item>
@@ -381,7 +406,7 @@ const TripPage: React.FC = () => {
         <Col xs={24} sm={12} lg={6}>
           <Card>
             <Statistic
-              title="Đúng giờ"
+              title="Đang mở bán"
               value={stats.onTime}
               valueStyle={{ color: "#52c41a" }}
             />
@@ -391,7 +416,7 @@ const TripPage: React.FC = () => {
         <Col xs={24} sm={12} lg={6}>
           <Card>
             <Statistic
-              title="Bị trễ"
+              title="Bị hoãn"
               value={stats.delayed}
               valueStyle={{ color: "#ff974d" }}
             />

@@ -8,11 +8,11 @@ import {
   Badge,
   Space,
   Breadcrumb,
+  Divider,
 } from "antd";
 import {
   BellOutlined,
   UserOutlined,
-  SettingOutlined,
   LogoutOutlined,
   MenuOutlined,
   CarOutlined,
@@ -45,19 +45,6 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
 
   const userMenuItems: MenuProps["items"] = [
     {
-      key: "profile",
-      icon: <UserOutlined />,
-      label: "Profile Settings",
-    },
-    {
-      key: "account",
-      icon: <SettingOutlined />,
-      label: "Account Settings",
-    },
-    {
-      type: "divider",
-    },
-    {
       key: "logout",
       icon: <LogoutOutlined />,
       label: "Logout",
@@ -69,26 +56,35 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
   const { notifications } = notificationStore();
 
   const notificationMenuItems: MenuProps["items"] = [
-    ...notifications.map((notification) => ({
-      key: notification.id,
-      label: (
-        <div>
-          <Text strong>{notification.message}</Text>
-          <br />
-          <Text type="secondary" style={{ fontSize: "12px" }}>
-            {notification.timestamp}
-          </Text>
-        </div>
-      ),
-    })),
-    {
-      type: "divider",
-    },
-    {
-      key: "all",
-      label: "View all notifications",
-      style: { textAlign: "center" },
-    },
+    ...notifications
+      .filter((item) => item.viewed)
+      .map((notification) => ({
+        key: notification.id,
+        label: (
+          <>
+            <div
+              onClick={() => {
+                const item = notification;
+                item.viewed = true;
+                notificationStore.getState().push(item);
+              }}
+            >
+              <Text strong>{notification.message}</Text>
+              <br />
+              <Text type="secondary" style={{ fontSize: "12px" }}>
+                {notification.timestamp}
+              </Text>
+            </div>
+            <Divider />,
+          </>
+        ),
+      })),
+
+    // {
+    //   key: "all",
+    //   label: "View all notifications",
+    //   style: { textAlign: "center" },
+    // },
   ];
 
   const breadcrumbItems = [
@@ -162,7 +158,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
               type="secondary"
               style={{ fontSize: "12px", display: "block" }}
             >
-              Today's Trips
+              Total Trips
             </Text>
             <Text strong style={{ fontSize: "16px", color: "#1890ff" }}>
               {report?.totalTrips}

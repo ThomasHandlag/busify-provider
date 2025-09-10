@@ -9,30 +9,99 @@ import {
   Row,
   Col,
   message,
+  Spin,
 } from "antd";
-import { operatorStore } from "../../stores/operator_store";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  changePassword,
+  getOperatorDataByUser,
+  updateOperatorProfile,
+} from "../../app/api/operator";
+import { useAuthStore } from "../../stores/auth_store";
 
 const { Title, Text } = Typography;
 
 const ProfilePage: React.FC = () => {
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
+  const [isPasswordModalVisible, setIsPasswordModalVisible] = useState(false);
   const [editForm] = Form.useForm();
-  const operatorData = operatorStore();
+  const queryClient = useQueryClient();
+  const [passwordForm] = Form.useForm();
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const { logOut } = useAuthStore();
+
+  // Fetch operator data
+  const {
+    data: operator,
+    isLoading,
+    isError,
+  } = useQuery({
+    queryKey: ["operator"],
+    queryFn: getOperatorDataByUser,
+  });
+
+  // Mutation update profile
+  const updateMutation = useMutation({
+    mutationFn: updateOperatorProfile,
+    onSuccess: (data) => {
+      queryClient.setQueryData(["operator"], data); // cập nhật cache
+      setIsEditModalVisible(false);
+      message.success("Cập nhật thông tin thành công!");
+    },
+    onError: (error: any) => {
+      // Nếu server trả về fieldErrors
+      if (error.response?.data?.fieldErrors) {
+        const fieldErrors = error.response.data.fieldErrors;
+
+        // Convert sang format Antd form cần
+        const errors = Object.keys(fieldErrors).map((field) => ({
+          name: field,
+          errors: fieldErrors[field],
+        }));
+
+        editForm.setFields(errors);
+      } else {
+        message.error(
+          error.response?.data?.message || "Không thể cập nhật thông tin!"
+        );
+      }
+    },
+  });
+
+  // Mutation change password
+  const changePasswordMutation = useMutation({
+    mutationFn: changePassword,
+    onSuccess: () => {
+      message.success("Đổi mật khẩu thành công, vui lòng đăng nhập lại.");
+      setIsPasswordModalVisible(false);
+      passwordForm.resetFields();
+      logOut();
+    },
+    onError: (error: any) => {
+      message.error(error.response?.data?.message || "Đổi mật khẩu thất bại!");
+    },
+  });
 
   const handleUpdate = () => {
-    editForm.setFieldsValue(operatorData.operator);
+    editForm.setFieldsValue(operator || {});
     setIsEditModalVisible(true);
   };
 
   const handleEditSubmit = async () => {
     try {
       const values = await editForm.validateFields();
-      operatorData.setOperator({ ...operatorData.operator, ...values });
-      setIsEditModalVisible(false);
-      message.success("Cập nhật thông tin thành công!");
-    } catch (error) {
-      // validation error
-    }
+      updateMutation.mutate({
+        ...values,
+        avatar: avatarFile || undefined, // thêm avatar file
+      });
+    } catch {}
+  };
+
+  const handlePasswordSubmit = async () => {
+    try {
+      const values = await passwordForm.validateFields();
+      changePasswordMutation.mutate(values);
+    } catch {}
   };
 
   const handleCancelContract = () => {
@@ -51,61 +120,109 @@ const ProfilePage: React.FC = () => {
     });
   };
 
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-[60vh]">
+        <Spin size="large" />
+      </div>
+    );
+  }
+
+  if (isError || !operator) {
+    return (
+      <div className="flex justify-center items-center h-[60vh]">
+        <p>Không thể tải dữ liệu nhà xe!</p>
+      </div>
+    );
+  }
+
   return (
-    <div style={{ padding: 24, maxWidth: 700, margin: "0 auto" }}>
+    <div style={{ padding: 24, maxWidth: 900, margin: "0 auto" }}>
       <Title level={2} style={{ marginBottom: 24 }}>
         Hồ sơ nhà xe
       </Title>
       <Card>
-        <Row gutter={16}>
-          <Col span={12}>
-            <Text strong>ID:</Text> {operatorData.operator?.id}
-          </Col>
-          <Col span={12}>
-            <Text strong>Tên nhà xe:</Text> {operatorData.operator?.name}
-          </Col>
-        </Row>
-        <Row gutter={16} style={{ marginTop: 12 }}>
-          <Col span={12}>
-            <Text strong>Email:</Text> {operatorData.operator?.email}
-          </Col>
-          <Col span={12}>
-            <Text strong>Số điện thoại:</Text> {operatorData.operator?.hotline}
-          </Col>
-        </Row>
-        <Row gutter={16} style={{ marginTop: 12 }}>
-          <Col span={24}>
-            <Text strong>Địa chỉ:</Text> {operatorData.operator?.address}
-          </Col>
-        </Row>
-        <Row gutter={16} style={{ marginTop: 12 }}>
-          <Col span={12}>
-            <Text strong>Trạng thái hợp đồng:</Text>{" "}
-            <span
+        {/* Avatar + Info */}
+        <Row gutter={16} align="middle" style={{ marginBottom: 24 }}>
+          <Col span={6}>
+            <div
               style={{
-                color:
-                  operatorData.operator?.status === "active"
-                    ? "#52c41a"
-                    : "#ff4d4f",
+                width: 120,
+                height: 120,
+                borderRadius: "50%",
+                overflow: "hidden",
+                border: "2px solid #ddd",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                background: "#f9f9f9",
               }}
             >
-              {operatorData.operator?.status === "active"
-                ? "Đang hiệu lực"
-                : "Đã hủy"}
-            </span>
+              {operator.avatarUrl ? (
+                <img
+                  src={operator.avatarUrl}
+                  alt="Avatar"
+                  style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                />
+              ) : (
+                <span style={{ color: "#aaa" }}>No Avatar</span>
+              )}
+            </div>
+          </Col>
+          <Col span={18}>
+            <Row gutter={16}>
+              <Col span={12}>
+                <Text strong>ID:</Text> {operator.id}
+              </Col>
+              <Col span={12}>
+                <Text strong>Tên nhà xe:</Text> {operator.name}
+              </Col>
+            </Row>
+            <Row gutter={16} style={{ marginTop: 12 }}>
+              <Col span={12}>
+                <Text strong>Email:</Text> {operator.email}
+              </Col>
+              <Col span={12}>
+                <Text strong>Số điện thoại:</Text> {operator.hotline}
+              </Col>
+            </Row>
+            <Row gutter={16} style={{ marginTop: 12 }}>
+              <Col span={24}>
+                <Text strong>Địa chỉ:</Text> {operator.address}
+              </Col>
+            </Row>
+            <Row gutter={16} style={{ marginTop: 12 }}>
+              <Col span={12}>
+                <Text strong>Trạng thái hợp đồng:</Text>{" "}
+                <span
+                  style={{
+                    color: operator.status === "active" ? "#52c41a" : "#ff4d4f",
+                  }}
+                >
+                  {operator.status === "active" ? "Đang hiệu lực" : "Đã hủy"}
+                </span>
+              </Col>
+            </Row>
           </Col>
         </Row>
-        <Row gutter={16} style={{ marginTop: 24 }}>
+
+        {/* Actions */}
+        <Row gutter={16} style={{ marginTop: 24, marginBottom: 16 }}>
           <Col>
             <Button type="primary" onClick={handleUpdate}>
               Cập nhật thông tin
             </Button>
           </Col>
           <Col>
+            <Button onClick={() => setIsPasswordModalVisible(true)}>
+              Đổi mật khẩu
+            </Button>
+          </Col>
+          <Col>
             <Button
               danger
               onClick={handleCancelContract}
-              disabled={operatorData.operator?.status !== "active"}
+              disabled={operator.status !== "active"}
             >
               Hủy hợp đồng
             </Button>
@@ -127,6 +244,7 @@ const ProfilePage: React.FC = () => {
         </Row>
       </Card>
 
+      {/* Modal Edit Profile */}
       <Modal
         title="Cập nhật thông tin nhà xe"
         open={isEditModalVisible}
@@ -134,6 +252,7 @@ const ProfilePage: React.FC = () => {
         onOk={handleEditSubmit}
         okText="Lưu"
         cancelText="Hủy"
+        confirmLoading={updateMutation.isPending}
       >
         <Form form={editForm} layout="vertical">
           <Form.Item
@@ -165,6 +284,53 @@ const ProfilePage: React.FC = () => {
             rules={[{ required: true, message: "Vui lòng nhập địa chỉ" }]}
           >
             <Input />
+          </Form.Item>
+          <Form.Item label="Avatar">
+            <Input
+              type="file"
+              accept="image/*"
+              onChange={(e) => {
+                if (e.target.files && e.target.files.length > 0) {
+                  setAvatarFile(e.target.files[0]);
+                }
+              }}
+            />
+          </Form.Item>
+        </Form>
+      </Modal>
+
+      {/* Modal Đổi mật khẩu */}
+      <Modal
+        title="Đổi mật khẩu"
+        open={isPasswordModalVisible}
+        onCancel={() => setIsPasswordModalVisible(false)}
+        onOk={handlePasswordSubmit}
+        okText="Lưu"
+        cancelText="Hủy"
+        confirmLoading={changePasswordMutation.isPending}
+      >
+        <Form form={passwordForm} layout="vertical">
+          <Form.Item
+            name="oldPassword"
+            label="Mật khẩu cũ"
+            rules={[{ required: true, message: "Vui lòng nhập mật khẩu cũ" }]}
+          >
+            <Input.Password />
+          </Form.Item>
+          <Form.Item
+            name="newPassword"
+            label="Mật khẩu mới"
+            rules={[{ required: true, message: "Vui lòng nhập mật khẩu mới" }]}
+          >
+            <Input.Password />
+          </Form.Item>
+          <Form.Item
+            name="confirmPassword"
+            label="Xác nhận mật khẩu"
+            dependencies={["newPassword"]}
+            rules={[{ required: true, message: "Vui lòng nhập lại mật khẩu" }]}
+          >
+            <Input.Password />
           </Form.Item>
         </Form>
       </Modal>

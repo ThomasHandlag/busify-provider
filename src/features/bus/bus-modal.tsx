@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   Modal,
   Form,
@@ -19,12 +19,15 @@ import type { BusModelForOperatorResponse } from "../../stores/bus_model_store";
 import { getBusModels } from "../../app/api/bus_models";
 import type { SeatLayoutForOperatorResponse } from "../../stores/seat_layout_store";
 import { getSeatLayouts } from "../../app/api/seat_layout";
+import { Upload } from "antd";
+import { PlusOutlined } from "@ant-design/icons";
+import type { BusImage } from "../../stores/bus_store";
 
 const { Option } = Select;
 
 export interface BusFormData {
   licensePlate: string;
-  modelId: number; // Thay đổi modelId thành modelName
+  modelId: number;
   operatorId: number;
   seatLayoutId: number;
   status: "active" | "under_maintenance" | "out_of_service";
@@ -41,6 +44,7 @@ interface BusModalProps {
   isModalVisible: boolean;
   setIsModalVisible: (visible: boolean) => void;
   form: FormInstance;
+  busData?: any;
   onSuccess?: () => void;
 }
 
@@ -49,10 +53,12 @@ const BusModal: React.FC<BusModalProps> = ({
   setIsModalVisible,
   form,
   onSuccess,
+  busData,
 }) => {
   const queryClient = useQueryClient();
+  const [initialImages, setInitialImages] = useState<any[]>([]);
 
-  // Create
+  // Create mutation
   const createMutation = useMutation({
     mutationFn: async (data: BusFormData) => {
       const response = await createBus(data);
@@ -71,13 +77,11 @@ const BusModal: React.FC<BusModalProps> = ({
     },
     onError: (error: any) => {
       const fieldErrors = error.response?.data?.fieldErrors;
-
       if (fieldErrors) {
         const fields = Object.entries(fieldErrors).map(([field, messages]) => ({
           name: field,
           errors: messages as string[],
         }));
-
         form.setFields(fields);
       } else {
         const errorMsg =
@@ -89,9 +93,15 @@ const BusModal: React.FC<BusModalProps> = ({
     },
   });
 
-  // Update
+  // Update mutation
   const updateMutation = useMutation({
-    mutationFn: async ({ id, data }: { id: number; data: BusFormData }) => {
+    mutationFn: async ({
+      id,
+      data,
+    }: {
+      id: number;
+      data: BusFormData & { deletedImages?: string[] };
+    }) => {
       const response = await updateBus(id, data);
       return response;
     },
@@ -109,26 +119,52 @@ const BusModal: React.FC<BusModalProps> = ({
     },
     onError: (error: any) => {
       const fieldErrors = error.response?.data?.fieldErrors;
-
       if (fieldErrors) {
         const fields = Object.entries(fieldErrors).map(([field, messages]) => ({
           name: field,
           errors: messages as string[],
         }));
-
         form.setFields(fields);
       } else {
         const errorMsg =
           error?.response?.data?.message ||
           error.message ||
           "Đã xảy ra lỗi không xác định";
-        message.error(`Lỗi thêm xe: ${errorMsg}`);
+        message.error(`Lỗi cập nhật xe: ${errorMsg}`);
       }
     },
   });
 
+  // Effect để load dữ liệu khi mở modal
+  useEffect(() => {
+    if (isModalVisible && busData) {
+      const amenitiesArray = Object.entries(busData.amenities || {})
+        .filter(([_, value]) => value === true)
+        .map(([key, _]) => key);
+
+      const imageFileList = busData.images
+        ? busData.images.map((img: BusImage, index: any) => ({
+            uid: `existing-${img.id || index}`,
+            url: img.imageUrl,
+            status: "done",
+            isExisting: true,
+            id: img.id,
+          }))
+        : [];
+      setInitialImages(imageFileList); // Store initial images
+      form.setFieldsValue({
+        ...busData,
+        amenities: amenitiesArray,
+        images: imageFileList,
+      });
+    }
+  }, [isModalVisible, busData, form]);
+
   const handleSubmit = async () => {
-    form.validateFields().then((values) => {
+    try {
+      const values = await form.validateFields();
+
+      // Convert amenities array to object format
       const amenities = {
         tv: false,
         wifi: false,
@@ -136,27 +172,48 @@ const BusModal: React.FC<BusModalProps> = ({
         charging: false,
         air_conditioner: false,
       };
-
-      // Convert array to object format
       (values.amenities || []).forEach((item: string) => {
         amenities[item as keyof typeof amenities] = true;
       });
 
-      const data: BusFormData = {
+      // Filter new files to upload
+      const newFiles = (values.images || [])
+        .filter((file: any) => file.originFileObj)
+        .map((file: any) => file.originFileObj as File);
+
+      // Get ids of existing images that remain
+      const existingImageIds = (values.images || [])
+        .filter((file: any) => !file.originFileObj && file.id) // chỉ giữ ảnh cũ có id
+        .map((file: any) => file.id);
+
+      // Detect deleted images by comparing initial ids vs hiện tại
+      const deletedImageIds = initialImages
+        .filter((initialImg: any) => !existingImageIds.includes(initialImg.id))
+        .map((initialImg: any) => initialImg.id);
+
+      const data = {
         licensePlate: values.licensePlate,
         modelId: values.modelId,
         operatorId: values.operatorId,
         seatLayoutId: values.seatLayoutId,
         status: values.status,
         amenities,
+        images: newFiles, // ảnh mới
+        existingImageIds, // gửi id ảnh còn lại
+        deletedImageIds:
+          deletedImageIds.length > 0 ? deletedImageIds : undefined,
       };
 
-      if (form.getFieldValue("id")) {
+      console.log("Submitting data:", data);
+
+      if (values.id) {
         updateMutation.mutate({ id: values.id, data });
       } else {
         createMutation.mutate(data);
       }
-    });
+    } catch (error) {
+      console.error("Form validation failed:", error);
+    }
   };
 
   // Fetch bus models
@@ -167,13 +224,33 @@ const BusModal: React.FC<BusModalProps> = ({
     queryFn: getBusModels,
   });
 
-  //Fetch seat layouts
+  // Fetch seat layouts
   const { data: seatLayouts = [], isLoading: loadingLayouts } = useQuery<
     SeatLayoutForOperatorResponse[]
   >({
     queryKey: ["seatLayouts"],
     queryFn: getSeatLayouts,
   });
+
+  // Custom upload handler
+  const handleUploadChange = ({ fileList }: any) => {
+    // Giới hạn số lượng file tối đa (ví dụ: 5 ảnh)
+    const limitedFileList = fileList.slice(-5);
+    form.setFieldValue("images", limitedFileList);
+  };
+
+  // Preview handler cho ảnh
+  const handlePreview = async (file: any) => {
+    if (!file.url && !file.preview) {
+      file.preview = await getBase64(file.originFileObj);
+    }
+
+    // Tạo modal preview hoặc mở ảnh trong tab mới
+    const image = new Image();
+    image.src = file.url || file.preview;
+    const imgWindow = window.open(file.url || file.preview);
+    imgWindow?.document.write(image.outerHTML);
+  };
 
   return (
     <Modal
@@ -184,10 +261,19 @@ const BusModal: React.FC<BusModalProps> = ({
         </div>
       }
       open={isModalVisible}
-      onCancel={() => setIsModalVisible(false)}
+      onCancel={() => {
+        form.resetFields();
+        setIsModalVisible(false);
+      }}
       width={800}
       footer={[
-        <Button key="cancel" onClick={() => setIsModalVisible(false)}>
+        <Button
+          key="cancel"
+          onClick={() => {
+            form.resetFields();
+            setIsModalVisible(false);
+          }}
+        >
           Hủy
         </Button>,
         <Button
@@ -292,6 +378,7 @@ const BusModal: React.FC<BusModalProps> = ({
               </Form.Item>
             </Col>
           </Row>
+
           <Row gutter={16}>
             <Col span={12}>
               <Form.Item name="amenities" label="Tiện ích">
@@ -316,11 +403,43 @@ const BusModal: React.FC<BusModalProps> = ({
                 </Checkbox.Group>
               </Form.Item>
             </Col>
+            <Col span={12}>
+              <Form.Item
+                name="images"
+                label="Ảnh xe khách"
+                valuePropName="fileList"
+              >
+                <Upload
+                  listType="picture-card"
+                  fileList={form.getFieldValue("images") || []} // Use form value
+                  multiple
+                  maxCount={5}
+                  beforeUpload={() => false}
+                  onChange={handleUploadChange}
+                  onPreview={handlePreview}
+                  accept="image/*"
+                >
+                  <div>
+                    <PlusOutlined />
+                    <div style={{ marginTop: 8 }}>Upload</div>
+                  </div>
+                </Upload>
+              </Form.Item>
+            </Col>
           </Row>
         </Card>
       </Form>
     </Modal>
   );
 };
+
+// Helper function để convert file thành base64 cho preview
+const getBase64 = (file: File): Promise<string> =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = (error) => reject(error);
+  });
 
 export default BusModal;

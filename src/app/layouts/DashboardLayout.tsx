@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Layout, Grid, Drawer } from "antd";
 import { Outlet, useNavigate, useLocation } from "react-router";
-import { useResponsive, getResponsiveConfig } from "../hooks";
+import { useResponsive, getResponsiveConfig, useGNotify } from "../hooks";
 import Sidebar from "../../components/sidebar";
 import DashboardHeader from "../../components/DashboardHeader";
 import { useAuthStore } from "../../stores/auth_store";
@@ -26,6 +26,7 @@ const DashboardLayout = () => {
   const { user } = useAuthStore();
   const operatorData = operatorStore();
   const notifyStorage = notificationStore();
+  const { notify } = useGNotify();
 
   useEffect(() => {
     // Fetch operator data from API or other sources
@@ -41,21 +42,27 @@ const DashboardLayout = () => {
     fetchOperatorData();
   }, []);
 
-  // Connect to WebSocket when operator ID is available
-  useWebSocket({
+  const messaging = useWebSocket({
     url: "http://localhost:8080/ws",
     topic: operatorData.operator?.id
       ? `/topic/operator/${operatorData.operator.id}`
-      : "",
-    onMessage: (message) => {
+      : undefined,
+    onMessage: (message: NotificationData) => {
       const newNotification = {
         message: message.message,
-        id: `message-${message.userId}-${Date.now().toString()}`,
-        email: message.email || undefined,
-        phoneNumber: message.phoneNumber || undefined,
+        id: message.id,
+        title: message.title || undefined,
+        data: message.data || undefined,
         timestamp: new Date().toLocaleString(),
       } as NotificationData;
       notifyStorage.push(newNotification);
+      notify?.info({
+        message: newNotification.title || "New Notification",
+        description: newNotification.message,
+      });
+      messaging.sendMessage(`/app/message-received`, {
+        notificationId: message.id,
+      });
     },
   });
 
@@ -64,19 +71,6 @@ const DashboardLayout = () => {
       navigate("/login");
     }
   }, [user, navigate, location.pathname]);
-
-  // Get current selected key from location pathname
-  const getSelectedKey = () => {
-    const path = location.pathname;
-    // Remove leading slash and use the first segment as the key
-    const pathSegments = path.split("/").filter(Boolean);
-    if (pathSegments.length === 0 || pathSegments[0] === "dashboard") {
-      return "dashboard";
-    }
-    return pathSegments[0];
-  };
-
-  const selectedKey = getSelectedKey();
 
   // Get current page name for breadcrumb
   const getCurrentPageName = () => {
@@ -89,21 +83,17 @@ const DashboardLayout = () => {
     const routeMap: { [key: string]: string } = {
       fleet: "Fleet Management",
       buses: "Buses Management",
-      // maintenance: "Maintenance",
-      // fuel: "Fuel Management",
       operations: "Operations",
       routes: "Routes Management",
-      // schedules: "Schedules",
       trips: "Trips Management",
       employees: "Employees Management",
       // bookings: "Booking System",
       // reservations: "Reservations",
-      // tickets: "Ticket Management",
+      tickets: "Ticket Management",
       // customers: "Customer Management",
       drivers: "Driver Management",
       analytics: "Analytics & Reports",
       finance: "Financial Management",
-      // settings: "System Settings",
     };
     return routeMap[pathSegments[0]] || pathSegments[0];
   };
@@ -148,7 +138,7 @@ const DashboardLayout = () => {
             },
           }}
         >
-          <Sidebar onMenuSelect={onSelectItem} selectedKey={selectedKey} />
+          <Sidebar onMenuSelect={onSelectItem} />
         </Drawer>
 
         <Content
@@ -175,7 +165,7 @@ const DashboardLayout = () => {
   // For desktop screens (lg breakpoint and above)
   return (
     <Layout className="responsive-layout">
-      <Sidebar onMenuSelect={onSelectItem} selectedKey={selectedKey} />
+      <Sidebar onMenuSelect={onSelectItem} />
       <Layout>
         <DashboardHeader
           showMenuButton={false}
