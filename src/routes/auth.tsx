@@ -74,25 +74,7 @@ export const AuthRoute: RouteObject = {
         </RoleGuard>
       ),
     },
-<<<<<<< HEAD
-    // {
-    //   path: "customer",
-    //   element: (
-    //     <RoleGuard roles={["STAFF", "OPERATOR", "DRIVER"]}>
-    //       <CustomerPage />
-    //     </RoleGuard>
-    //   ),
-    // },
-    // {
-    //   path: "report",
-    //   element: (
-    //     <RoleGuard roles={["OPERATOR"]}>
-    //       <ReportPage />
-    //     </RoleGuard>
-    //   ),
-    // },
-     {
-=======
+
     {
       path: "report",
       element: (
@@ -118,7 +100,6 @@ export const AuthRoute: RouteObject = {
       ),
     },
     {
->>>>>>> origin/dev
       path: "driver",
       element: (
         <RoleGuard roles={["STAFF"]}>

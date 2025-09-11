@@ -62,37 +62,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onMenuSelect }) => {
             icon: <DollarOutlined />,
             label: "Financial Reports",
           },
-<<<<<<< HEAD
-          // {
-          //   key: "operational-reports",
-          //   icon: <BarChartOutlined />,
-          //   label: "Operational Reports",
-          // },
-          // {
-          //   key: "performance",
-          //   icon: <BarChartOutlined />,
-          //   label: "Performance Metrics",
-          // },
-        ],
-      },
-      // {
-      //   key: "bookings",
-      //   icon: <FileTextOutlined />,
-      //   label: "Booking System",
-      //   children: [
-      //     {
-      //       key: "reservations",
-      //       icon: <FileTextOutlined />,
-      //       label: "Reservations",
-      //     },
-      //     {
-      //       key: "tickets",
-      //       icon: <SafetyCertificateOutlined />,
-      //       label: "Ticket Management",
-      //     },
-      //   ],
-      // },
-=======
+
         ],
       },
       {
@@ -100,7 +70,6 @@ const Sidebar: React.FC<SidebarProps> = ({ onMenuSelect }) => {
         icon: <SafetyCertificateOutlined />,
         label: "Ticket Management",
       },
->>>>>>> origin/dev
       {
         key: "operations",
         icon: <ScheduleOutlined />,
@@ -132,19 +101,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onMenuSelect }) => {
         key: "profile",
         icon: <ProfileOutlined />,
         label: "Profile",
-<<<<<<< HEAD
-      });
-    }
 
-    // Driver Management riêng cho STAFF (bên ngoài Operations menu)
-    if (user?.role === "STAFF") {
-      menuItems.push({
-        key: "driver",
-        icon: <CarOutlined />,
-        label: "Driver Management",
-      });
-    }
-=======
       },
       {
         key: "fleet",
@@ -173,7 +130,6 @@ const Sidebar: React.FC<SidebarProps> = ({ onMenuSelect }) => {
       icon: <UserOutlined />,
       label: "Driver Management",
     });
->>>>>>> origin/dev
   }
 
   return (
