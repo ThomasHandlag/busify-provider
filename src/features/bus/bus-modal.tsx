@@ -234,9 +234,7 @@ const BusModal: React.FC<BusModalProps> = ({
 
   // Custom upload handler
   const handleUploadChange = ({ fileList }: any) => {
-    // Giới hạn số lượng file tối đa (ví dụ: 5 ảnh)
-    const limitedFileList = fileList.slice(-5);
-    form.setFieldValue("images", limitedFileList);
+    form.setFieldValue("images", fileList);
   };
 
   // Preview handler cho ảnh
@@ -413,7 +411,6 @@ const BusModal: React.FC<BusModalProps> = ({
                   listType="picture-card"
                   fileList={form.getFieldValue("images") || []} // Use form value
                   multiple
-                  maxCount={5}
                   beforeUpload={() => false}
                   onChange={handleUploadChange}
                   onPreview={handlePreview}
