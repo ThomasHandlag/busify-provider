@@ -5,6 +5,7 @@ import {
   getDrivers,
   getDriverTrips,
   getTripPassengers,
+  getTripDetail,
   updateTicket,
   updateTripStatus,
   type UpdateTicketData,
@@ -17,6 +18,7 @@ export const QUERY_KEYS = {
   drivers: ["drivers"],
   driverTrips: (driverId: number) => ["driver-trips", driverId],
   tripPassengers: (tripId: number) => ["trip-passengers", tripId],
+  tripDetail: (tripId: number) => ["trip-detail", tripId],
 };
 
 // Hooks for fetching data
@@ -52,6 +54,16 @@ export function useTripPassengers(tripId: number) {
     gcTime: 5 * 60 * 1000, // Keep in cache for 5 minutes
     refetchOnWindowFocus: false, // Don't refetch on window focus
     refetchOnMount: "always", // Always refetch when component mounts
+  });
+}
+
+export function useTripDetail(tripId: number) {
+  return useQuery({
+    queryKey: QUERY_KEYS.tripDetail(tripId),
+    queryFn: () => getTripDetail(tripId),
+    enabled: tripId > 0, // Auto fetch when tripId is valid
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+    refetchOnWindowFocus: false,
   });
 }
 

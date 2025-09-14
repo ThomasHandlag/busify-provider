@@ -14,17 +14,16 @@ import { SwapOutlined } from "@ant-design/icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createRoute, updateRoute } from "../../app/api/route_api";
 import type { FormInstance } from "antd";
-import type { LocationForOperatorResponse } from "../../stores/location_store";
-import { getLocations } from "../../app/api/location";
+import type { LocationDropdownItem } from "../../app/api/location";
+import { getLocationDropdown } from "../../app/api/location";
 const { Option } = Select;
 
 export interface RouteFormData {
   startLocationId: number;
-  startLocationName: string;
   endLocationId: number;
-  endLocationName: string;
   defaultDurationMinutes: number;
   defaultPrice: number;
+  stopLocationIds?: number[]; // Thay đổi để phù hợp với API
 }
 
 interface RouteModalProps {
@@ -45,7 +44,9 @@ const RouteModal: React.FC<RouteModalProps> = ({
   // Create
   const createMutation = useMutation({
     mutationFn: async (data: RouteFormData) => {
+      console.log("API Request data:", data);
       const response = await createRoute(data);
+      console.log("API Response:", response);
       return response;
     },
     onSuccess: (response) => {
@@ -60,6 +61,7 @@ const RouteModal: React.FC<RouteModalProps> = ({
       }
     },
     onError: (error: any) => {
+      console.error("Create route error:", error);
       const fieldErrors = error.response?.data?.fieldErrors;
 
       if (fieldErrors) {
@@ -109,9 +111,20 @@ const RouteModal: React.FC<RouteModalProps> = ({
   const handleSubmit = async () => {
     try {
       const values = await form.validateFields();
-      const data = {
-        ...values,
+      
+      // Transform data to match API requirements
+      const data: RouteFormData = {
+        startLocationId: values.startLocationId,
+        endLocationId: values.endLocationId,
+        defaultDurationMinutes: values.defaultDurationMinutes,
+        defaultPrice: values.defaultPrice,
+        ...(values.stopLocationIds && values.stopLocationIds.length > 0 
+          ? { stopLocationIds: values.stopLocationIds }
+          : {}
+        )
       };
+
+      console.log("Sending data to API:", data);
 
       if (form.getFieldValue("id")) {
         updateMutation.mutate({ id: values.id, data });
@@ -123,12 +136,21 @@ const RouteModal: React.FC<RouteModalProps> = ({
     }
   };
 
-  // fetch locations
+  // fetch locations for start/end points
   const { data: locations = [], isLoading: loadingLocations } = useQuery<
-    LocationForOperatorResponse[]
+    LocationDropdownItem[]
   >({
     queryKey: ["locations"],
-    queryFn: getLocations,
+    queryFn: getLocationDropdown,
+  });
+
+  // fetch locations for pickup/dropoff stops
+  const { data: stopLocations = [], isLoading: loadingStopLocations } = useQuery<
+    LocationDropdownItem[]
+  >({
+    queryKey: ["locations", "dropdown"],
+    queryFn: getLocationDropdown,
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
   });
 
   return (
@@ -207,8 +229,8 @@ const RouteModal: React.FC<RouteModalProps> = ({
                   }
                 >
                   {locations.map((loc) => (
-                    <Option key={loc.locationId} value={loc.locationId}>
-                      {loc.locationName}
+                    <Option key={loc.id} value={loc.id}>
+                      {loc.name}
                     </Option>
                   ))}
                 </Select>
@@ -235,8 +257,65 @@ const RouteModal: React.FC<RouteModalProps> = ({
                   }
                 >
                   {locations.map((loc) => (
-                    <Option key={loc.locationId} value={loc.locationId}>
-                      {loc.locationName}
+                    <Option key={loc.id} value={loc.id}>
+                      {loc.name}
+                    </Option>
+                  ))}
+                </Select>
+              </Form.Item>
+            </Col>
+          </Row>
+
+          {/* Thêm section cho điểm dừng trung gian */}
+          <Row gutter={16}>
+            <Col span={24}>
+              <Form.Item
+                name="stopLocationIds"
+                label="Điểm dừng trung gian"
+                tooltip="Chọn các điểm dừng trung gian trên tuyến đường (tùy chọn)"
+                rules={[
+                  {
+                    validator: (_, value) => {
+                      if (!value || value.length === 0) return Promise.resolve();
+                      
+                      const startLocationId = form.getFieldValue('startLocationId');
+                      const endLocationId = form.getFieldValue('endLocationId');
+                      
+                      const hasConflict = value.some((id: number) => 
+                        id === startLocationId || id === endLocationId
+                      );
+                      
+                      if (hasConflict) {
+                        return Promise.reject(new Error('Điểm dừng không được trùng với điểm xuất phát hoặc kết thúc'));
+                      }
+                      
+                      return Promise.resolve();
+                    }
+                  }
+                ]}
+              >
+                <Select
+                  mode="multiple"
+                  showSearch
+                  placeholder="Chọn các điểm dừng trung gian"
+                  optionFilterProp="children"
+                  loading={loadingStopLocations}
+                  filterOption={(input, option) =>
+                    (option?.children as unknown as string)
+                      .toLowerCase()
+                      .includes(input.toLowerCase())
+                  }
+                  maxTagCount="responsive"
+                  allowClear
+                >
+                  {stopLocations.map((loc) => (
+                    <Option key={`stop-${loc.id}`} value={loc.id}>
+                      {loc.name}
+                      {loc.address && (
+                        <span style={{ color: '#999', fontSize: '12px' }}>
+                          {` - ${loc.address}`}
+                        </span>
+                      )}
                     </Option>
                   ))}
                 </Select>

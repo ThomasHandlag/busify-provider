@@ -6,6 +6,7 @@ import TripCard from "./components/TripCard";
 import PassengerModal from "./components/PassengerModal";
 import EditTicketModal from "./components/EditTicketModal";
 import EditTripStatusModal from "./components/EditTripStatusModal";
+import TripTimelineModal from "./components/TripTimelineModal";
 
 // Hooks
 import {
@@ -28,6 +29,8 @@ const DriverManagement: React.FC = () => {
   const [isEditTicketModalVisible, setIsEditTicketModalVisible] =
     useState(false);
   const [isEditTripStatusVisible, setIsEditTripStatusVisible] = useState(false);
+  const [isTripTimelineVisible, setIsTripTimelineVisible] = useState(false);
+  const [selectedTripForTimeline, setSelectedTripForTimeline] = useState<Trip | null>(null);
 
   // Forms
   const [form] = Form.useForm();
@@ -67,6 +70,11 @@ const DriverManagement: React.FC = () => {
     setSelectedTrip(trip);
     statusForm.setFieldsValue({ status: trip.status });
     setIsEditTripStatusVisible(true);
+  };
+
+  const handleViewTripTimeline = (trip: Trip) => {
+    setSelectedTripForTimeline(trip);
+    setIsTripTimelineVisible(true);
   };
 
   // Submit handlers
@@ -141,6 +149,7 @@ const DriverManagement: React.FC = () => {
               trip={trip}
               onViewPassengers={handleTripClick}
               onEditStatus={handleEditTripStatus}
+              onViewTimeline={handleViewTripTimeline}
             />
           ))
         )}
@@ -167,6 +176,12 @@ const DriverManagement: React.FC = () => {
         onCancel={() => setIsEditTripStatusVisible(false)}
         onOk={() => statusForm.submit()}
         form={statusForm}
+      />
+
+      <TripTimelineModal
+        visible={isTripTimelineVisible}
+        onCancel={() => setIsTripTimelineVisible(false)}
+        tripId={selectedTripForTimeline?.trip_id || 0}
       />
 
       {/* Hidden forms for mutation callbacks */}
