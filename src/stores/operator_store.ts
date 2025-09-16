@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { persist } from "zustand/middleware";
 
 export interface OperatorData {
   id: number;
@@ -24,7 +25,14 @@ export interface ChangePasswordPayload {
 export const operatorStore = create<{
   operator: OperatorData | null;
   setOperator: (operator: OperatorData | null) => void;
-}>((set) => ({
-  operator: null,
-  setOperator: (operator) => set({ operator }),
-}));
+}>()(
+  persist(
+    (set) => ({
+      operator: null,
+      setOperator: (operator) => set({ operator }),
+    }),
+    {
+      name: "operator-storage",
+    }
+  )
+);
