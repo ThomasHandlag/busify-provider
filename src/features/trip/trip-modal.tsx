@@ -160,11 +160,13 @@ const TripModal: React.FC<TripModalProps> = ({
     }
   };
 
-  // fetch locations
+  // fetch routes
   const { data: routes = [], isLoading: loadingRoutes } = useQuery<RouteData[]>(
     {
       queryKey: ["routes"],
       queryFn: getRoutesForOperator,
+      refetchOnWindowFocus: true,
+      refetchOnMount: "always",
     }
   );
 
@@ -172,6 +174,8 @@ const TripModal: React.FC<TripModalProps> = ({
   const { data: buses = [], isLoading: loadingBuses } = useQuery<BusData[]>({
     queryKey: ["buses"],
     queryFn: getBusesForOperator,
+    refetchOnWindowFocus: true,
+    refetchOnMount: "always",
   });
 
   // fetch drivers
@@ -180,6 +184,8 @@ const TripModal: React.FC<TripModalProps> = ({
   >({
     queryKey: ["drivers"],
     queryFn: getDrivers,
+    refetchOnWindowFocus: true,
+    refetchOnMount: "always",
   });
 
   return (

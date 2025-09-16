@@ -103,6 +103,7 @@ const TicketPage: React.FC = () => {
       title: "Mã vé",
       dataIndex: "ticketCode",
       key: "ticketCode",
+      width: 100,
       render: (code) => (
         <Text strong style={{ color: "#1890ff" }}>
           {code}
