@@ -1,8 +1,10 @@
-import { Card, Row, Col, Typography, Empty } from "antd";
+import { Card, Row, Col, Typography, Empty, Button, message } from "antd";
 import { Bar, Line } from "@ant-design/charts";
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import { getReportYearly } from "../../app/api/report";
 import { operatorStore } from "../../stores/operator_store";
+import { PrinterOutlined } from "@ant-design/icons";
+import { useReactToPrint } from "react-to-print";
 
 const { Title } = Typography;
 
@@ -24,6 +26,19 @@ const ReportPage = () => {
   const [tripsData, setTripsData] = React.useState<ChartData[]>([]);
   const [ratioData, setRatioData] = React.useState<ChartData[]>([]);
   const operator = operatorStore();
+  const contentRef = useRef<HTMLDivElement>(null);
+
+  // Use the react-to-print hook properly
+  const handlePrint = useReactToPrint({
+    contentRef,
+    documentTitle: `Báo cáo năm ${new Date().getFullYear()}`,
+    onAfterPrint: () => {
+      message.info("In vé hoàn tất");
+    },
+    onPrintError: (error) => {
+      message.error("Lỗi khi in vé: " + error);
+    },
+  });
 
   useEffect(() => {
     const fetchData = async () => {
@@ -123,41 +138,46 @@ const ReportPage = () => {
 
   return (
     <div style={{ padding: 24 }}>
-      <Title level={2} style={{ marginBottom: 24 }}>
-        Báo cáo tổng hợp
-      </Title>
-      <Row gutter={24}>
-        <Col span={24} style={{ marginBottom: 24 }}>
-          <Card title="Số vé hoàn trả mỗi tháng" style={{ marginBottom: 24 }}>
-            {ratioData.length > 0 ? (
-              <Bar {...cancelRatioPie} />
-            ) : (
-              <Empty description="Chưa có dữ liệu" />
-            )}
-          </Card>
-        </Col>
-        <Col span={24}>
-          <Card
-            title="Các chuyến đã hoàn thành trong tháng"
-            style={{ marginBottom: 24 }}
-          >
-            {tripsData.length > 0 ? (
-              <Bar {...tripsBars} />
-            ) : (
-              <Empty description="Chưa có dữ liệu" />
-            )}
-          </Card>
-        </Col>
-        <Col span={24}>
-          <Card title="Doanh thu theo tháng" style={{ marginBottom: 24 }}>
-            {revenueData.length > 0 ? (
-              <Line {...revenueLine} />
-            ) : (
-              <Empty description="Chưa có dữ liệu" />
-            )}
-          </Card>
-        </Col>
-      </Row>
+      <Button onClick={handlePrint} type="primary" style={{ marginBottom: 16 }}>
+        In báo cáo <PrinterOutlined />
+      </Button>
+      <div ref={contentRef} style={{ background: "#fff", padding: 24 }}>
+        <Title level={2} style={{ marginBottom: 24 }}>
+          Báo cáo tổng hợp
+        </Title>
+        <Row gutter={24}>
+          <Col span={24} style={{ marginBottom: 24 }}>
+            <Card title="Số vé hoàn trả mỗi tháng" style={{ marginBottom: 24 }}>
+              {ratioData.length > 0 ? (
+                <Bar {...cancelRatioPie} />
+              ) : (
+                <Empty description="Chưa có dữ liệu" />
+              )}
+            </Card>
+          </Col>
+          <Col span={24}>
+            <Card
+              title="Các chuyến đã hoàn thành trong tháng"
+              style={{ marginBottom: 24 }}
+            >
+              {tripsData.length > 0 ? (
+                <Bar {...tripsBars} />
+              ) : (
+                <Empty description="Chưa có dữ liệu" />
+              )}
+            </Card>
+          </Col>
+          <Col span={24}>
+            <Card title="Doanh thu theo tháng" style={{ marginBottom: 24 }}>
+              {revenueData.length > 0 ? (
+                <Line {...revenueLine} />
+              ) : (
+                <Empty description="Chưa có dữ liệu" />
+              )}
+            </Card>
+          </Col>
+        </Row>
+      </div>
     </div>
   );
 };
