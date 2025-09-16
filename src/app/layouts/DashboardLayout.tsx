@@ -70,6 +70,26 @@ const DashboardLayout = () => {
     messaging.sendMessage("/app/missed-notification", {
       userId: operatorData.operator?.id,
     });
+    messaging.subscribe(
+      `/topic/operator/${operatorData.operator?.id}`,
+      (message) => {
+        const newNotification = {
+          message: message.message,
+          id: message.id,
+          title: message.title || undefined,
+          data: message.data || undefined,
+          timestamp: new Date().toLocaleString(),
+        } as NotificationData;
+        notifyStorage.push(newNotification);
+        notify?.info({
+          message: newNotification.title || "New Notification",
+          description: newNotification.message,
+        });
+        messaging.sendMessage(`/app/message-received`, {
+          notificationId: message.id,
+        });
+      }
+    );
   }, []);
 
   useEffect(() => {
