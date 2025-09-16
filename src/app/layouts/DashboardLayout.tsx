@@ -67,6 +67,12 @@ const DashboardLayout = () => {
   });
 
   useEffect(() => {
+    messaging.sendMessage("/app/missed-notification", {
+      userId: operatorData.operator?.id,
+    });
+  }, []);
+
+  useEffect(() => {
     if (!user) {
       navigate("/login");
     }
