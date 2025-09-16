@@ -16,7 +16,6 @@ import {
   SwapOutlined,
   ProfileOutlined,
   SafetyCertificateOutlined,
-  DollarOutlined,
 } from "@ant-design/icons";
 import { useAuthStore } from "../stores/auth_store";
 import { operatorStore } from "../stores/operator_store";
@@ -56,13 +55,6 @@ const Sidebar: React.FC<SidebarProps> = ({ onMenuSelect }) => {
         key: "report",
         icon: <BarChartOutlined />,
         label: "Analytics & Reports",
-        children: [
-          {
-            key: "financial-reports",
-            icon: <DollarOutlined />,
-            label: "Financial Reports",
-          },
-        ],
       },
       {
         key: "tickets",

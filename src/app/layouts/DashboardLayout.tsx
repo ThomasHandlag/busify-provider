@@ -67,9 +67,6 @@ const DashboardLayout = () => {
   });
 
   useEffect(() => {
-    messaging.sendMessage("/app/missed-notification", {
-      userId: operatorData.operator?.id,
-    });
     messaging.subscribe(
       `/topic/operator/${operatorData.operator?.id}`,
       (message) => {
@@ -90,6 +87,9 @@ const DashboardLayout = () => {
         });
       }
     );
+    messaging.sendMessage("/app/missed-notification", {
+      userId: operatorData.operator?.id,
+    });
   }, []);
 
   useEffect(() => {
