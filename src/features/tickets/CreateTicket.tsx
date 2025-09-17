@@ -11,7 +11,7 @@ import {
   InputNumber,
   type FormProps,
   Modal,
-  Select,
+  AutoComplete,
 } from "antd";
 import {
   UserOutlined,
@@ -218,36 +218,54 @@ const CreateTicket = () => {
               name="guestFullName"
               label="Passenger Name"
               rules={[
-                { required: true, message: "Please select passenger name" },
+                {
+                  required: true,
+                  message: "Please select or enter passenger name",
+                },
               ]}
             >
-              <Select
-                showSearch
-                placeholder="Select passenger name"
-                optionFilterProp="children"
+              <AutoComplete
+                placeholder="Select or enter passenger name"
+                prefix={<UserOutlined />}
+                options={guests.map((g) => ({
+                  value: g.guestEmail, // value là email để phân biệt unique
+                  label: `${g.guestFullName} - ${g.guestPhone ?? ""} - ${
+                    g.guestEmail ?? ""
+                  }`,
+                }))}
+                filterOption={(inputValue, option) =>
+                  option
+                    ? option.label
+                        .toString()
+                        .toLowerCase()
+                        .includes(inputValue.toLowerCase())
+                    : false
+                }
                 onSelect={(value) => {
+                  // value = guestEmail nếu chọn từ danh sách
                   const guest = guests.find((g) => g.guestEmail === value);
                   if (guest) {
                     form.setFieldsValue({
                       guestFullName: guest.guestFullName,
                       guestEmail: guest.guestEmail,
                       guestPhone: guest.guestPhone,
-                      ...(guest.guestAddress
-                        ? { guestAddress: guest.guestAddress }
-                        : { guestAddress: "" }),
+                      guestAddress: guest.guestAddress ?? "",
                     });
                   }
                 }}
-                prefix={<UserOutlined />}
-              >
-                {guests.map((g) => (
-                  <Select.Option key={g.guestEmail} value={g.guestEmail}>
-                    {`${g.guestFullName} - ${g.guestPhone ?? ""} - ${
-                      g.guestEmail ?? ""
-                    }`}
-                  </Select.Option>
-                ))}
-              </Select>
+                onChange={(input) => {
+                  // Nếu gõ mới thì reset các field khác để nhập tay
+                  const guest = guests.find((g) => g.guestEmail === input);
+                  if (!guest) {
+                    form.setFieldsValue({
+                      guestFullName: input,
+                      guestEmail: "",
+                      guestPhone: "",
+                      guestAddress: "",
+                    });
+                  }
+                }}
+              />
             </Form.Item>
           </Col>
           <Col xs={24} md={12}>
@@ -272,7 +290,6 @@ const CreateTicket = () => {
             </Form.Item>
           </Col>
         </Row>
-
         <Row gutter={16}>
           <Col xs={24} md={12}>
             <Form.Item
