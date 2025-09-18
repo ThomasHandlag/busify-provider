@@ -214,12 +214,6 @@ const BusPage: React.FC = () => {
       width: 100,
     },
     {
-      title: "Tên nhà xe",
-      dataIndex: "operatorName",
-      key: "operatorName",
-      width: 140,
-    },
-    {
       title: "Tên sơ đồ ghế",
       dataIndex: "seatLayoutName",
       key: "seatLayoutName",
