@@ -13,7 +13,7 @@ export interface EmployeeQuery {
 }
 
 export async function getDrivers(): Promise<DriverData[]> {
-  const response = await apiClient.get("api/employees");
+  const response = await apiClient.get("api/employees/for-operator");
   return response.data.result;
 }
 

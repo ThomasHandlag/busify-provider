@@ -28,6 +28,8 @@ import {
   ClearOutlined,
   PlusOutlined,
   TeamOutlined,
+  CarOutlined,
+  IdcardOutlined,
 } from "@ant-design/icons";
 import { getEmployees, deleteEmployee } from "../../app/api/employee";
 import type { TableProps } from "antd";
@@ -168,6 +170,41 @@ const EmployeePage: React.FC = () => {
     }
   };
 
+  const getEmployeeTypeTag = (type: string) => {
+    let color = "";
+    let text = "";
+    let icon = null;
+
+    switch (type) {
+      case "DRIVER":
+        color = "green";
+        text = "Tài xế";
+        icon = <CarOutlined />;
+        break;
+      case "STAFF":
+        color = "purple";
+        text = "Nhân viên bán vé";
+        icon = <IdcardOutlined />;
+        break;
+    }
+
+    return (
+      <Tag
+        color={color}
+        style={{
+          display: "inline-flex",
+          alignItems: "center",
+          gap: "6px",
+          padding: "4px 8px",
+          borderRadius: "16px",
+        }}
+      >
+        {icon}
+        {text}
+      </Tag>
+    );
+  };
+
   const columns: TableProps<EmployeeData>["columns"] = [
     {
       title: "ID",
@@ -191,10 +228,11 @@ const EmployeePage: React.FC = () => {
       width: 200,
     },
     {
-      title: "Nhà vận hành",
-      dataIndex: "operatorName",
-      key: "operatorName",
-      width: 180,
+      title: "Loại nhân viên",
+      dataIndex: "employeeType",
+      key: "employeeType",
+      width: 160,
+      render: (type: string) => getEmployeeTypeTag(type),
     },
     {
       title: "Số GPLX",

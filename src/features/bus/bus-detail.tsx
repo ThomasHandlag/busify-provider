@@ -63,7 +63,6 @@ const BusDetailModal: React.FC<BusDetailModalProps> = ({
         </Descriptions.Item>
         <Descriptions.Item label="Mẫu xe">{bus.modelName}</Descriptions.Item>
         <Descriptions.Item label="Số ghế">{bus.totalSeats}</Descriptions.Item>
-        <Descriptions.Item label="Nhà xe">{bus.operatorName}</Descriptions.Item>
         <Descriptions.Item label="Bố trí ghế">
           {bus.seatLayoutName}
         </Descriptions.Item>
