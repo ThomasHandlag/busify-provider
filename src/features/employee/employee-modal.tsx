@@ -55,6 +55,7 @@ const EmployeeModal: React.FC<EmployeeModalProps> = ({
         message.error("Thêm nhân viên thất bại!");
       }
     },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onError: (error: any) => {
       const fieldErrors = error.response?.data?.fieldErrors;
       if (fieldErrors) {
@@ -96,6 +97,7 @@ const EmployeeModal: React.FC<EmployeeModalProps> = ({
         message.error("Cập nhật nhân viên thất bại!");
       }
     },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onError: (error: any) => {
       const fieldErrors = error.response?.data?.fieldErrors;
       if (fieldErrors) {
