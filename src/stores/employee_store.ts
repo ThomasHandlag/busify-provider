@@ -11,6 +11,7 @@ export interface EmployeeData {
   status: "active" | "inactive" | "suspended";
   address: string;
   phoneNumber: string;
+  employeeType: "DRIVER" | "STAFF";
 }
 
 export interface DriverData {
