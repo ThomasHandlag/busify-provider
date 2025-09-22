@@ -258,6 +258,7 @@ const TripModal: React.FC<TripModalProps> = ({
                   placeholder="Chọn biển số xe"
                   optionFilterProp="children"
                   loading={loadingBuses}
+                  disabled={form.getFieldValue("status") !== "scheduled"}
                   filterOption={(input, option) =>
                     (option?.children as unknown as string)
                       .toLowerCase()
