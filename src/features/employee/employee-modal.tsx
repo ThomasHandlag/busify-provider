@@ -366,25 +366,6 @@ const EmployeeModal: React.FC<EmployeeModalProps> = ({
                     <Input.Password placeholder="Nhập mật khẩu" />
                   </Form.Item>
                 </Col>
-                <Col span={12}>
-                  <Form.Item
-                    name="employeeType"
-                    label="Loại nhân viên"
-                    rules={[
-                      {
-                        required: true,
-                        message: "Vui lòng chọn loại nhân viên",
-                      },
-                    ]}
-                  >
-                    <Select placeholder="Chọn loại nhân viên">
-                      <Select.Option value="DRIVER">Tài xế</Select.Option>
-                      <Select.Option value="STAFF">
-                        Nhân viên bán vé
-                      </Select.Option>
-                    </Select>
-                  </Form.Item>
-                </Col>
               </Row>
             </>
           )}
