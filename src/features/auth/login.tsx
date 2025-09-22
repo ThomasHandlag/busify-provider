@@ -1,8 +1,9 @@
-import { Form, Input, Button, Checkbox, type FormProps } from "antd";
+import { Form, Input, Button, Checkbox, type FormProps, Flex } from "antd";
 import { useState } from "react";
 import { useGNotify } from "../../app/hooks";
 import { useAuthStore } from "../../stores/auth_store";
 import { useNavigate } from "react-router";
+import { LockOutlined, MailOutlined } from "@ant-design/icons";
 
 type LoginFieldType = {
   username?: string;
@@ -12,38 +13,29 @@ type LoginFieldType = {
 
 const LoginPage = () => {
   const { notify } = useGNotify();
-  const {login} = useAuthStore();
+  const { login } = useAuthStore();
   const navigate = useNavigate();
 
   const onFinish: FormProps<LoginFieldType>["onFinish"] = async (
     values: LoginFieldType
   ) => {
     setLoading(true);
-    const response = await login(
-      {
+    try {
+      await login({
         username: values.username || "",
         password: values.password || "",
-        navigate
-      }
-    );
-
-    console.log(response);
-    setLoading(false);
-    notify?.success({
-      message: "Login Successful",
-      placement: "bottomRight",
-    });
-  };
-
-  const onFinishFailed: FormProps<LoginFieldType>["onFinishFailed"] = (
-    errorInfo
-  ) => {
-    setLoading(false);
-    notify?.error({
-      message: "Login Failed",
-      description: errorInfo.errorFields[0]?.errors[0],
-      placement: "bottomRight",
-    });
+        navigate,
+      });
+    } catch (e) {
+      const error = e as Error;
+      console.error("Login error:", error);
+      setLoading(false);
+      notify?.error({
+        message: "Login Failed",
+        description: error?.message || "Unknown error",
+        placement: "bottomRight",
+      });
+    }
   };
 
   const [loading, setLoading] = useState(false);
@@ -55,7 +47,6 @@ const LoginPage = () => {
           name="loginForm"
           initialValues={{ rememberMe: true }}
           onFinish={onFinish}
-          onFinishFailed={onFinishFailed}
           autoComplete="off"
           layout="vertical"
         >
@@ -76,7 +67,7 @@ const LoginPage = () => {
             label="Email"
             name="username"
           >
-            <Input />
+            <Input prefix={<MailOutlined />} />
           </Form.Item>
           <Form.Item<LoginFieldType>
             validateDebounce={500}
@@ -91,19 +82,27 @@ const LoginPage = () => {
             label="Password"
             name="password"
           >
-            <Input.Password />
-          </Form.Item>
-          <Form.Item<LoginFieldType>
-            label="Remember me"
-            name="rememberMe"
-            valuePropName="checked"
-          >
-            <Checkbox />
+            <Input.Password prefix={<LockOutlined />} />
           </Form.Item>
           <Form.Item>
-            <Button type="primary" loading={loading} htmlType="submit">
-              Login
+            <Flex justify="space-between" align="center">
+              <Form.Item name="rememberMe" valuePropName="checked" noStyle>
+                <Checkbox>Remember me</Checkbox>
+              </Form.Item>
+              <a href="">Forgot password</a>
+            </Flex>
+          </Form.Item>
+          <Form.Item>
+            <Button
+              block
+              type="primary"
+              htmlType="submit"
+              loading={loading}
+              iconPosition="start"
+            >
+              Log in
             </Button>
+            or <a href="">Register now!</a>
           </Form.Item>
         </Form>
       </div>

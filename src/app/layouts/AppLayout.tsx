@@ -11,9 +11,9 @@ const AppLayout = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     if (!accessToken) {
-      navigate("login");
+      navigate("/login");
     } else {
-      navigate("dashboard");
+      navigate(window.location.pathname)
     }
   }, [accessToken, navigate]);
 

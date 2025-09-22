@@ -2,15 +2,16 @@ import type { NavigateFunction } from "react-router";
 import { create } from "zustand";
 import { persist, devtools } from "zustand/middleware";
 import { login } from "../app/api/auth";
+import type { Role } from "../features/auth/data/role";
 
-export interface LoggedInUser {
-  role: string;
+export interface User {
+  role: Role;
   userId: number;
   email: string;
 }
 
 export interface AuthState {
-  loggedInUser?: LoggedInUser;
+  user?: User;
   accessToken: string;
   refreshToken: string;
   loading: boolean;
@@ -32,63 +33,53 @@ export const useAuthStore = create<AuthState>()(
     persist(
       (set) => {
         return {
+          // Set mock data để luôn ở trạng thái đã đăng nhập
           accessToken: "",
-          refreshToken: "",
-          loggedInUser: undefined,
+          refreshToken: "mock_refresh_token",
+          user: {
+            role: "STAFF",
+            userId: 1,
+            email: "staff@example.com"
+          },
           loading: false,
           error: null,
           login: async ({ username, password, navigate }) => {
-            try {
-              set(
-                {
-                  loggedInUser: undefined,
-                  accessToken: "",
-                  refreshToken: "",
-                },
-                false,
-                { type: "@AUTH/LOGIN/LOADING" }
-              );
+            set(
+              {
+                user: undefined,
+                accessToken: "",
+                refreshToken: "",
+              },
+              false,
+              { type: "@AUTH/LOGIN/LOADING" }
+            );
 
-              const response = await login({
-                username,
-                password,
-              });
+            const response = await login({
+              username,
+              password,
+            });
 
-              console.log(response);
+            console.log(response);
 
-              set(
-                {
-                  accessToken: response?.accessToken,
-                  refreshToken: response?.refreshToken,
-                  loggedInUser: response?.loggedInUser as LoggedInUser,
-                  loading: false,
-                  error: null,
-                },
-                false,
-                { type: "@AUTH/LOGIN/SUCCESS" }
-              );
-              navigate("/dashboard");
-            } catch (error) {
-              set(
-                {
-                  error: error instanceof Error ? error.message : "Login failed",
-                  accessToken: "",
-                  refreshToken: "",
-                  loggedInUser: undefined,
-                },
-                false,
-                {
-                  type: "@AUTH/LOGIN/ERROR",
-                }
-              );
-            }
+            set(
+              {
+                accessToken: response?.accessToken,
+                refreshToken: response?.refreshToken,
+                user: response?.user as User,
+                loading: false,
+                error: null,
+              },
+              false,
+              { type: "@AUTH/LOGIN/SUCCESS" }
+            );
+            navigate("/dashboard");
           },
 
           logOut: async () => {
             set({
               accessToken: "",
               refreshToken: "",
-              loggedInUser: undefined,
+              user: undefined,
             });
           },
         };

@@ -1,114 +1,148 @@
-import React from 'react';
-import { Row, Col, Card, Statistic, Progress, Table, Badge, Space, Typography, List, Avatar } from 'antd';
+import { useEffect } from "react";
+import {
+  Row,
+  Col,
+  Card,
+  Statistic,
+  Table,
+  Badge,
+  Space,
+  Typography,
+  List,
+  Avatar,
+} from "antd";
 import {
   CarOutlined,
-  DollarOutlined,
   UserOutlined,
   ClockCircleOutlined,
-  WarningOutlined,
   CheckCircleOutlined,
   TrophyOutlined,
   EnvironmentOutlined,
-} from '@ant-design/icons';
+  NotificationOutlined,
+} from "@ant-design/icons";
+import { getBusesByOperator } from "../../app/api/bus";
+import { busStore } from "../../stores/bus_store";
+import { operatorStore } from "../../stores/operator_store";
+import { weeklyReportStore } from "../../stores/report_store";
+import { getWeeklyOperatorReport } from "../../app/api/report";
+import { tripStore } from "../../stores/trip_store";
+import { getNextTripsOfOperator } from "../../app/api/trip";
+import { notificationStore } from "../../stores/notification_store";
+import { Link } from "react-router";
 
 const { Title, Text } = Typography;
 
-const DashboardIndex: React.FC = () => {
-  // Sample data for the bus enterprise dashboard
-  const todayStats = {
-    totalRevenue: 12540,
-    totalTrips: 156,
-    activeBuses: 24,
-    totalPassengers: 1890,
-  };
+const toLocalTime = (date: string) => {
+  return new Date(date).toLocaleString();
+};
 
-  const busStatusData = [
-    { key: '1', busNumber: 'BUS-001', route: 'Downtown - Airport', status: 'Active', passengers: 45, capacity: 50 },
-    { key: '2', busNumber: 'BUS-002', route: 'Mall - University', status: 'Active', passengers: 38, capacity: 45 },
-    { key: '3', busNumber: 'BUS-003', route: 'Station - Hospital', status: 'Maintenance', passengers: 0, capacity: 40 },
-    { key: '4', busNumber: 'BUS-004', route: 'Airport - City Center', status: 'Active', passengers: 52, capacity: 55 },
-    { key: '5', busNumber: 'BUS-005', route: 'Beach - Downtown', status: 'Active', passengers: 31, capacity: 45 },
-  ];
+export interface WeeklyReportData {
+  totalRevenue: number;
+  totalTrips: number;
+  totalBuses: number;
+  totalPassengers: number;
+}
 
-  const maintenanceAlerts = [
-    { id: 1, bus: 'BUS-003', issue: 'Engine maintenance due', priority: 'high', time: '2 hours ago' },
-    { id: 2, bus: 'BUS-007', issue: 'Tire replacement needed', priority: 'medium', time: '5 hours ago' },
-    { id: 3, bus: 'BUS-012', issue: 'Regular inspection due', priority: 'low', time: '1 day ago' },
-  ];
+const DashboardIndex = () => {
+  const busesData = busStore();
+  const operatorData = operatorStore();
+  const nextTripsData = tripStore();
 
-  const recentBookings = [
-    { id: 1, customer: 'John Doe', route: 'Downtown - Airport', time: '10:30 AM', status: 'confirmed' },
-    { id: 2, customer: 'Jane Smith', route: 'Mall - University', time: '11:15 AM', status: 'pending' },
-    { id: 3, customer: 'Mike Johnson', route: 'Station - Hospital', time: '12:00 PM', status: 'confirmed' },
-  ];
+  const weeklyData = weeklyReportStore();
 
-  interface BusStatusRecord {
-    key: string;
-    busNumber: string;
-    route: string;
-    status: string;
-    passengers: number;
-    capacity: number;
-  }
+  useEffect(() => {
+    const fetchWeeklyData = async () => {
+      if (!operatorData.operator) {
+        return;
+      }
+      const response = await getWeeklyOperatorReport(operatorData.operator?.id);
+      weeklyData?.setReport(response);
+    };
 
-  const busStatusColumns = [
+    fetchWeeklyData();
+  }, [operatorData]);
+
+  useEffect(() => {
+    // Fetch bus data from API or other sources
+    const fetchBusData = async () => {
+      if (!operatorData.operator) {
+        return;
+      } // Replace with actual operator ID
+      const data = await getBusesByOperator(operatorData?.operator?.id);
+      busesData.setBuses(data);
+    };
+
+    fetchBusData();
+  }, [operatorData]);
+
+  useEffect(() => {
+    // Fetch next trips data from API or other sources
+    const fetchNextTripsData = async () => {
+      if (!operatorData.operator) {
+        return;
+      }
+      const data = await getNextTripsOfOperator(operatorData?.operator?.id);
+      nextTripsData.setNextTrips(data);
+    };
+
+    fetchNextTripsData();
+  }, [operatorData]);
+
+  const notifications = notificationStore();
+
+  const nextTripsColumns = [
     {
-      title: 'Bus Number',
-      dataIndex: 'busNumber',
-      key: 'busNumber',
-      render: (text: string) => <Text strong>{text}</Text>,
+      title: "License Plate",
+      dataIndex: "license_plate",
+      key: "license_plate",
     },
     {
-      title: 'Route',
-      dataIndex: 'route',
-      key: 'route',
+      title: "Departure Time",
+      dataIndex: "departure_time",
+      key: "departure_time",
+      render: (text: string) => toLocalTime(text),
     },
     {
-      title: 'Status',
-      dataIndex: 'status',
-      key: 'status',
-      render: (status: string) => {
-        const color = status === 'Active' ? 'success' : status === 'Maintenance' ? 'warning' : 'default';
-        return <Badge status={color} text={status} />;
-      },
+      title: " Arrival Time",
+      dataIndex: "arrival_time",
+      key: "arrival_time",
+      render: (text: string) => toLocalTime(text),
     },
     {
-      title: 'Occupancy',
-      key: 'occupancy',
-      render: (_: unknown, record: BusStatusRecord) => (
-        <Space direction="vertical" size="small">
-          <Text>{record.passengers}/{record.capacity}</Text>
-          <Progress 
-            percent={Math.round((record.passengers / record.capacity) * 100)} 
-            size="small"
-            status={record.passengers / record.capacity > 0.8 ? 'exception' : 'normal'}
-          />
-        </Space>
-      ),
+      title: "Trip Duration/Minutes",
+      dataIndex: "duration_minutes",
+      key: "duration_minutes",
+    },
+    {
+      title: "Available Seats",
+      dataIndex: "available_seats",
+      key: "available_seats",
+      render: (value: number) => <Text strong>{value}</Text>,
     },
   ];
 
   return (
-    <div style={{ padding: '0' }}>
-      <div style={{ marginBottom: '24px' }}>
+    <div style={{ padding: "0" }}>
+      <div style={{ marginBottom: "24px" }}>
         <Title level={2}>Bus Enterprise Dashboard</Title>
-        <Text type="secondary">Welcome back! Here's what's happening with your bus fleet today.</Text>
+        <Text type="secondary">
+          Welcome back! Here's what's happening with your bus fleet today.
+        </Text>
       </div>
 
       {/* Key Performance Indicators */}
-      <Row gutter={[16, 16]} style={{ marginBottom: '24px' }}>
+      <Row gutter={[16, 16]} style={{ marginBottom: "24px" }}>
         <Col xs={24} sm={12} lg={6}>
           <Card>
             <Statistic
-              title="Today's Revenue"
-              value={todayStats.totalRevenue}
+              title="This Week Revenue"
+              value={weeklyData?.report?.totalRevenue}
               precision={0}
-              valueStyle={{ color: '#3f8600' }}
-              prefix={<DollarOutlined />}
-              suffix="USD"
+              valueStyle={{ color: "#3f8600" }}
+              suffix="VND"
             />
-            <div style={{ marginTop: '8px' }}>
-              <Text type="secondary">+12.5% from yesterday</Text>
+            <div style={{ marginTop: "8px" }}>
+              <Text type="secondary">+12.5% from last week</Text>
             </div>
           </Card>
         </Col>
@@ -116,12 +150,12 @@ const DashboardIndex: React.FC = () => {
           <Card>
             <Statistic
               title="Total Trips"
-              value={todayStats.totalTrips}
-              valueStyle={{ color: '#1890ff' }}
+              value={weeklyData?.report?.totalTrips}
+              valueStyle={{ color: "#1890ff" }}
               prefix={<ClockCircleOutlined />}
             />
-            <div style={{ marginTop: '8px' }}>
-              <Text type="secondary">+8.3% from yesterday</Text>
+            <div style={{ marginTop: "8px" }}>
+              <Text type="secondary">+8.3% from last week</Text>
             </div>
           </Card>
         </Col>
@@ -129,11 +163,11 @@ const DashboardIndex: React.FC = () => {
           <Card>
             <Statistic
               title="Active Buses"
-              value={todayStats.activeBuses}
-              valueStyle={{ color: '#52c41a' }}
+              value={weeklyData?.report?.totalBuses}
+              valueStyle={{ color: "#52c41a" }}
               prefix={<CarOutlined />}
             />
-            <div style={{ marginTop: '8px' }}>
+            <div style={{ marginTop: "8px" }}>
               <Text type="secondary">2 in maintenance</Text>
             </div>
           </Card>
@@ -142,12 +176,12 @@ const DashboardIndex: React.FC = () => {
           <Card>
             <Statistic
               title="Total Passengers"
-              value={todayStats.totalPassengers}
-              valueStyle={{ color: '#722ed1' }}
+              value={weeklyData?.report?.totalPassengers}
+              valueStyle={{ color: "#722ed1" }}
               prefix={<UserOutlined />}
             />
-            <div style={{ marginTop: '8px' }}>
-              <Text type="secondary">+15.2% from yesterday</Text>
+            <div style={{ marginTop: "8px" }}>
+              <Text type="secondary">+15.2% from last week</Text>
             </div>
           </Card>
         </Col>
@@ -156,69 +190,37 @@ const DashboardIndex: React.FC = () => {
       <Row gutter={[16, 16]}>
         {/* Fleet Status */}
         <Col xs={24} lg={16}>
-          <Card title="Real-time Fleet Status" extra={<Badge status="processing" text="Live Updates" />}>
+          <Card
+            title="Up coming Trips"
+            extra={<Badge status="processing" text="Live Updates" />}
+          >
             <Table
-              columns={busStatusColumns}
-              dataSource={busStatusData}
+              columns={nextTripsColumns}
+              dataSource={nextTripsData.nextTrips}
               pagination={false}
+              loading={nextTripsData.loading}
               size="small"
             />
           </Card>
         </Col>
-
-        {/* Maintenance Alerts */}
         <Col xs={24} lg={8}>
-          <Card 
-            title="Maintenance Alerts" 
-            extra={<Badge count={maintenanceAlerts.length} />}
-            style={{ marginBottom: '16px' }}
+          <Card
+            title="Recent Notifications"
+            extra={<CheckCircleOutlined style={{ color: "#52c41a" }} />}
           >
             <List
               itemLayout="horizontal"
-              dataSource={maintenanceAlerts}
-              renderItem={(item) => (
-                <List.Item>
-                  <List.Item.Meta
-                    avatar={
-                      <Avatar 
-                        icon={<WarningOutlined />} 
-                        style={{ backgroundColor: item.priority === 'high' ? '#ff4d4f' : item.priority === 'medium' ? '#fa8c16' : '#52c41a' }}
-                      />
-                    }
-                    title={<Text strong>{item.bus}</Text>}
-                    description={
-                      <div>
-                        <div>{item.issue}</div>
-                        <Text type="secondary" style={{ fontSize: '12px' }}>{item.time}</Text>
-                      </div>
-                    }
-                  />
-                </List.Item>
-              )}
-            />
-          </Card>
-
-          {/* Recent Bookings */}
-          <Card title="Recent Bookings" extra={<CheckCircleOutlined style={{ color: '#52c41a' }} />}>
-            <List
-              itemLayout="horizontal"
-              dataSource={recentBookings}
+              dataSource={notifications.notifications.slice(-5).reverse()}
               renderItem={(item) => (
                 <List.Item>
                   <List.Item.Meta
                     avatar={<Avatar icon={<UserOutlined />} />}
-                    title={<Text strong>{item.customer}</Text>}
+                    title={<Text strong>{item.title}</Text>}
                     description={
                       <div>
                         <Space direction="vertical" size="small">
-                          <div><EnvironmentOutlined /> {item.route}</div>
                           <div>
-                            <ClockCircleOutlined /> {item.time} 
-                            <Badge 
-                              status={item.status === 'confirmed' ? 'success' : 'processing'} 
-                              text={item.status}
-                              style={{ marginLeft: '8px' }}
-                            />
+                            <NotificationOutlined /> {item.message}
                           </div>
                         </Space>
                       </div>
@@ -232,53 +234,97 @@ const DashboardIndex: React.FC = () => {
       </Row>
 
       {/* Quick Actions */}
-      <Row gutter={[16, 16]} style={{ marginTop: '24px' }}>
+      <Row gutter={[16, 16]} style={{ marginTop: "24px" }}>
         <Col span={24}>
           <Card title="Quick Actions">
             <Row gutter={[16, 16]}>
               <Col xs={24} sm={12} md={6}>
-                <Card 
-                  hoverable 
-                  size="small"
-                  style={{ textAlign: 'center', cursor: 'pointer' }}
-                  bodyStyle={{ padding: '16px' }}
-                >
-                  <CarOutlined style={{ fontSize: '24px', color: '#1890ff', marginBottom: '8px' }} />
-                  <div>Add New Bus</div>
-                </Card>
+                <Link to="/dashboard/buses">
+                  <Card
+                    hoverable
+                    size="small"
+                    style={{
+                      textAlign: "center",
+                      cursor: "pointer",
+                      padding: "16px",
+                    }}
+                  >
+                    <CarOutlined
+                      style={{
+                        fontSize: "24px",
+                        color: "#1890ff",
+                        marginBottom: "8px",
+                      }}
+                    />
+                    <div>Add New Bus</div>
+                  </Card>
+                </Link>
               </Col>
               <Col xs={24} sm={12} md={6}>
-                <Card 
-                  hoverable 
-                  size="small"
-                  style={{ textAlign: 'center', cursor: 'pointer' }}
-                  bodyStyle={{ padding: '16px' }}
-                >
-                  <EnvironmentOutlined style={{ fontSize: '24px', color: '#52c41a', marginBottom: '8px' }} />
-                  <div>Create Route</div>
-                </Card>
+                <Link to="/dashboard/routes">
+                  <Card
+                    hoverable
+                    size="small"
+                    style={{
+                      textAlign: "center",
+                      cursor: "pointer",
+                      padding: "16px",
+                    }}
+                  >
+                    <EnvironmentOutlined
+                      style={{
+                        fontSize: "24px",
+                        color: "#52c41a",
+                        marginBottom: "8px",
+                      }}
+                    />
+                    <div>Create Route</div>
+                  </Card>
+                </Link>
               </Col>
               <Col xs={24} sm={12} md={6}>
-                <Card 
-                  hoverable 
-                  size="small"
-                  style={{ textAlign: 'center', cursor: 'pointer' }}
-                  bodyStyle={{ padding: '16px' }}
-                >
-                  <ClockCircleOutlined style={{ fontSize: '24px', color: '#fa8c16', marginBottom: '8px' }} />
-                  <div>Schedule Trip</div>
-                </Card>
+                <Link to="/dashboard/trips">
+                  <Card
+                    hoverable
+                    size="small"
+                    style={{
+                      textAlign: "center",
+                      cursor: "pointer",
+                      padding: "16px",
+                    }}
+                  >
+                    <ClockCircleOutlined
+                      style={{
+                        fontSize: "24px",
+                        color: "#fa8c16",
+                        marginBottom: "8px",
+                      }}
+                    />
+                    <div>Schedule Trip</div>
+                  </Card>
+                </Link>
               </Col>
               <Col xs={24} sm={12} md={6}>
-                <Card 
-                  hoverable 
-                  size="small"
-                  style={{ textAlign: 'center', cursor: 'pointer' }}
-                  bodyStyle={{ padding: '16px' }}
-                >
-                  <TrophyOutlined style={{ fontSize: '24px', color: '#722ed1', marginBottom: '8px' }} />
-                  <div>View Reports</div>
-                </Card>
+                <Link to="/dashboard/reports">
+                  <Card
+                    hoverable
+                    size="small"
+                    style={{
+                      textAlign: "center",
+                      cursor: "pointer",
+                      padding: "16px",
+                    }}
+                  >
+                    <TrophyOutlined
+                      style={{
+                        fontSize: "24px",
+                        color: "#722ed1",
+                        marginBottom: "8px",
+                      }}
+                    />
+                    <div>View Reports</div>
+                  </Card>
+                </Link>
               </Col>
             </Row>
           </Card>

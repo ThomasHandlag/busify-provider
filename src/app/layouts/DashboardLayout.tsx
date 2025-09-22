@@ -1,9 +1,17 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Layout, Grid, Drawer } from "antd";
 import { Outlet, useNavigate, useLocation } from "react-router";
-import { useResponsive, getResponsiveConfig } from "../hooks";
+import { useResponsive, getResponsiveConfig, useGNotify } from "../hooks";
 import Sidebar from "../../components/sidebar";
-import DashboardHeader from "../../components/dashboard-header";
+import DashboardHeader from "../../components/DashboardHeader";
+import { useAuthStore } from "../../stores/auth_store";
+import { operatorStore } from "../../stores/operator_store";
+import { getOperatorDataByUser } from "../api/operator";
+import {
+  notificationStore,
+  type NotificationData,
+} from "../../stores/notification_store";
+import { useWebSocket } from "../hooks/useWebSocket";
 
 const { Content } = Layout;
 const { useBreakpoint } = Grid;
@@ -15,45 +23,103 @@ const DashboardLayout = () => {
   const { screenSize, isMobile, isDesktop } = useResponsive();
   const config = getResponsiveConfig(screenSize);
   const [mobileDrawerVisible, setMobileDrawerVisible] = useState(false);
+  const { user } = useAuthStore();
+  const operatorData = operatorStore();
+  const notifyStorage = notificationStore();
+  const { notify } = useGNotify();
 
-  // Get current selected key from location pathname
-  const getSelectedKey = () => {
-    const path = location.pathname;
-    // Remove leading slash and use the first segment as the key
-    const pathSegments = path.split('/').filter(Boolean);
-    if (pathSegments.length === 0 || pathSegments[0] === 'dashboard') {
-      return 'dashboard';
+  useEffect(() => {
+    // Fetch operator data from API or other sources
+    const fetchOperatorData = async () => {
+      try {
+        const data = await getOperatorDataByUser();
+        operatorData.setOperator(data);
+      } catch (error) {
+        console.error("Error fetching operator data:", error);
+      }
+    };
+
+    fetchOperatorData();
+  }, []);
+
+  const messaging = useWebSocket({
+    url: "http://localhost:8080/ws",
+    topic: operatorData.operator?.id
+      ? `/topic/operator/${operatorData.operator.id}`
+      : undefined,
+    onMessage: (message: NotificationData) => {
+      const newNotification = {
+        message: message.message,
+        id: message.id,
+        title: message.title || undefined,
+        data: message.data || undefined,
+        timestamp: new Date().toLocaleString(),
+      } as NotificationData;
+      notifyStorage.push(newNotification);
+      notify?.info({
+        message: newNotification.title || "New Notification",
+        description: newNotification.message,
+      });
+      messaging.sendMessage(`/app/message-received`, {
+        notificationId: message.id,
+      });
+    },
+  });
+
+  useEffect(() => {
+    messaging.subscribe(
+      `/topic/operator/${operatorData.operator?.id}`,
+      (message) => {
+        const newNotification = {
+          message: message.message,
+          id: message.id,
+          title: message.title || undefined,
+          data: message.data || undefined,
+          timestamp: new Date().toLocaleString(),
+        } as NotificationData;
+        notifyStorage.push(newNotification);
+        notify?.info({
+          message: newNotification.title || "New Notification",
+          description: newNotification.message,
+        });
+        messaging.sendMessage(`/app/message-received`, {
+          notificationId: message.id,
+        });
+      }
+    );
+    messaging.sendMessage("/app/missed-notification", {
+      userId: operatorData.operator?.id,
+    });
+  }, []);
+
+  useEffect(() => {
+    if (!user) {
+      navigate("/login");
     }
-    return pathSegments[0];
-  };
-
-  const selectedKey = getSelectedKey();
+  }, [user, navigate, location.pathname]);
 
   // Get current page name for breadcrumb
   const getCurrentPageName = () => {
     const path = location.pathname;
-    const pathSegments = path.split('/').filter(Boolean);
-    if (pathSegments.length === 0 || pathSegments[0] === 'dashboard') {
-      return 'Dashboard Overview';
+    const pathSegments = path.split("/").filter(Boolean);
+    if (pathSegments.length === 0 || pathSegments[0] === "dashboard") {
+      return "Dashboard Overview";
     }
     // Convert route to readable name
     const routeMap: { [key: string]: string } = {
-      'fleet': 'Fleet Management',
-      'buses': 'Bus Inventory',
-      'maintenance': 'Maintenance',
-      'fuel': 'Fuel Management',
-      'operations': 'Operations',
-      'routes': 'Routes & Stops',
-      'schedules': 'Schedules',
-      'trips': 'Trip Management',
-      'bookings': 'Booking System',
-      'reservations': 'Reservations',
-      'tickets': 'Ticket Management',
-      'customers': 'Customer Management',
-      'drivers': 'Driver Management',
-      'analytics': 'Analytics & Reports',
-      'finance': 'Financial Management',
-      'settings': 'System Settings',
+      fleet: "Fleet Management",
+      buses: "Buses Management",
+      operations: "Operations",
+      routes: "Routes Management",
+      trips: "Trips Management",
+      employees: "Employees Management",
+      // bookings: "Booking System",
+      // reservations: "Reservations",
+      tickets: "Ticket Management",
+      // customers: "Customer Management",
+      drivers: "Driver Management",
+      analytics: "Analytics & Reports",
+      finance: "Financial Management",
     };
     return routeMap[pathSegments[0]] || pathSegments[0];
   };
@@ -82,10 +148,9 @@ const DashboardLayout = () => {
           onMenuToggle={showMobileDrawer}
           showMenuButton={true}
           currentPage={getCurrentPageName()}
-          userName="Admin"
-          companyName="Busify Transport"
+          companyName={operatorData.operator?.name}
         />
-        
+
         <Drawer
           title="Navigation"
           placement="left"
@@ -96,12 +161,12 @@ const DashboardLayout = () => {
           styles={{
             header: {
               borderBottom: "1px solid #f0f0f0",
-            }
+            },
           }}
         >
-          <Sidebar onMenuSelect={onSelectItem} selectedKey={selectedKey} />
+          <Sidebar onMenuSelect={onSelectItem} />
         </Drawer>
-        
+
         <Content
           style={{
             margin: config.contentMargin,
@@ -109,7 +174,9 @@ const DashboardLayout = () => {
             background: "#fff",
             borderRadius: "8px",
             boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-            minHeight: `calc(100vh - ${config.headerHeight}px - ${config.contentMargin * 2}px)`,
+            minHeight: `calc(100vh - ${config.headerHeight}px - ${
+              config.contentMargin * 2
+            }px)`,
           }}
           className={isMobile ? "mobile-content" : "tablet-content"}
         >
@@ -124,7 +191,7 @@ const DashboardLayout = () => {
   // For desktop screens (lg breakpoint and above)
   return (
     <Layout className="responsive-layout">
-      <Sidebar onMenuSelect={onSelectItem} selectedKey={selectedKey} />
+      <Sidebar onMenuSelect={onSelectItem} />
       <Layout>
         <DashboardHeader
           showMenuButton={false}
