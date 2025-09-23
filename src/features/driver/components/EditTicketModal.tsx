@@ -15,15 +15,9 @@ const EditTicketModal: React.FC<EditTicketModalProps> = ({
   onCancel,
   onOk,
   form,
-  passenger,
 }) => {
   return (
-    <Modal
-      title="Edit Ticket"
-      open={visible}
-      onCancel={onCancel}
-      onOk={onOk}
-    >
+    <Modal title="Edit Ticket" open={visible} onCancel={onCancel} onOk={onOk}>
       <Form form={form} layout="vertical">
         <Form.Item
           name="passengerPhone"
