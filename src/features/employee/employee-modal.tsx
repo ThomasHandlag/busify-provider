@@ -55,6 +55,7 @@ const EmployeeModal: React.FC<EmployeeModalProps> = ({
         message.error("Thêm nhân viên thất bại!");
       }
     },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onError: (error: any) => {
       const fieldErrors = error.response?.data?.fieldErrors;
       if (fieldErrors) {
@@ -96,6 +97,7 @@ const EmployeeModal: React.FC<EmployeeModalProps> = ({
         message.error("Cập nhật nhân viên thất bại!");
       }
     },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onError: (error: any) => {
       const fieldErrors = error.response?.data?.fieldErrors;
       if (fieldErrors) {
@@ -304,6 +306,23 @@ const EmployeeModal: React.FC<EmployeeModalProps> = ({
                     </Select>
                   </Form.Item>
                 </Col>
+                <Col span={12}>
+                  <Form.Item
+                    name="employeeType"
+                    label="Loại nhân viên"
+                    rules={[
+                      {
+                        required: true,
+                        message: "Loại nhân viên không được để trống",
+                      },
+                    ]}
+                  >
+                    <Select>
+                      <Select.Option value="DRIVER">Tài xế</Select.Option>
+                      <Select.Option value="STAFF">Nhân viên</Select.Option>
+                    </Select>
+                  </Form.Item>
+                </Col>
               </Row>
             </>
           ) : (
@@ -347,25 +366,6 @@ const EmployeeModal: React.FC<EmployeeModalProps> = ({
                     ]}
                   >
                     <Input.Password placeholder="Nhập mật khẩu" />
-                  </Form.Item>
-                </Col>
-                <Col span={12}>
-                  <Form.Item
-                    name="employeeType"
-                    label="Loại nhân viên"
-                    rules={[
-                      {
-                        required: true,
-                        message: "Vui lòng chọn loại nhân viên",
-                      },
-                    ]}
-                  >
-                    <Select placeholder="Chọn loại nhân viên">
-                      <Select.Option value="DRIVER">Tài xế</Select.Option>
-                      <Select.Option value="STAFF">
-                        Nhân viên bán vé
-                      </Select.Option>
-                    </Select>
                   </Form.Item>
                 </Col>
               </Row>
