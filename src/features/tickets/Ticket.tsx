@@ -15,7 +15,6 @@ import {
   Col,
   Breadcrumb,
   Alert,
-  Empty,
 } from "antd";
 import {
   BookOutlined,
@@ -103,6 +102,7 @@ const TicketPage: React.FC = () => {
       title: "Mã vé",
       dataIndex: "ticketCode",
       key: "ticketCode",
+      width: 100,
       render: (code) => (
         <Text strong style={{ color: "#1890ff" }}>
           {code}
@@ -303,41 +303,35 @@ const TicketPage: React.FC = () => {
 
       {/* Search Results Table */}
       <Card>
-        {tickets.length === 0 ? (
-          <Empty description="Không có dữ liệu vé" />
-        ) : (
-          <>
-            {hasSearched && (
-              <Alert
-                message={`Tìm thấy ${tickets.length} kết quả phù hợp`}
-                type="success"
-                showIcon
-                style={{ marginBottom: "16px" }}
-              />
-            )}
-            {!hasSearched && (
-              <Alert
-                message={`Hiển thị tất cả ${tickets.length} vé trong hệ thống`}
-                type="info"
-                showIcon
-                style={{ marginBottom: "16px" }}
-              />
-            )}
-            <Table
-              columns={columns}
-              dataSource={tickets}
-              rowKey="ticketId"
-              loading={loading}
-              pagination={{
-                pageSize: 10,
-                showSizeChanger: true,
-                showQuickJumper: true,
-                showTotal: (total, range) =>
-                  `${range[0]}-${range[1]} của ${total} vé`,
-              }}
-            />
-          </>
+        {hasSearched && tickets.length > 0 && (
+          <Alert
+            message={`Tìm thấy ${tickets.length} kết quả phù hợp`}
+            type="success"
+            showIcon
+            style={{ marginBottom: "16px" }}
+          />
         )}
+        {!hasSearched && tickets.length > 0 && (
+          <Alert
+            message={`Hiển thị tất cả ${tickets.length} vé trong hệ thống`}
+            type="info"
+            showIcon
+            style={{ marginBottom: "16px" }}
+          />
+        )}
+        <Table
+          columns={columns}
+          dataSource={tickets}
+          rowKey="ticketId"
+          loading={loading}
+          pagination={{
+            pageSize: 10,
+            showSizeChanger: true,
+            showQuickJumper: true,
+            showTotal: (total, range) =>
+              `${range[0]}-${range[1]} của ${total} vé`,
+          }}
+        />
       </Card>
       <TicketDetailModal
         ticket={selectedTicket}

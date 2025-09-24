@@ -9,6 +9,7 @@ import {
   Space,
   Breadcrumb,
   Divider,
+  Modal,
 } from "antd";
 import {
   BellOutlined,
@@ -57,7 +58,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
 
   const notificationMenuItems: MenuProps["items"] = [
     ...notifications
-      .filter((item) => item.viewed)
+      .filter((item) => !item.viewed)
       .map((notification) => ({
         key: notification.id,
         label: (
@@ -80,11 +81,47 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
         ),
       })),
 
-    // {
-    //   key: "all",
-    //   label: "View all notifications",
-    //   style: { textAlign: "center" },
-    // },
+    {
+      key: "all",
+      label: "View all notifications",
+      style: { textAlign: "center" },
+      onClick: () => {
+        Modal.info({
+          title: "All Notifications",
+          content: (
+            <div style={{ maxHeight: "400px", overflowY: "auto" }}>
+              {notifications.length === 0 && <Text>No notifications</Text>}
+              {notifications.map((notification) => (
+                <div
+                  key={notification.id}
+                  style={{
+                    marginBottom: "12px",
+                    cursor: "pointer",
+                    backgroundColor: notification.viewed
+                      ? "#f5f5f5"
+                      : "#e6f7ff",
+                    padding: "8px",
+                    borderRadius: "4px",
+                  }}
+                  onClick={() => {
+                    const item = notification;
+                    item.viewed = true;
+                    notificationStore.getState().push(item);
+                  }}
+                >
+                  <Text strong>{notification.message}</Text>
+                  <br />
+                  <Text type="secondary" style={{ fontSize: "12px" }}>
+                    {notification.timestamp}
+                  </Text>
+                </div>
+              ))}
+            </div>
+          ),
+          onOk() {},
+        });
+      },
+    },
   ];
 
   const breadcrumbItems = [
@@ -113,6 +150,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
         position: "sticky",
         top: 0,
         zIndex: 1000,
+        height: 80,
         boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
       }}
     >
@@ -186,7 +224,10 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
           <Button
             type="text"
             icon={
-              <Badge count={notifications.length} size="small">
+              <Badge
+                count={notifications.filter((item) => !item.viewed).length}
+                size="small"
+              >
                 <BellOutlined style={{ fontSize: "18px" }} />
               </Badge>
             }

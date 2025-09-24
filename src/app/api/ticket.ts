@@ -79,3 +79,19 @@ export const createTicket = async (data: {
     throw new Error("Không thể tạo vé" + error);
   }
 };
+
+export interface GuestInfo {
+  guestFullName: string;
+  guestEmail: string;
+  guestPhone: string;
+  guestAddress?: string | null;
+}
+
+export const getGuestsByOperator = async (): Promise<GuestInfo[]> => {
+  try {
+    const response = await apiClient.get("/api/bookings/guests");
+    return response.data.result;
+  } catch (error) {
+    throw new Error("Không thể lấy thông tin khách hàng: " + error);
+  }
+};

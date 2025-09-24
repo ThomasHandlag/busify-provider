@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   Modal,
   Form,
@@ -31,6 +31,13 @@ const EmployeeModal: React.FC<EmployeeModalProps> = ({
 }) => {
   const queryClient = useQueryClient();
 
+  useEffect(() => {
+    if (!isModalVisible) {
+      form.resetFields();
+      form.setFields([{ name: "driverLicenseNumber", errors: [] }]);
+    }
+  }, [isModalVisible, form]);
+
   // Create
   const createMutation = useMutation({
     mutationFn: async (data: Partial<EmployeeData>) => {
@@ -48,6 +55,7 @@ const EmployeeModal: React.FC<EmployeeModalProps> = ({
         message.error("Thêm nhân viên thất bại!");
       }
     },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onError: (error: any) => {
       const fieldErrors = error.response?.data?.fieldErrors;
       if (fieldErrors) {
@@ -89,6 +97,7 @@ const EmployeeModal: React.FC<EmployeeModalProps> = ({
         message.error("Cập nhật nhân viên thất bại!");
       }
     },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onError: (error: any) => {
       const fieldErrors = error.response?.data?.fieldErrors;
       if (fieldErrors) {
@@ -156,21 +165,41 @@ const EmployeeModal: React.FC<EmployeeModalProps> = ({
             <>
               <Row gutter={16}>
                 <Col span={12}>
-                  <Form.Item
-                    name="driverLicenseNumber"
-                    label="Số GPLX"
-                    rules={[
-                      {
-                        required: true,
-                        message: "Số GPLX không được để trống",
-                      },
-                      //   {
-                      //     max: 20,
-                      //     message: "Số GPLX không được vượt quá 20 ký tự",
-                      //   },
-                    ]}
-                  >
-                    <Input placeholder="Nhập số GPLX" />
+                  <Form.Item shouldUpdate style={{ marginBottom: 0 }}>
+                    {({ getFieldValue, setFieldsValue }) => {
+                      const employeeType = getFieldValue("employeeType");
+
+                      // Nếu đổi từ DRIVER sang STAFF thì clear Số GPLX
+                      if (
+                        employeeType === "STAFF" &&
+                        getFieldValue("driverLicenseNumber")
+                      ) {
+                        setFieldsValue({ driverLicenseNumber: "" });
+                      }
+
+                      return (
+                        <Form.Item
+                          name="driverLicenseNumber"
+                          label="Số GPLX"
+                          dependencies={["employeeType"]}
+                          rules={
+                            employeeType === "DRIVER"
+                              ? [
+                                  {
+                                    required: true,
+                                    message: "Số GPLX bắt buộc với Tài xế",
+                                  },
+                                ]
+                              : []
+                          }
+                        >
+                          <Input
+                            placeholder="Nhập số GPLX"
+                            disabled={employeeType === "STAFF"}
+                          />
+                        </Form.Item>
+                      );
+                    }}
                   </Form.Item>
                 </Col>
                 <Col span={12}>
@@ -233,6 +262,32 @@ const EmployeeModal: React.FC<EmployeeModalProps> = ({
               <Row gutter={16}>
                 <Col span={12}>
                   <Form.Item
+                    name="employeeType"
+                    label="Loại nhân viên"
+                    rules={[
+                      {
+                        required: true,
+                        message: "Vui lòng chọn loại nhân viên",
+                      },
+                    ]}
+                  >
+                    <Select placeholder="Chọn loại nhân viên">
+                      <Select.Option value="DRIVER">Tài xế</Select.Option>
+                      <Select.Option value="STAFF">
+                        Nhân viên bán vé
+                      </Select.Option>
+                    </Select>
+                  </Form.Item>
+                </Col>
+                <Col span={12}>
+                  <Form.Item name="password" label="Đặt lại mật khẩu (nếu có)">
+                    <Input.Password placeholder="Nhập mật khẩu mới" />
+                  </Form.Item>
+                </Col>
+              </Row>
+              <Row gutter={16}>
+                <Col span={12}>
+                  <Form.Item
                     name="status"
                     label="Trạng thái"
                     rules={[
@@ -248,6 +303,23 @@ const EmployeeModal: React.FC<EmployeeModalProps> = ({
                         Ngừng hoạt động
                       </Select.Option>
                       <Select.Option value="suspended">Bị cấm</Select.Option>
+                    </Select>
+                  </Form.Item>
+                </Col>
+                <Col span={12}>
+                  <Form.Item
+                    name="employeeType"
+                    label="Loại nhân viên"
+                    rules={[
+                      {
+                        required: true,
+                        message: "Loại nhân viên không được để trống",
+                      },
+                    ]}
+                  >
+                    <Select>
+                      <Select.Option value="DRIVER">Tài xế</Select.Option>
+                      <Select.Option value="STAFF">Nhân viên</Select.Option>
                     </Select>
                   </Form.Item>
                 </Col>

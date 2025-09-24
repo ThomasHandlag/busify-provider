@@ -11,7 +11,9 @@ import {
   InputNumber,
   type FormProps,
   Modal,
+  AutoComplete,
 } from "antd";
+import { currencyInputFormatter, currencyInputParser } from "../../utils/currency";
 import {
   UserOutlined,
   PhoneOutlined,
@@ -19,14 +21,19 @@ import {
   HomeOutlined,
   NumberOutlined,
 } from "@ant-design/icons";
-import { createBooking, createTicket } from "../../app/api/ticket";
-import type { CreateBookingData } from "../../app/api/ticket";
+import {
+  createBooking,
+  createTicket,
+  getGuestsByOperator,
+} from "../../app/api/ticket";
+import type { CreateBookingData, GuestInfo } from "../../app/api/ticket";
 import type { BusLayout, Seat } from "./SeatSelectCard";
 import { getTripSeatById, type TripSeatsStatus } from "../../app/api/trip";
 import { getBusSeatsLayout } from "../../app/api/bus";
 import SeatSelectCard from "./SeatSelectCard";
 import { useGNotify } from "../../app/hooks";
 import { globStore } from "../../stores/glob_store";
+import { useNavigate } from "react-router";
 
 const { Title } = Typography;
 
@@ -103,6 +110,8 @@ const CreateTicket = () => {
   );
   console.log(data);
   const { notify } = useGNotify();
+  const navigate = useNavigate();
+  const [guests, setGuests] = useState<GuestInfo[]>([]);
   useEffect(() => {
     try {
       const fetchData = async () => {
@@ -122,6 +131,19 @@ const CreateTicket = () => {
       });
     }
   }, [data.tripId]);
+
+  useEffect(() => {
+    const fetchGuests = async () => {
+      try {
+        const data = await getGuestsByOperator();
+        setGuests(data);
+        console.log("Fetched guests:", data);
+      } catch (error) {
+        console.error("Error fetching guests:", error);
+      }
+    };
+    fetchGuests();
+  }, []);
 
   const onFinish: FormProps<TicketFormData>["onFinish"] = async (values) => {
     setLoading(true);
@@ -157,6 +179,7 @@ const CreateTicket = () => {
 
               message.success("Ticket created successfully!");
               form.resetFields();
+              navigate("/dashboard/tickets");
             } catch (error) {
               console.error("Error creating ticket:", error);
               message.error("Failed to create ticket. Please try again.");
@@ -180,7 +203,7 @@ const CreateTicket = () => {
         layout="vertical"
         onFinish={onFinish}
         initialValues={{
-          guestFullName: "",
+          guestFullName: undefined,
           guestPhone: "",
           guestEmail: "",
           guestAddress: "",
@@ -196,13 +219,53 @@ const CreateTicket = () => {
               name="guestFullName"
               label="Passenger Name"
               rules={[
-                { required: true, message: "Please enter passenger name" },
-                { min: 2, message: "Name must be at least 2 characters" },
+                {
+                  required: true,
+                  message: "Please select or enter passenger name",
+                },
               ]}
             >
-              <Input
+              <AutoComplete
+                placeholder="Select or enter passenger name"
                 prefix={<UserOutlined />}
-                placeholder="Enter passenger full name"
+                options={guests.map((g) => ({
+                  value: g.guestEmail, // value là email để phân biệt unique
+                  label: `${g.guestFullName} - ${g.guestPhone ?? ""} - ${
+                    g.guestEmail ?? ""
+                  }`,
+                }))}
+                filterOption={(inputValue, option) =>
+                  option
+                    ? option.label
+                        .toString()
+                        .toLowerCase()
+                        .includes(inputValue.toLowerCase())
+                    : false
+                }
+                onSelect={(value) => {
+                  // value = guestEmail nếu chọn từ danh sách
+                  const guest = guests.find((g) => g.guestEmail === value);
+                  if (guest) {
+                    form.setFieldsValue({
+                      guestFullName: guest.guestFullName,
+                      guestEmail: guest.guestEmail,
+                      guestPhone: guest.guestPhone,
+                      guestAddress: guest.guestAddress ?? "",
+                    });
+                  }
+                }}
+                onChange={(input) => {
+                  // Nếu gõ mới thì reset các field khác để nhập tay
+                  const guest = guests.find((g) => g.guestEmail === input);
+                  if (!guest) {
+                    form.setFieldsValue({
+                      guestFullName: input,
+                      guestEmail: "",
+                      guestPhone: "",
+                      guestAddress: "",
+                    });
+                  }
+                }}
               />
             </Form.Item>
           </Col>
@@ -228,7 +291,6 @@ const CreateTicket = () => {
             </Form.Item>
           </Col>
         </Row>
-
         <Row gutter={16}>
           <Col xs={24} md={12}>
             <Form.Item
@@ -269,9 +331,12 @@ const CreateTicket = () => {
               ]}
             >
               <InputNumber
-                addonBefore="₫"
+                addonAfter="VND"
                 placeholder="Enter ticket price"
+                formatter={currencyInputFormatter}
+                parser={currencyInputParser}
                 min={0}
+                stringMode
                 style={{ width: "100%" }}
               />
             </Form.Item>

@@ -21,7 +21,7 @@ export const AuthRoute: RouteObject = {
     {
       index: true,
       element: (
-        <RoleGuard roles={["STAFF", "OPERATOR"]}>
+        <RoleGuard roles={["STAFF", "OPERATOR", "DRIVER"]}>
           <DashboardIndex />
         </RoleGuard>
       ),
@@ -53,7 +53,7 @@ export const AuthRoute: RouteObject = {
     {
       path: "trips",
       element: (
-        <RoleGuard roles={["OPERATOR"]}>
+        <RoleGuard roles={["OPERATOR", "STAFF"]}>
           <TripPage />
         </RoleGuard>
       ),
@@ -102,7 +102,7 @@ export const AuthRoute: RouteObject = {
     {
       path: "driver",
       element: (
-        <RoleGuard roles={["STAFF"]}>
+        <RoleGuard roles={["DRIVER"]}>
           <DriverManagement />
         </RoleGuard>
       ),

@@ -10,6 +10,7 @@ import {
   message,
   Select,
   DatePicker,
+  InputNumber,
 } from "antd";
 import { CarOutlined } from "@ant-design/icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -23,6 +24,7 @@ import { getBusesForOperator } from "../../app/api/bus";
 import type { BusData } from "../../stores/bus_store";
 import { getDrivers } from "../../app/api/employee";
 import type { DriverData } from "../../stores/employee_store";
+import { currencyInputFormatter, currencyInputParser } from "../../utils/currency";
 
 const { Option } = Select;
 
@@ -58,6 +60,7 @@ const TripModal: React.FC<TripModalProps> = ({
         message.error("Thêm chuyến xe thất bại!");
       }
     },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onError: (error: any) => {
       const fieldErrors = error.response?.data?.fieldErrors;
 
@@ -101,6 +104,7 @@ const TripModal: React.FC<TripModalProps> = ({
             const tripId = form.getFieldValue("id");
             await addPointsByTrip(tripId);
             message.success("Điểm đã được cộng cho khách hàng!");
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           } catch (err: any) {
             message.error(
               "Không thể cộng điểm: " +
@@ -116,6 +120,7 @@ const TripModal: React.FC<TripModalProps> = ({
         message.error("Cập nhật chuyến xe thất bại!");
       }
     },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onError: (error: any) => {
       const fieldErrors = error.response?.data?.fieldErrors;
 
@@ -160,11 +165,13 @@ const TripModal: React.FC<TripModalProps> = ({
     }
   };
 
-  // fetch locations
+  // fetch routes
   const { data: routes = [], isLoading: loadingRoutes } = useQuery<RouteData[]>(
     {
       queryKey: ["routes"],
       queryFn: getRoutesForOperator,
+      refetchOnWindowFocus: true,
+      refetchOnMount: "always",
     }
   );
 
@@ -172,6 +179,8 @@ const TripModal: React.FC<TripModalProps> = ({
   const { data: buses = [], isLoading: loadingBuses } = useQuery<BusData[]>({
     queryKey: ["buses"],
     queryFn: getBusesForOperator,
+    refetchOnWindowFocus: true,
+    refetchOnMount: "always",
   });
 
   // fetch drivers
@@ -180,6 +189,8 @@ const TripModal: React.FC<TripModalProps> = ({
   >({
     queryKey: ["drivers"],
     queryFn: getDrivers,
+    refetchOnWindowFocus: true,
+    refetchOnMount: "always",
   });
 
   return (
@@ -252,6 +263,7 @@ const TripModal: React.FC<TripModalProps> = ({
                   placeholder="Chọn biển số xe"
                   optionFilterProp="children"
                   loading={loadingBuses}
+                  disabled={form.getFieldValue("status") !== "scheduled"}
                   filterOption={(input, option) =>
                     (option?.children as unknown as string)
                       .toLowerCase()
@@ -341,10 +353,13 @@ const TripModal: React.FC<TripModalProps> = ({
                 label="Giá vé"
                 rules={[{ required: true, message: "Vui lòng nhập giá vé!" }]}
               >
-                <Input
-                  type="number"
+                <InputNumber
                   placeholder="Nhập giá vé"
-                  prefix="VND"
+                  addonAfter="VND"
+                  formatter={currencyInputFormatter}
+                  parser={currencyInputParser}
+                  min={0}
+                  stringMode
                   style={{ width: "100%" }}
                 />
               </Form.Item>

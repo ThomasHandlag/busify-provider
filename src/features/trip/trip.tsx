@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState, useEffect } from "react";
 import {
   Table,
@@ -485,7 +486,7 @@ const TripPage: React.FC = () => {
                 showSizeChanger: true,
                 showQuickJumper: true,
                 showTotal: (total, range) =>
-                  `${range[0]}-${range[1]} của ${total} xe`,
+                  `${range[0]}-${range[1]} của ${total} chuyến xe`,
               }}
               onChange={handleTableChange}
               loading={loading}

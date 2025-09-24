@@ -115,21 +115,30 @@ const Sidebar: React.FC<SidebarProps> = ({ onMenuSelect }) => {
           },
         ],
       }
-
-      // {
-      //   key: "settings",
-      //   icon: <SettingOutlined />,
-      //   label: "System Settings",
-      // }
     );
   }
 
-  if (user?.role === "STAFF") {
+  if (user?.role === "DRIVER") {
     menuItems.push({
       key: "driver",
       icon: <UserOutlined />,
       label: "Driver Management",
     });
+  }
+
+  if (user?.role === "STAFF") {
+    menuItems.push(
+      {
+        key: "tickets",
+        icon: <SafetyCertificateOutlined />,
+        label: "Ticket Management",
+      },
+      {
+        key: "trips",
+        icon: <FileTextOutlined />,
+        label: "Trips Management",
+      }
+    );
   }
 
   return (
