@@ -176,6 +176,7 @@ const DriverManagement: React.FC = () => {
         onCancel={() => setIsEditTripStatusVisible(false)}
         onOk={() => statusForm.submit()}
         form={statusForm}
+        currentStatus={selectedTrip?.status}
       />
 
       <TripTimelineModal
