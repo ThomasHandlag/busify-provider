@@ -11,7 +11,10 @@ import {
   Select,
   InputNumber,
 } from "antd";
-import { currencyInputFormatter, currencyInputParser } from "../../utils/currency";
+import {
+  currencyInputFormatter,
+  currencyInputParser,
+} from "../../utils/currency";
 import { SwapOutlined } from "@ant-design/icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createRoute, updateRoute } from "../../app/api/route_api";
