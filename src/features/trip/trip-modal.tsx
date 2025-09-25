@@ -24,7 +24,6 @@ import { getBusesForOperator } from "../../app/api/bus";
 import type { BusData } from "../../stores/bus_store";
 import { getDrivers } from "../../app/api/employee";
 import type { DriverData } from "../../stores/employee_store";
-import { currencyInputFormatter, currencyInputParser } from "../../utils/currency";
 
 const { Option } = Select;
 
@@ -356,8 +355,11 @@ const TripModal: React.FC<TripModalProps> = ({
                 <InputNumber
                   placeholder="Nhập giá vé"
                   addonAfter="VND"
-                  formatter={currencyInputFormatter}
-                  parser={currencyInputParser}
+                  formatter={(value) => {
+                    if (!value) return "";
+                    return `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+                  }}
+                  
                   min={0}
                   stringMode
                   style={{ width: "100%" }}

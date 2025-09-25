@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useEffect } from "react";
 import { Modal, Form, InputNumber, Button, message, Select } from "antd";
 import { addRouteStop, updateRouteStop } from "../../app/api/route_stop_api";

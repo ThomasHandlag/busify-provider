@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState } from "react";
 import {
   Card,
@@ -94,14 +95,18 @@ const ProfilePage: React.FC = () => {
         ...values,
         avatar: avatarFile || undefined, // thêm avatar file
       });
-    } catch {}
+    } catch (error) {
+      console.log("Validation Failed:", error);
+    }
   };
 
   const handlePasswordSubmit = async () => {
     try {
       const values = await passwordForm.validateFields();
       changePasswordMutation.mutate(values);
-    } catch {}
+    } catch {
+      console.log("Validation Failed");
+    }
   };
 
   const handleCancelContract = () => {

@@ -11,7 +11,6 @@ import {
   Select,
   InputNumber,
 } from "antd";
-import { currencyInputFormatter, currencyInputParser } from "../../utils/currency";
 import { SwapOutlined } from "@ant-design/icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createRoute, updateRoute } from "../../app/api/route_api";
@@ -115,17 +114,16 @@ const RouteModal: React.FC<RouteModalProps> = ({
   const handleSubmit = async () => {
     try {
       const values = await form.validateFields();
-      
+
       // Transform data to match API requirements
       const data: RouteFormData = {
         startLocationId: values.startLocationId,
         endLocationId: values.endLocationId,
         defaultDurationMinutes: values.defaultDurationMinutes,
         defaultPrice: values.defaultPrice,
-        ...(values.stopLocationIds && values.stopLocationIds.length > 0 
+        ...(values.stopLocationIds && values.stopLocationIds.length > 0
           ? { stopLocationIds: values.stopLocationIds }
-          : {}
-        )
+          : {}),
       };
 
       console.log("Sending data to API:", data);
@@ -149,13 +147,12 @@ const RouteModal: React.FC<RouteModalProps> = ({
   });
 
   // fetch locations for pickup/dropoff stops
-  const { data: stopLocations = [], isLoading: loadingStopLocations } = useQuery<
-    LocationDropdownItem[]
-  >({
-    queryKey: ["locations", "dropdown"],
-    queryFn: getLocationDropdown,
-    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
-  });
+  const { data: stopLocations = [], isLoading: loadingStopLocations } =
+    useQuery<LocationDropdownItem[]>({
+      queryKey: ["locations", "dropdown"],
+      queryFn: getLocationDropdown,
+      staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+    });
 
   return (
     <Modal
@@ -197,8 +194,10 @@ const RouteModal: React.FC<RouteModalProps> = ({
                 <InputNumber
                   placeholder="VD: 200,000"
                   addonAfter="VND"
-                  formatter={currencyInputFormatter}
-                  parser={currencyInputParser}
+                  formatter={(value) => {
+                    if (!value) return "";
+                    return `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+                  }}
                   min={0}
                   stringMode
                   style={{ width: "100%" }}
@@ -288,22 +287,29 @@ const RouteModal: React.FC<RouteModalProps> = ({
                 rules={[
                   {
                     validator: (_, value) => {
-                      if (!value || value.length === 0) return Promise.resolve();
-                      
-                      const startLocationId = form.getFieldValue('startLocationId');
-                      const endLocationId = form.getFieldValue('endLocationId');
-                      
-                      const hasConflict = value.some((id: number) => 
-                        id === startLocationId || id === endLocationId
+                      if (!value || value.length === 0)
+                        return Promise.resolve();
+
+                      const startLocationId =
+                        form.getFieldValue("startLocationId");
+                      const endLocationId = form.getFieldValue("endLocationId");
+
+                      const hasConflict = value.some(
+                        (id: number) =>
+                          id === startLocationId || id === endLocationId
                       );
-                      
+
                       if (hasConflict) {
-                        return Promise.reject(new Error('Điểm dừng không được trùng với điểm xuất phát hoặc kết thúc'));
+                        return Promise.reject(
+                          new Error(
+                            "Điểm dừng không được trùng với điểm xuất phát hoặc kết thúc"
+                          )
+                        );
                       }
-                      
+
                       return Promise.resolve();
-                    }
-                  }
+                    },
+                  },
                 ]}
               >
                 <Select
@@ -324,7 +330,7 @@ const RouteModal: React.FC<RouteModalProps> = ({
                     <Option key={`stop-${loc.id}`} value={loc.id}>
                       {loc.name}
                       {loc.address && (
-                        <span style={{ color: '#999', fontSize: '12px' }}>
+                        <span style={{ color: "#999", fontSize: "12px" }}>
                           {` - ${loc.address}`}
                         </span>
                       )}

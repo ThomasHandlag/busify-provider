@@ -50,6 +50,7 @@ const PassengerModal: React.FC<PassengerModalProps> = ({
     {
       title: "Actions",
       key: "actions",
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       render: (_: any, record: Passenger) => (
         <Button
           type="primary"
