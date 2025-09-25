@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState, useEffect } from "react";
 import {
   Card,
@@ -79,7 +80,7 @@ const RoutePage: React.FC = () => {
         }
       }
     } catch (error) {
-      message.error("Không thể tải danh sách tuyến đường");
+      message.error("Không thể tải danh sách tuyến đường", error as any);
       setRoutes([]);
     } finally {
       setLoading(false);

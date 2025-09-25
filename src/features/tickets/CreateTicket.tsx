@@ -13,7 +13,6 @@ import {
   Modal,
   AutoComplete,
 } from "antd";
-import { currencyInputFormatter, currencyInputParser } from "../../utils/currency";
 import {
   UserOutlined,
   PhoneOutlined,
@@ -333,8 +332,10 @@ const CreateTicket = () => {
               <InputNumber
                 addonAfter="VND"
                 placeholder="Enter ticket price"
-                formatter={currencyInputFormatter}
-                parser={currencyInputParser}
+                formatter={(value) => {
+                    if (!value) return "";
+                    return `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+                  }}
                 min={0}
                 stringMode
                 style={{ width: "100%" }}

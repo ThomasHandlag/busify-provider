@@ -74,6 +74,7 @@ export const AuthRoute: RouteObject = {
         </RoleGuard>
       ),
     },
+
     {
       path: "report",
       element: (

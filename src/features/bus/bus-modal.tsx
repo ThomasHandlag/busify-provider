@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useEffect, useState } from "react";
 import {
   Modal,
@@ -139,8 +140,8 @@ const BusModal: React.FC<BusModalProps> = ({
   useEffect(() => {
     if (isModalVisible && busData) {
       const amenitiesArray = Object.entries(busData.amenities || {})
-        .filter(([_, value]) => value === true)
-        .map(([key, _]) => key);
+        .filter(([, value]) => value === true)
+        .map(([key, ]) => key);
 
       const imageFileList = busData.images
         ? busData.images.map((img: BusImage, index: any) => ({

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useEffect, useState } from "react";
 import { Modal, Table, Button, Space, Tooltip, message } from "antd";
 import { PlusOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
@@ -29,7 +30,7 @@ const RouteStopModal: React.FC<Props> = ({ routeId, visible, onClose }) => {
       const response = await getRouteStops(id);
       setStops(response.result || []);
     } catch (e) {
-      message.error("Không thể tải điểm dừng");
+      message.error("Không thể tải điểm dừng", e as any);
     } finally {
       setLoading(false);
     }
@@ -49,7 +50,7 @@ const RouteStopModal: React.FC<Props> = ({ routeId, visible, onClose }) => {
         message.error(response.message || "Xóa thất bại");
       }
     } catch (e) {
-      message.error("Lỗi khi xóa điểm dừng");
+      message.error("Lỗi khi xóa điểm dừng", e as any);
     }
   };
 
