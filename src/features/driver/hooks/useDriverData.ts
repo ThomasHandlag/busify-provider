@@ -5,6 +5,7 @@ import {
   getDrivers,
   getDriverTrips,
   getTripPassengers,
+  getTripDetail,
   updateTicket,
   updateTripStatus,
   type UpdateTicketData,
@@ -17,6 +18,7 @@ export const QUERY_KEYS = {
   drivers: ["drivers"],
   driverTrips: (driverId: number) => ["driver-trips", driverId],
   tripPassengers: (tripId: number) => ["trip-passengers", tripId],
+  tripDetail: (tripId: number) => ["trip-detail", tripId],
 };
 
 // Hooks for fetching data
@@ -47,7 +49,21 @@ export function useTripPassengers(tripId: number) {
   return useQuery({
     queryKey: QUERY_KEYS.tripPassengers(tripId),
     queryFn: () => getTripPassengers(tripId),
-    enabled: false, // Only fetch when explicitly called
+    enabled: tripId > 0, // Auto fetch when tripId is valid
+    staleTime: 0, // Always fetch fresh data
+    gcTime: 5 * 60 * 1000, // Keep in cache for 5 minutes
+    refetchOnWindowFocus: false, // Don't refetch on window focus
+    refetchOnMount: "always", // Always refetch when component mounts
+  });
+}
+
+export function useTripDetail(tripId: number) {
+  return useQuery({
+    queryKey: QUERY_KEYS.tripDetail(tripId),
+    queryFn: () => getTripDetail(tripId),
+    enabled: tripId > 0, // Auto fetch when tripId is valid
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+    refetchOnWindowFocus: false,
   });
 }
 
@@ -65,16 +81,29 @@ export function useUpdateTicket() {
       ticketId: number;
       data: UpdateTicketData;
     }) => updateTicket(tripId, ticketId, data),
-    onSuccess: (_, variables) => {
-      message.success("Ticket updated successfully");
-      // Invalidate trip passengers to refetch
-      queryClient.invalidateQueries({
+    onSuccess: async (_, variables) => {
+      message.success("Cập nhật vé thành công");
+      
+      // Invalidate và refetch dữ liệu passengers ngay lập tức
+      await queryClient.invalidateQueries({
         queryKey: QUERY_KEYS.tripPassengers(variables.tripId),
+        exact: true,
+      });
+      
+      // Force refetch dữ liệu passengers
+      await queryClient.refetchQueries({
+        queryKey: QUERY_KEYS.tripPassengers(variables.tripId),
+        exact: true,
+      });
+      
+      // Also invalidate trips to update any aggregate data
+      queryClient.invalidateQueries({
+        queryKey: QUERY_KEYS.trips,
       });
     },
     onError: (error: any) => {
       message.error(
-        error.response?.data?.message || "Failed to update ticket"
+        error.response?.data?.message || "Cập nhật vé thất bại"
       );
     },
   });
@@ -91,16 +120,20 @@ export function useUpdateTripStatus() {
       tripId: number;
       data: UpdateTripStatusData;
     }) => updateTripStatus(tripId, data),
-    onSuccess: () => {
-      message.success("Trip status updated successfully");
+    onSuccess: (_, variables) => {
+      message.success("Cập nhật trạng thái chuyến đi thành công");
       // Invalidate trips to refetch
       queryClient.invalidateQueries({
         queryKey: QUERY_KEYS.trips,
       });
+      // Also invalidate passengers data for this trip
+      queryClient.invalidateQueries({
+        queryKey: QUERY_KEYS.tripPassengers(variables.tripId),
+      });
     },
     onError: (error: any) => {
       message.error(
-        error.response?.data?.message || "Failed to update trip status"
+        error.response?.data?.message || "Cập nhật trạng thái thất bại"
       );
     },
   });

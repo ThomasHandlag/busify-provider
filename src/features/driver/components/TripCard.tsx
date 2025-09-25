@@ -11,6 +11,7 @@ import {
   ThunderboltOutlined,
   PlayCircleOutlined,
   EditOutlined,
+  ReadOutlined,
 } from "@ant-design/icons";
 import type { Trip } from "../../../app/api/driver";
 
@@ -18,12 +19,14 @@ interface TripCardProps {
   trip: Trip;
   onViewPassengers: (trip: Trip) => void;
   onEditStatus: (trip: Trip) => void;
+  onViewTimeline?: (trip: Trip) => void;
 }
 
 const TripCard: React.FC<TripCardProps> = ({
   trip,
   onViewPassengers,
   onEditStatus,
+  onViewTimeline,
 }) => {
   return (
     <Card
@@ -133,6 +136,19 @@ const TripCard: React.FC<TripCardProps> = ({
             Sửa trạng thái
           </Button>
         </div>
+        
+        {/* Timeline button */}
+        {onViewTimeline && (
+          <Button
+            type="dashed"
+            size="small"
+            icon={<ReadOutlined />}
+            onClick={() => onViewTimeline(trip)}
+            className="w-full mt-2"
+          >
+            Xem hành trình
+          </Button>
+        )}
       </div>
     </Card>
   );
