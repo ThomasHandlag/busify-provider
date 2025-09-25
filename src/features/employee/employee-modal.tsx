@@ -306,23 +306,6 @@ const EmployeeModal: React.FC<EmployeeModalProps> = ({
                     </Select>
                   </Form.Item>
                 </Col>
-                <Col span={12}>
-                  <Form.Item
-                    name="employeeType"
-                    label="Loại nhân viên"
-                    rules={[
-                      {
-                        required: true,
-                        message: "Loại nhân viên không được để trống",
-                      },
-                    ]}
-                  >
-                    <Select>
-                      <Select.Option value="DRIVER">Tài xế</Select.Option>
-                      <Select.Option value="STAFF">Nhân viên</Select.Option>
-                    </Select>
-                  </Form.Item>
-                </Col>
               </Row>
             </>
           ) : (
@@ -366,6 +349,24 @@ const EmployeeModal: React.FC<EmployeeModalProps> = ({
                     ]}
                   >
                     <Input.Password placeholder="Nhập mật khẩu" />
+                  </Form.Item>
+                </Col>
+                <Col span={12}>
+                  <Form.Item
+                    name="employeeType"
+                    label="Loại nhân viên"
+                    initialValue="DRIVER"
+                    rules={[
+                      {
+                        required: true,
+                        message: "Loại nhân viên không được để trống",
+                      },
+                    ]}
+                  >
+                    <Select>
+                      <Select.Option value="DRIVER">Tài xế</Select.Option>
+                      <Select.Option value="STAFF">Nhân viên</Select.Option>
+                    </Select>
                   </Form.Item>
                 </Col>
               </Row>

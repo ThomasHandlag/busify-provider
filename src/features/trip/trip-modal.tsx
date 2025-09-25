@@ -103,7 +103,7 @@ const TripModal: React.FC<TripModalProps> = ({
             const tripId = form.getFieldValue("id");
             await addPointsByTrip(tripId);
             message.success("Điểm đã được cộng cho khách hàng!");
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
           } catch (err: any) {
             message.error(
               "Không thể cộng điểm: " +
@@ -262,7 +262,10 @@ const TripModal: React.FC<TripModalProps> = ({
                   placeholder="Chọn biển số xe"
                   optionFilterProp="children"
                   loading={loadingBuses}
-                  disabled={form.getFieldValue("status") !== "scheduled"}
+                  disabled={
+                    form.getFieldValue("id") &&
+                    form.getFieldValue("status") !== "scheduled"
+                  }
                   filterOption={(input, option) =>
                     (option?.children as unknown as string)
                       .toLowerCase()
@@ -359,7 +362,6 @@ const TripModal: React.FC<TripModalProps> = ({
                     if (!value) return "";
                     return `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
                   }}
-                  
                   min={0}
                   stringMode
                   style={{ width: "100%" }}
