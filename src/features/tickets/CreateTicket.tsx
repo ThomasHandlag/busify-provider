@@ -330,9 +330,14 @@ const CreateTicket = () => {
               ]}
             >
               <InputNumber
-                addonBefore="₫"
+                addonAfter="VND"
                 placeholder="Enter ticket price"
+                formatter={(value) => {
+                    if (!value) return "";
+                    return `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+                  }}
                 min={0}
+                stringMode
                 style={{ width: "100%" }}
               />
             </Form.Item>

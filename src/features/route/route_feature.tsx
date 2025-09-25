@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState, useEffect } from "react";
 import {
   Card,
@@ -30,6 +31,7 @@ import type { TableProps } from "antd";
 import { getRoutes, deleteRoute } from "../../app/api/route_api";
 import type { RouteData, RouteResponse } from "../../stores/route_store";
 import RouteModal from "./route-modal";
+import RouteStopModal from "./route-stop-modal";
 
 const { Title, Text } = Typography;
 
@@ -39,6 +41,9 @@ const RoutePage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
   const [isRouteModalVisible, setIsRouteModalVisible] = useState(false);
+  const [selectedRouteId, setSelectedRouteId] = useState<number | null>(null);
+  const [isRouteStopModalVisible, setIsRouteStopModalVisible] = useState(false);
+
   const [routeForm] = Form.useForm();
 
   const [pagination, setPagination] = useState({
@@ -75,7 +80,7 @@ const RoutePage: React.FC = () => {
         }
       }
     } catch (error) {
-      message.error("Không thể tải danh sách tuyến đường");
+      message.error("Không thể tải danh sách tuyến đường", error as any);
       setRoutes([]);
     } finally {
       setLoading(false);
@@ -178,11 +183,14 @@ const RoutePage: React.FC = () => {
       key: "action",
       render: (_, record) => (
         <Space>
-          <Tooltip title="Xem chi tiết">
+          <Tooltip title="Xem tất cả điểm dừng">
             <Button
               type="text"
               icon={<EyeOutlined />}
-              onClick={() => message.info(`Chi tiết chuyến xe: ${record.id}`)}
+              onClick={() => {
+                setSelectedRouteId(record.id);
+                setIsRouteStopModalVisible(true);
+              }}
             />
           </Tooltip>
           <Tooltip title="Chỉnh sửa">
@@ -319,6 +327,11 @@ const RoutePage: React.FC = () => {
         onSuccess={() =>
           loadRoutes({ page: pagination.current, size: pagination.pageSize })
         }
+      />
+      <RouteStopModal
+        routeId={selectedRouteId}
+        visible={isRouteStopModalVisible}
+        onClose={() => setIsRouteStopModalVisible(false)}
       />
     </div>
   );

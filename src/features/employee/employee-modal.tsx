@@ -55,6 +55,7 @@ const EmployeeModal: React.FC<EmployeeModalProps> = ({
         message.error("Thêm nhân viên thất bại!");
       }
     },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onError: (error: any) => {
       const fieldErrors = error.response?.data?.fieldErrors;
       if (fieldErrors) {
@@ -96,6 +97,7 @@ const EmployeeModal: React.FC<EmployeeModalProps> = ({
         message.error("Cập nhật nhân viên thất bại!");
       }
     },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onError: (error: any) => {
       const fieldErrors = error.response?.data?.fieldErrors;
       if (fieldErrors) {
@@ -353,18 +355,17 @@ const EmployeeModal: React.FC<EmployeeModalProps> = ({
                   <Form.Item
                     name="employeeType"
                     label="Loại nhân viên"
+                    initialValue="DRIVER"
                     rules={[
                       {
                         required: true,
-                        message: "Vui lòng chọn loại nhân viên",
+                        message: "Loại nhân viên không được để trống",
                       },
                     ]}
                   >
-                    <Select placeholder="Chọn loại nhân viên">
+                    <Select>
                       <Select.Option value="DRIVER">Tài xế</Select.Option>
-                      <Select.Option value="STAFF">
-                        Nhân viên bán vé
-                      </Select.Option>
+                      <Select.Option value="STAFF">Nhân viên</Select.Option>
                     </Select>
                   </Form.Item>
                 </Col>

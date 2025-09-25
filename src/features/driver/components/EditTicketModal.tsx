@@ -6,6 +6,7 @@ interface EditTicketModalProps {
   visible: boolean;
   onCancel: () => void;
   onOk: () => void;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   form: any;
   passenger: Passenger | null;
 }
@@ -15,15 +16,9 @@ const EditTicketModal: React.FC<EditTicketModalProps> = ({
   onCancel,
   onOk,
   form,
-  passenger,
 }) => {
   return (
-    <Modal
-      title="Edit Ticket"
-      open={visible}
-      onCancel={onCancel}
-      onOk={onOk}
-    >
+    <Modal title="Edit Ticket" open={visible} onCancel={onCancel} onOk={onOk}>
       <Form form={form} layout="vertical">
         <Form.Item
           name="passengerPhone"

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import apiClient from ".";
 import type { BusData, BusResponse } from "../../stores/bus_store";
 

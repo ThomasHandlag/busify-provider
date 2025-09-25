@@ -6,6 +6,7 @@ import TripCard from "./components/TripCard";
 import PassengerModal from "./components/PassengerModal";
 import EditTicketModal from "./components/EditTicketModal";
 import EditTripStatusModal from "./components/EditTripStatusModal";
+import TripTimelineModal from "./components/TripTimelineModal";
 
 // Hooks
 import {
@@ -28,6 +29,8 @@ const DriverManagement: React.FC = () => {
   const [isEditTicketModalVisible, setIsEditTicketModalVisible] =
     useState(false);
   const [isEditTripStatusVisible, setIsEditTripStatusVisible] = useState(false);
+  const [isTripTimelineVisible, setIsTripTimelineVisible] = useState(false);
+  const [selectedTripForTimeline, setSelectedTripForTimeline] = useState<Trip | null>(null);
 
   // Forms
   const [form] = Form.useForm();
@@ -36,23 +39,30 @@ const DriverManagement: React.FC = () => {
   // React Query hooks
   const { data: trips = [], isLoading: tripsLoading } = useTrips();
 
-  const { data: passengersData, refetch: refetchPassengers } =
-    useTripPassengers(selectedTrip?.trip_id || 0);
+  const { data: passengersData } = useTripPassengers(selectedTrip?.trip_id || 0);
 
   // Mutations
   const updateTicketMutation = useUpdateTicket();
   const updateTripStatusMutation = useUpdateTripStatus();
 
   // Event handlers
-  const handleTripClick = async (trip: Trip) => {
+  const handleTripClick = (trip: Trip) => {
     setSelectedTrip(trip);
     setIsPassengerModalVisible(true);
-    await refetchPassengers();
+    // Data will be automatically fetched due to tripId change
   };
 
   const handleEditTicket = (passenger: Passenger) => {
     setSelectedTicket(passenger);
-    form.setFieldsValue(passenger);
+    // Reset form trước khi set giá trị mới
+    form.resetFields();
+    // Set giá trị cho form
+    form.setFieldsValue({
+      passengerPhone: passenger.passengerPhone,
+      email: passenger.email,
+      seatNumber: passenger.seatNumber,
+      status: passenger.status,
+    });
     setIsEditTicketModalVisible(true);
   };
 
@@ -60,6 +70,11 @@ const DriverManagement: React.FC = () => {
     setSelectedTrip(trip);
     statusForm.setFieldsValue({ status: trip.status });
     setIsEditTripStatusVisible(true);
+  };
+
+  const handleViewTripTimeline = (trip: Trip) => {
+    setSelectedTripForTimeline(trip);
+    setIsTripTimelineVisible(true);
   };
 
   // Submit handlers
@@ -79,10 +94,33 @@ const DriverManagement: React.FC = () => {
       tripId: selectedTrip.trip_id,
       ticketId: selectedTicket.ticketId,
       data: updateData,
+    }, {
+      onSuccess: () => {
+        // Reset tất cả state liên quan
+        setIsEditTicketModalVisible(false);
+        setSelectedTicket(null);
+        form.resetFields();
+        
+        // Đợi một chút để đảm bảo UI được update
+        setTimeout(() => {
+          console.log("Ticket updated and states reset");
+        }, 100);
+      }
     });
+  };
 
+  const handleCloseEditTicketModal = () => {
     setIsEditTicketModalVisible(false);
+    setSelectedTicket(null);
     form.resetFields();
+  };
+
+  const handleClosePassengerModal = () => {
+    setIsPassengerModalVisible(false);
+    // Reset selected trip khi đóng modal passengers để đảm bảo query được reset
+    setTimeout(() => {
+      setSelectedTrip(null);
+    }, 300); // Delay để modal animation hoàn thành
   };
 
   const onUpdateTripStatus = async (values: { status: string }) => {
@@ -91,10 +129,12 @@ const DriverManagement: React.FC = () => {
     updateTripStatusMutation.mutate({
       tripId: selectedTrip.trip_id,
       data: values,
+    }, {
+      onSuccess: () => {
+        setIsEditTripStatusVisible(false);
+        statusForm.resetFields();
+      }
     });
-
-    setIsEditTripStatusVisible(false);
-    statusForm.resetFields();
   };
   return (
     <div className="p-6">
@@ -109,6 +149,7 @@ const DriverManagement: React.FC = () => {
               trip={trip}
               onViewPassengers={handleTripClick}
               onEditStatus={handleEditTripStatus}
+              onViewTimeline={handleViewTripTimeline}
             />
           ))
         )}
@@ -117,14 +158,14 @@ const DriverManagement: React.FC = () => {
       {/* Modals */}
       <PassengerModal
         visible={isPassengerModalVisible}
-        onCancel={() => setIsPassengerModalVisible(false)}
+        onCancel={handleClosePassengerModal}
         passengers={passengersData?.passengers || []}
         onEditTicket={handleEditTicket}
       />
 
       <EditTicketModal
         visible={isEditTicketModalVisible}
-        onCancel={() => setIsEditTicketModalVisible(false)}
+        onCancel={handleCloseEditTicketModal}
         onOk={() => form.submit()}
         form={form}
         passenger={selectedTicket}
@@ -135,6 +176,13 @@ const DriverManagement: React.FC = () => {
         onCancel={() => setIsEditTripStatusVisible(false)}
         onOk={() => statusForm.submit()}
         form={statusForm}
+        currentStatus={selectedTrip?.status}
+      />
+
+      <TripTimelineModal
+        visible={isTripTimelineVisible}
+        onCancel={() => setIsTripTimelineVisible(false)}
+        tripId={selectedTripForTimeline?.trip_id || 0}
       />
 
       {/* Hidden forms for mutation callbacks */}

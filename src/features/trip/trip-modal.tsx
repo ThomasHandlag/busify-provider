@@ -10,6 +10,7 @@ import {
   message,
   Select,
   DatePicker,
+  InputNumber,
 } from "antd";
 import { CarOutlined } from "@ant-design/icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -58,6 +59,7 @@ const TripModal: React.FC<TripModalProps> = ({
         message.error("Thêm chuyến xe thất bại!");
       }
     },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onError: (error: any) => {
       const fieldErrors = error.response?.data?.fieldErrors;
 
@@ -101,6 +103,7 @@ const TripModal: React.FC<TripModalProps> = ({
             const tripId = form.getFieldValue("id");
             await addPointsByTrip(tripId);
             message.success("Điểm đã được cộng cho khách hàng!");
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
           } catch (err: any) {
             message.error(
               "Không thể cộng điểm: " +
@@ -116,6 +119,7 @@ const TripModal: React.FC<TripModalProps> = ({
         message.error("Cập nhật chuyến xe thất bại!");
       }
     },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onError: (error: any) => {
       const fieldErrors = error.response?.data?.fieldErrors;
 
@@ -258,6 +262,10 @@ const TripModal: React.FC<TripModalProps> = ({
                   placeholder="Chọn biển số xe"
                   optionFilterProp="children"
                   loading={loadingBuses}
+                  disabled={
+                    form.getFieldValue("id") &&
+                    form.getFieldValue("status") !== "scheduled"
+                  }
                   filterOption={(input, option) =>
                     (option?.children as unknown as string)
                       .toLowerCase()
@@ -347,10 +355,15 @@ const TripModal: React.FC<TripModalProps> = ({
                 label="Giá vé"
                 rules={[{ required: true, message: "Vui lòng nhập giá vé!" }]}
               >
-                <Input
-                  type="number"
+                <InputNumber
                   placeholder="Nhập giá vé"
-                  prefix="VND"
+                  addonAfter="VND"
+                  formatter={(value) => {
+                    if (!value) return "";
+                    return `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+                  }}
+                  min={0}
+                  stringMode
                   style={{ width: "100%" }}
                 />
               </Form.Item>
