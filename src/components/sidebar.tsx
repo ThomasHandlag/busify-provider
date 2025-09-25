@@ -87,6 +87,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onMenuSelect }) => {
         key: "profile",
         icon: <ProfileOutlined />,
         label: "Profile",
+
       },
       {
         key: "fleet",

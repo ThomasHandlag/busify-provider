@@ -6,6 +6,7 @@ interface EditTicketModalProps {
   visible: boolean;
   onCancel: () => void;
   onOk: () => void;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   form: any;
   passenger: Passenger | null;
 }

@@ -24,7 +24,6 @@ import { getBusesForOperator } from "../../app/api/bus";
 import type { BusData } from "../../stores/bus_store";
 import { getDrivers } from "../../app/api/employee";
 import type { DriverData } from "../../stores/employee_store";
-import { currencyInputFormatter, currencyInputParser } from "../../utils/currency";
 
 const { Option } = Select;
 
@@ -104,7 +103,7 @@ const TripModal: React.FC<TripModalProps> = ({
             const tripId = form.getFieldValue("id");
             await addPointsByTrip(tripId);
             message.success("Điểm đã được cộng cho khách hàng!");
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
           } catch (err: any) {
             message.error(
               "Không thể cộng điểm: " +
@@ -263,7 +262,10 @@ const TripModal: React.FC<TripModalProps> = ({
                   placeholder="Chọn biển số xe"
                   optionFilterProp="children"
                   loading={loadingBuses}
-                  disabled={form.getFieldValue("status") !== "scheduled"}
+                  disabled={
+                    form.getFieldValue("id") &&
+                    form.getFieldValue("status") !== "scheduled"
+                  }
                   filterOption={(input, option) =>
                     (option?.children as unknown as string)
                       .toLowerCase()
@@ -356,8 +358,10 @@ const TripModal: React.FC<TripModalProps> = ({
                 <InputNumber
                   placeholder="Nhập giá vé"
                   addonAfter="VND"
-                  formatter={currencyInputFormatter}
-                  parser={currencyInputParser}
+                  formatter={(value) => {
+                    if (!value) return "";
+                    return `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+                  }}
                   min={0}
                   stringMode
                   style={{ width: "100%" }}
