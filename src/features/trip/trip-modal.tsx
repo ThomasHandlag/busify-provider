@@ -229,7 +229,7 @@ const TripModal: React.FC<TripModalProps> = ({
                 name="routeId"
                 label="Tuyến đường"
                 rules={[
-                  { required: true, message: "Vui lòng chọn điểm xuất phát!" },
+                  { required: true, message: "Vui lòng chọn tuyến đường!" },
                 ]}
               >
                 <Select
@@ -243,13 +243,16 @@ const TripModal: React.FC<TripModalProps> = ({
                       .includes(input.toLowerCase())
                   }
                   onChange={(value) => {
-                    const selectedRoute = routes.find(
-                      (route) => route.id === value
-                    );
-                    if (selectedRoute) {
-                      form.setFieldsValue({
-                        pricePerSeat: selectedRoute.default_price,
-                      });
+                    // chỉ autofill khi đang thêm mới
+                    if (!form.getFieldValue("id")) {
+                      const selectedRoute = routes.find(
+                        (route) => route.id === value
+                      );
+                      if (selectedRoute) {
+                        form.setFieldsValue({
+                          pricePerSeat: selectedRoute.default_price,
+                        });
+                      }
                     }
                   }}
                 >
