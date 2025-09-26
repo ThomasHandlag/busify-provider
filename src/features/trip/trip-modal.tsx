@@ -18,7 +18,7 @@ import { addPointsByTrip, createTrip, updateTrip } from "../../app/api/trip";
 import type { FormInstance } from "antd";
 import type { TripData } from "../../stores/trip_store";
 import dayjs from "dayjs";
-import type { RouteData } from "../../stores/route_store";
+import type { RouteForTripData } from "../../stores/route_store";
 import { getRoutesForOperator } from "../../app/api/route_api";
 import { getBusesForOperator } from "../../app/api/bus";
 import type { BusData } from "../../stores/bus_store";
@@ -165,14 +165,14 @@ const TripModal: React.FC<TripModalProps> = ({
   };
 
   // fetch routes
-  const { data: routes = [], isLoading: loadingRoutes } = useQuery<RouteData[]>(
-    {
-      queryKey: ["routes"],
-      queryFn: getRoutesForOperator,
-      refetchOnWindowFocus: true,
-      refetchOnMount: "always",
-    }
-  );
+  const { data: routes = [], isLoading: loadingRoutes } = useQuery<
+    RouteForTripData[]
+  >({
+    queryKey: ["routes"],
+    queryFn: getRoutesForOperator,
+    refetchOnWindowFocus: true,
+    refetchOnMount: "always",
+  });
 
   // fetch buses
   const { data: buses = [], isLoading: loadingBuses } = useQuery<BusData[]>({
@@ -242,6 +242,16 @@ const TripModal: React.FC<TripModalProps> = ({
                       .toLowerCase()
                       .includes(input.toLowerCase())
                   }
+                  onChange={(value) => {
+                    const selectedRoute = routes.find(
+                      (route) => route.id === value
+                    );
+                    if (selectedRoute) {
+                      form.setFieldsValue({
+                        pricePerSeat: selectedRoute.default_price,
+                      });
+                    }
+                  }}
                 >
                   {routes.map((route) => (
                     <Option key={route.id} value={route.id}>

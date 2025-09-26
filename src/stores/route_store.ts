@@ -13,6 +13,12 @@ export interface RouteData {
   defaultPrice: number;
 }
 
+export interface RouteForTripData {
+  id: number;
+  name: string;
+  default_price: number;
+}
+
 export interface RouteResponse {
   code: number;
   message: string;
