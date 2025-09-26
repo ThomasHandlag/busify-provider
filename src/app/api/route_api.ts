@@ -1,5 +1,9 @@
 import apiClient from ".";
-import type { RouteData, RouteResponse } from "../../stores/route_store";
+import type {
+  RouteData,
+  RouteForTripData,
+  RouteResponse,
+} from "../../stores/route_store";
 
 export interface RouteQuery {
   page?: number;
@@ -7,7 +11,7 @@ export interface RouteQuery {
   keyword?: string;
 }
 
-export async function getRoutesForOperator(): Promise<RouteData[]> {
+export async function getRoutesForOperator(): Promise<RouteForTripData[]> {
   const response = await apiClient.get("api/routes");
   return response.data.result;
 }

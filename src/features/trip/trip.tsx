@@ -292,7 +292,15 @@ const TripPage: React.FC = () => {
               <Button
                 type="text"
                 icon={<PlusOutlined />}
-                onClick={() => handleCreate(record)}
+                onClick={() => {
+                  if (record.status === "on_sell") {
+                    handleCreate(record);
+                  } else {
+                    message.warning(
+                      "Chỉ có thể thêm vé cho chuyến xe đang mở bán"
+                    );
+                  }
+                }}
               />
             </Tooltip>
           </Flex>

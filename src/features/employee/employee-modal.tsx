@@ -365,7 +365,9 @@ const EmployeeModal: React.FC<EmployeeModalProps> = ({
                   >
                     <Select>
                       <Select.Option value="DRIVER">Tài xế</Select.Option>
-                      <Select.Option value="STAFF">Nhân viên</Select.Option>
+                      <Select.Option value="STAFF">
+                        Nhân viên bán vé
+                      </Select.Option>
                     </Select>
                   </Form.Item>
                 </Col>
