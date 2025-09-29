@@ -99,12 +99,19 @@ export const getGuestsByOperator = async (): Promise<GuestInfo[]> => {
 
 export async function getTicketInfoBySeatNumber(
   tripId: number,
-  seatNumber: string
+  seatNumber: string,
+  callBack: (message: string) => void
 ): Promise<Ticket | null> {
   try {
     const res = await apiClient.get(
       `api/tickets/trip/${tripId}/seat/${seatNumber}`
     );
+    if (res.data.code !== 200) {
+      const message = res.data.message || "Không tìm thấy vé";
+      console.error("Error fetching ticket info by seat number:", message);
+      callBack(message);
+      return null;
+    }
     return res.data.result;
   } catch (error) {
     console.error("Error fetching ticket info by seat number:", error);
