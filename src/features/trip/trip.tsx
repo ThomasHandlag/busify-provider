@@ -342,7 +342,7 @@ const TripPage: React.FC = () => {
             <Col xs={24} sm={12} lg={6}>
               <Form.Item name="keyword" label="Tìm kiếm theo tuyến đường">
                 <Input
-                  placeholder="Nhập tên tuyến đường"
+                  placeholder="Nhập tên tuyến đường, biến số xe, tài xế"
                   prefix={<CarOutlined />}
                 />
               </Form.Item>
