@@ -1,5 +1,6 @@
 import apiClient from ".";
 import type { TripData, TripResponse } from "../../stores/trip_store";
+import type { BusLayout } from "./bus";
 
 export const SStatus = {
   AVAILABLE: "available",
@@ -7,7 +8,7 @@ export const SStatus = {
   LOCKED: "locked",
 } as const;
 
-export type SStatus = typeof SStatus[keyof typeof SStatus];
+export type SStatus = (typeof SStatus)[keyof typeof SStatus];
 
 export interface TripQuery {
   page?: number;
@@ -103,3 +104,27 @@ export async function getTripSeatById(
     return null;
   }
 }
+
+export interface NextTripSeatStatus {
+  tripId: number;
+  busSeatsCount: number;
+  checkedSeatsCount: number;
+  bookedSeatsCount: number;
+  busLayout: BusLayout;
+}
+
+export async function getNextTripSeatStatusById(
+  tripId: number
+): Promise<NextTripSeatStatus | null> {
+  try {
+    const res = await apiClient.get(
+      `api/trips/${tripId}/next-trip-seats-status`
+    );
+    return res.data.result as NextTripSeatStatus;
+  } catch (error) {
+    console.error("Error fetching next trip seat status:", error);
+    return null;
+  }
+}
+
+
