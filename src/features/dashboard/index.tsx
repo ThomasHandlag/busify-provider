@@ -10,6 +10,8 @@ import {
   Typography,
   List,
   Avatar,
+  Button,
+  type TableProps,
 } from "antd";
 import {
   CarOutlined,
@@ -26,9 +28,9 @@ import { operatorStore } from "../../stores/operator_store";
 import { weeklyReportStore } from "../../stores/report_store";
 import { getWeeklyOperatorReport } from "../../app/api/report";
 import { tripStore } from "../../stores/trip_store";
-import { getNextTripsOfOperator } from "../../app/api/trip";
+import { getNextTripsOfOperator, type NextTrip } from "../../app/api/trip";
 import { notificationStore } from "../../stores/notification_store";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 
 const { Title, Text } = Typography;
 
@@ -49,6 +51,8 @@ const DashboardIndex = () => {
   const nextTripsData = tripStore();
 
   const weeklyData = weeklyReportStore();
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchWeeklyData = async () => {
@@ -90,7 +94,7 @@ const DashboardIndex = () => {
 
   const notifications = notificationStore();
 
-  const nextTripsColumns = [
+  const nextTripsColumns: TableProps<NextTrip>["columns"] = [
     {
       title: "License Plate",
       dataIndex: "license_plate",
@@ -119,6 +123,16 @@ const DashboardIndex = () => {
       key: "available_seats",
       render: (value: number) => <Text strong>{value}</Text>,
     },
+    {
+      "title" : "Action",
+      key: "action",
+      render: (_, record) => {
+        const { trip_id } = record;
+        return <Button type="link" onClick={() => {
+          navigate(`/dashboard/trips-seat-status/${trip_id}`);
+        }}>View Details</Button>;
+      }
+    }
   ];
 
   return (
