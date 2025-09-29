@@ -126,5 +126,3 @@ export async function getNextTripSeatStatusById(
     return null;
   }
 }
-
-

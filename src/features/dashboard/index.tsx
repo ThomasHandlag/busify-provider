@@ -86,6 +86,7 @@ const DashboardIndex = () => {
         return;
       }
       const data = await getNextTripsOfOperator(operatorData?.operator?.id);
+      console.log(data);
       nextTripsData.setNextTrips(data);
     };
 
@@ -124,15 +125,22 @@ const DashboardIndex = () => {
       render: (value: number) => <Text strong>{value}</Text>,
     },
     {
-      "title" : "Action",
+      title: "Action",
       key: "action",
       render: (_, record) => {
         const { trip_id } = record;
-        return <Button type="link" onClick={() => {
-          navigate(`/dashboard/trips-seat-status/${trip_id}`);
-        }}>View Details</Button>;
-      }
-    }
+        return (
+          <Button
+            type="link"
+            onClick={() => {
+              navigate(`/dashboard/trips-seat-status/${trip_id}`);
+            }}
+          >
+            View Details
+          </Button>
+        );
+      },
+    },
   ];
 
   return (

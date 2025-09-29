@@ -10,6 +10,7 @@ export interface Ticket {
   ticketCode: string;
   bookingId: number;
   sellerName: string;
+  licensePlate: string;
 }
 
 export interface TicketDetail {

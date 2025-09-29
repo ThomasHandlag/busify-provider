@@ -19,6 +19,8 @@ export interface TripData {
     | "arrived"
     | "cancelled";
   pricePerSeat: number;
+  totalSeats: number;
+  availableSeats: number;
 }
 
 export interface TripResponse {

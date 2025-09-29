@@ -72,6 +72,8 @@ const TripPage: React.FC = () => {
 
       const response = await getTrips(query);
 
+      console.log("Trips loaded:", response);
+
       setTrips(response.result.result);
       setPagination({
         current: response.result.pageNumber,
@@ -244,6 +246,20 @@ const TripPage: React.FC = () => {
       width: 150,
     },
     {
+      title: "Số ghế còn trống",
+      dataIndex: "availableSeats",
+      key: "availableSeats",
+      render: (_, record) => (
+        console.log(record),
+        (
+          <Text strong>
+            {record.availableSeats}/{record.totalSeats}
+          </Text>
+        )
+      ),
+      width: 150,
+    },
+    {
       title: "Trạng thái",
       dataIndex: "status",
       key: "status",
@@ -340,8 +356,8 @@ const TripPage: React.FC = () => {
       <Card style={{ marginBottom: "24px" }}>
         <Form form={form} layout="vertical" onFinish={handleSearch}>
           <Row gutter={16}>
-            <Col xs={24} sm={12} lg={6}>
-              <Form.Item name="keyword" label="Tìm kiếm theo tuyến đường">
+            <Col xs={24} sm={12} lg={12}>
+              <Form.Item name="keyword" label="Tìm kiếm">
                 <Input
                   placeholder="Nhập tên tuyến đường, biến số xe, tài xế"
                   prefix={<CarOutlined />}
@@ -360,11 +376,11 @@ const TripPage: React.FC = () => {
                 </Select>
               </Form.Item>
             </Col>
-            <Col xs={24} sm={12} lg={6}>
+            {/* <Col xs={24} sm={12} lg={6}>
               <Form.Item name="licensePlate" label="Biển số xe">
                 <Input placeholder="Nhập biển số xe" />
               </Form.Item>
-            </Col>
+            </Col> */}
             <Col xs={24} sm={12} lg={12}>
               <Form.Item label=" " style={{ marginBottom: 0 }}>
                 <Space>

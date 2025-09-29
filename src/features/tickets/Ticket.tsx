@@ -110,6 +110,12 @@ const TicketPage: React.FC = () => {
       ),
     },
     {
+      title: "biển số xe",
+      dataIndex: "licensePlate",
+      key: "licensePlate",
+      width: 150,
+    },
+    {
       title: "Tên hành khách",
       dataIndex: "passengerName",
       key: "passengerName",
