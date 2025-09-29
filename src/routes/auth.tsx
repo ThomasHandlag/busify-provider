@@ -13,6 +13,7 @@ import ProfilePage from "../features/profile/Profile";
 import TicketPage from "../features/tickets/Ticket";
 import CreateTicket from "../features/tickets/CreateTicket";
 import AnalysisPage from "../features/analysis/Analysis";
+import TripSeatDialog from "../features/dashboard/TripSeatDialog";
 
 export const AuthRoute: RouteObject = {
   path: "dashboard",
@@ -124,5 +125,13 @@ export const AuthRoute: RouteObject = {
         </RoleGuard>
       ),
     },
+    {
+      path: "trips-seat-status/:id",
+      element: (
+        <RoleGuard roles={["OPERATOR", "STAFF"]}>
+          <TripSeatDialog />
+        </RoleGuard>
+      ),
+    }
   ],
 };

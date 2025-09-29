@@ -1,5 +1,6 @@
 import apiClient from ".";
 import type {
+  Ticket,
   TicketDetailResponse,
   TicketResponse,
 } from "../../stores/ticket_store";
@@ -95,3 +96,18 @@ export const getGuestsByOperator = async (): Promise<GuestInfo[]> => {
     throw new Error("Không thể lấy thông tin khách hàng: " + error);
   }
 };
+
+export async function getTicketInfoBySeatNumber(
+  tripId: number,
+  seatNumber: string
+): Promise<Ticket | null> {
+  try {
+    const res = await apiClient.get(
+      `api/tickets/trip/${tripId}/seat/${seatNumber}`
+    );
+    return res.data.result;
+  } catch (error) {
+    console.error("Error fetching ticket info by seat number:", error);
+    return null;
+  }
+}

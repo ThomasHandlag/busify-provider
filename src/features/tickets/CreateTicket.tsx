@@ -274,10 +274,6 @@ const CreateTicket = () => {
               label="Passenger Phone"
               rules={[
                 {
-                  required: true,
-                  message: "Please enter passenger phone number",
-                },
-                {
                   pattern: /^[0-9+\-\s]+$/,
                   message: "Please enter a valid phone number",
                 },
@@ -296,7 +292,6 @@ const CreateTicket = () => {
               name="guestEmail"
               label="Passenger Email"
               rules={[
-                { required: true, message: "Please enter passenger email" },
                 {
                   type: "email",
                   message: "Please enter a valid email address",
