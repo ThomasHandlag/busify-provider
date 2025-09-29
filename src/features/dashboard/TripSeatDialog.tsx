@@ -36,7 +36,7 @@ const { TabPane } = Tabs;
 interface DisplaySeat {
   id: number;
   seat_number: string;
-  status: "available" | "booked" | "checked";
+  status: "valid" | "used" | "available" | "cancelled";
   row: number;
   column: number;
   floor: number;
@@ -61,11 +61,8 @@ const TripSeatDialog = () => {
   const generateSeatsFromLayout = (): DisplaySeat[] => {
     if (!tripSeatStatus?.busLayout) return [];
 
-    const { busLayout, bookedSeatsCount, checkedSeatsCount } = tripSeatStatus;
+    const { busLayout, seatStatuses } = tripSeatStatus;
     const generatedSeats: DisplaySeat[] = [];
-
-    let bookedCount = 0;
-    let checkedCount = 0;
 
     for (let floor = 1; floor <= busLayout.floors; floor++) {
       for (let row = 1; row <= busLayout.rows; row++) {
@@ -76,22 +73,13 @@ const TripSeatDialog = () => {
             col +
             1;
           const seatName = `${String.fromCharCode(65 + col)}.${row}.${floor}`;
-
-          // Distribute seats based on counts (simple distribution for demo)
-          let status: "available" | "booked" | "checked" = "available";
-
-          if (bookedCount < bookedSeatsCount) {
-            status = "booked";
-            bookedCount++;
-          } else if (checkedCount < checkedSeatsCount) {
-            status = "checked";
-            checkedCount++;
-          }
-
+          const seatStatus =
+            seatStatuses?.find((s) => s.seatNumber === seatName)?.status ||
+            "available";
           generatedSeats.push({
             id: seatId,
             seat_number: seatName,
-            status,
+            status: seatStatus,
             row: row - 1,
             column: col,
             floor,
@@ -135,14 +123,14 @@ const TripSeatDialog = () => {
               </Tag>
             </Badge>
             <Badge
-              count={floorSeats.filter((s) => s.status === "booked").length}
+              count={floorSeats.filter((s) => s.status === "valid").length}
             >
               <Tag color="processing" icon={<CalendarOutlined />}>
                 Booked
               </Tag>
             </Badge>
             <Badge
-              count={floorSeats.filter((s) => s.status === "checked").length}
+              count={floorSeats.filter((s) => s.status === "used").length}
             >
               <Tag color="warning" icon={<CheckCircleFilled />}>
                 Checked In
@@ -166,8 +154,8 @@ const TripSeatDialog = () => {
             >
               {row.map((seat) => {
                 const isAvailable = seat.status === "available";
-                const isBooked = seat.status === "booked";
-                const isChecked = seat.status === "checked";
+                const isBooked = seat.status === "valid";
+                const isChecked = seat.status === "used";
 
                 // Using Ant Design default token colors
                 let seatColor = "";
