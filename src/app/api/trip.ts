@@ -105,12 +105,18 @@ export async function getTripSeatById(
   }
 }
 
+export type SeatStatusInfo = {
+  seatNumber: string;
+  status: "valid" | "cancelled" | "used";
+};
+
 export interface NextTripSeatStatus {
   tripId: number;
   busSeatsCount: number;
   checkedSeatsCount: number;
   bookedSeatsCount: number;
   busLayout: BusLayout;
+  seatStatuses: SeatStatusInfo[];
 }
 
 export async function getNextTripSeatStatusById(
@@ -126,5 +132,3 @@ export async function getNextTripSeatStatusById(
     return null;
   }
 }
-
-

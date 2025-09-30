@@ -67,7 +67,6 @@ const TripPage: React.FC = () => {
         size: params.size || pagination.pageSize,
         keyword: params.keyword,
         status: params.status,
-        licensePlate: params.licensePlate,
       };
 
       const response = await getTrips(query);
@@ -360,11 +359,6 @@ const TripPage: React.FC = () => {
                 </Select>
               </Form.Item>
             </Col>
-            {/* <Col xs={24} sm={12} lg={6}>
-              <Form.Item name="licensePlate" label="Biển số xe">
-                <Input placeholder="Nhập biển số xe" />
-              </Form.Item>
-            </Col> */}
             <Col xs={24} sm={12} lg={12}>
               <Form.Item label=" " style={{ marginBottom: 0 }}>
                 <Space>
